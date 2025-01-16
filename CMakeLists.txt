@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 3.26)
+
+
+project(
+  ne591
+  VERSION 1.0.0
+  DESCRIPTION "Implementations for NE 591 Math & Comp (Spring 2025)"
+  LANGUAGES CXX
+)
+
+# specify the C++ standard
+add_library(ne591_compiler_flags INTERFACE)
+target_compile_features(ne591_compiler_flags INTERFACE cxx_std_23)
+
+# add compiler warning flags just when building this project via
+# the BUILD_INTERFACE genex
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+target_compile_options(ne591_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
+
+# fetch latest argparse
+include(FetchContent)
+
+FetchContent_Declare(
+    argparse
+    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+)
+
+FetchContent_Declare(
+   fmt
+   GIT_REPOSITORY https://github.com/fmtlib/fmt
+   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281  # 10.2.1
+)
+
+FetchContent_MakeAvailable(fmt argparse)
+
+add_subdirectory(src)

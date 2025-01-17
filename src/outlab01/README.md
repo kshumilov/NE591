@@ -1,9 +1,44 @@
 # Outlab #01
 - Author: Kirill Shumilov
 
+# Requirements
+- C++ Compiler: GCC/Clang supporing C++23 standard
+- CMake of version $>=3.26$
+
+## Hazel HPC System (NCSU)
+Make sure you are logged to the cluser with
+```bash
+ssh -X $USER:login.hpc.ncsu.edu
+```
+
+Request an interactive session on a compute node:
+```bash
+bsub -Is -n 4 -R "span[hosts=1]" -W 20 bash
+```
+
+Load the latest gcc compiler:
+```bash
+module load gcc/13.2.0
+```
+
+# Building
+To build a desired inlab or outlab, from the root of the project execute the following commands:
+```bash
+cmake -S. -Bbuild --config Release
+cmake --build build --target outlab01 -j
+cmake --install build --prefix <install_location>
+```
+Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.
+The binary is located in `bin` directory.
+
+To run the desired project:
+```bash
+<install_location>/bin/shumilov_outlabNN [ARGS...]
+```
+
 # Example run
 ```bash
-"/Users/kirill/Documents/NC State/Classes/2025 Spring/ne591/cmake-build-debug/src/outlab01/outlab01" -k 2.0 -M 3 -N 4 -J 5
+> ./bin/shumilov_outlab01 -k 2.0 -M 3 -N 4 -J 5
 A<3 x 4, d> where a_{m,n} = 1.0 if (m == n) else 0.5
 [[  1.00   0.50   0.50   0.50] 
  [  0.50   1.00   0.50   0.50] 

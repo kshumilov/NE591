@@ -54,15 +54,23 @@ public:
     Matrix(const idx_t rows, const idx_t cols, std::function<T(idx_t, idx_t)> func)
         : m_rows{rows}
         , m_cols{cols}
-        , m_data {
-              std::ranges::iota_view(0U, size())
-              | std::views::transform([&](const idx_t flat_idx) -> T {
+//        , m_data {
+//              std::ranges::iota_view(0U, size())
+//              | std::views::transform([&](const idx_t flat_idx) -> T {
+//                  auto [row, col] = pair_idx(flat_idx);
+//                  return func(row, col);
+//                })
+//              | std::ranges::to<std::vector>()
+//          }
+    {
+	auto r = std::ranges::iota_view(0U, size())
+                 | std::views::transform([&](const idx_t flat_idx) -> T {
                   auto [row, col] = pair_idx(flat_idx);
                   return func(row, col);
-                })
-              | std::ranges::to<std::vector<T>>()
-          }
-    {}
+                 });
+	m_data.reserve(m_rows * m_cols);
+	std::ranges::copy(r, std::back_inserter(m_data));
+    }
 
     // Const accessor for matrix elements
     auto operator()(const idx_t row, const idx_t col) const -> const T& {

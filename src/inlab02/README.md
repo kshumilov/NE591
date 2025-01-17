@@ -32,10 +32,10 @@ module load gcc/13.2.0
 ```
 
 # Building
-To build `inlab01` run the following commands from the root of the project `<NE591>`:
+To build `inlab02` run the following commands from the root of the project `<NE591>`:
 ```bash
 cmake -S. -Bbuild --config Release
-cmake --build build --target inlab01 -j
+cmake --build build --target inlab02 -j
 cmake --install build --prefix <install_location>
 ```
 Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.

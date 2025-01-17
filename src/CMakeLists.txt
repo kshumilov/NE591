@@ -4,4 +4,5 @@ target_link_libraries(methods INTERFACE ne591_compiler_flags fmt)
 
 #add_subdirectory(inlab01)
 add_subdirectory(outlab01)
+add_subdirectory(inlab02)
 

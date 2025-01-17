@@ -35,16 +35,15 @@ auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair
 }
 
 auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool use_fx) -> void {
-    std::cout << fmt::format("{:=^80s}\n", "")
-              << fmt::format("{: ^80s}\n", "Input Arguments")
-              << fmt::format("{:-^80s}\n", "")
-              << fmt::format("#samples: m = {:d}\n", m)
-              << fmt::format("#points : n = {:d}\n", xs.size())
-              // << std::format("Output filename: {}\n", filename)
-              << fmt::format("user defined function: {}\n", use_fx)
-              << fmt::format("{:-^80s}\n", "")
-              << fmt::format("{: ^80s}\n", "Interpolation Points")
-              << fmt::format("{: ^4s}{: ^38s}{: ^38s}\n", "i", "x", "f(x)");
+    fmt::println("{:=^80s}", "");
+    fmt::println("{: ^80s}", "Input Arguments");
+    fmt::println("{:-^80s}", "");
+    fmt::println("#samples: m = {:d}", m);
+    fmt::println("#points : n = {:d}", xs.size());
+    fmt::println("user defined function: {}", use_fx);
+    fmt::println("{:-^80s}", "");
+    fmt::println("{: ^80s}", "Interpolation Points");
+    fmt::println("{: ^4s}{: ^38s}{: ^38s}", "i", "x", "f(x)");
 
     for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xs, ys)) {
         fmt::print("{: >4d}", i);
@@ -53,7 +52,7 @@ auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool use_fx) 
         std::cout << "\n";
     }
 
-    std::println(std::cout, "{:=^80s}", "");
+    fmt::println( "{:=^80s}", "");
 }
 
 

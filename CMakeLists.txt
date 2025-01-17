@@ -27,12 +27,13 @@ include(FetchContent)
 FetchContent_Declare(
     argparse
     GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+    GIT_TAG 68fd0277eea5412aff9b91c0b70efc698359dae0
 )
 
 FetchContent_Declare(
-   fmt
-   GIT_REPOSITORY https://github.com/fmtlib/fmt
-   GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281  # 10.2.1
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG        8303d140a1a11f19b982a9f664bbe59a1ccda3f4
 )
 
 FetchContent_MakeAvailable(fmt argparse)

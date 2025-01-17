@@ -2,49 +2,68 @@
 #include <format>
 #include <argparse/argparse.hpp>
 
+#include <fstream>
+
+#include <fmt/format.h>
+#include <fmt/ranges.h>
+
 #include "interpolate.h"
 #include "array.h"
 
 #include "user_func.h"
+#include "fmt/os.h"
 
 
 using dvec = std::vector<double>;
 
-auto outlab02(int samples, const dvec& xi, const dvec& yi, bool use_fx = false) -> std::pair<dvec, dvec> {
-    auto xs = linspace(xi[0], xi[xi.size() - 1], samples);
-    const LagrangeInterpolation<double> inter {xi, yi};
-    auto Ls = inter(xs);
 
-    // dvec Es(xs.size(), 0.0);
-    // for (int i = 0; i < xs.size(); i++) {
-    //     Es[i] = user_func(xs[i]) - Ls[i];
-    // }
+auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec> {
+    auto rgf = xs | std::views::transform(user_func);
+    const dvec fs {rgf.cbegin(), rgf.cend()};
 
-    return {xs, Ls};
+    auto error = [&](auto f, auto L) { return f - L; };
+    auto rge = std::views::zip_transform(error, fs, Ls);
+    const dvec Es {rge.cbegin(), rge.cend()};
+    return {fs, Es};
 }
 
 
-auto echo_output(const int m, const dvec& xs, const dvec& ys, const bool use_fx) -> void {
+auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair<dvec, dvec> {
+    const LagrangeInterpolation<double> inter {xi, yi};
+    auto const xs = linspace(xi.front(), xi.back(), samples);
+    return {xs, inter(xs)};
+}
+
+auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool use_fx) -> void {
     std::cout << std::format("{:=^80s}\n", "")
-                          << std::format("{: ^80s}\n", "Input Arguments")
-                          << std::format("{:-^80s}\n", "")
-                          << std::format("#samples: m = {:d}\n", m)
-                          << std::format("#points : n = {:d}\n", xs.size())
-                          << std::format("user defined function: {}\n", use_fx)
-                          << std::format("{:-^80s}\n", "")
-                          << std::format("{: ^26s}{: ^27s}{: ^27s}\n", "ID", "x", "f(x)");
+              << std::format("{: ^80s}\n", "Input Arguments")
+              << std::format("{:-^80s}\n", "")
+              << std::format("#samples: m = {:d}\n", m)
+              << std::format("#points : n = {:d}\n", xs.size())
+              // << std::format("Output filename: {}\n", filename)
+              << std::format("user defined function: {}\n", use_fx)
+              << std::format("{:-^80s}\n", "")
+              << std::format("{: ^80s}\n", "Interpolation Points")
+              << std::format("{: ^4s}{: ^38s}{: ^38s}\n", "i", "x", "f(x)");
 
     for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xs, ys)) {
-        std::print(std::cout, "{: >26d}", i);
-        std::print(std::cout, "{: >26g}", x);
-        std::println(std::cout, "{: >26g}", y);
+        std::print(std::cout, "{: >4d}", i);
+        std::print(std::cout, "{: >38.12E}", x);
+        std::print(std::cout, "{: >28.12E}", y);
+        std::cout << "\n";
     }
 
     std::println(std::cout, "{:=^80s}", "");
 }
 
+
 auto main(int argc, char* argv[]) -> int {
     using namespace std::literals;
+
+    std::unordered_map<std::string, std::vector<double>> input_table_data {};
+
+    std::vector<std::string> output_table_headers {};
+    std::unordered_map<std::string, std::vector<double>> output_table_data {};
 
     argparse::ArgumentParser program {
         "shumilov_inlab02",
@@ -54,9 +73,9 @@ auto main(int argc, char* argv[]) -> int {
 
     const std::string description {
         "================================================================================\n"s +
-        std::format("{:<80s}\n", "NE 591 Outlab #01: Basic Math") +
+        std::format("{:<80s}\n", "NE 591 Inlab #02: Lagrange Interpolation I/O") +
         std::format("{:<80s}\n", "Author: Kirill Shumilov") +
-        std::format("{:<80s}\n", "01/17/2025") +
+        std::format("{:<80s}\n", "Date: 01/17/2025") +
         "================================================================================\n"s
         "This program perform Lagrange Interpolation of a 1D real function\n"s
       };
@@ -67,75 +86,107 @@ auto main(int argc, char* argv[]) -> int {
         .help("Number of interpolation points")
         .scan<'d', int>();
 
-    program.add_argument("-m")
-        .help("Number of points where the Lagrange Interpolation Polynomial will be evaluated.")
+    program.add_argument("-m", "--samples")
+        .help("Number of samples to interpolate the function at")
         .required()
         .scan<'d', int>();
 
-    program.add_argument("-x")
-        .help("Distinct interpolation points, x, sorted from smallest to greatest")
+    program.add_argument("-x", "--points")
+        .help("Distinct real interpolation points in increasing order: {x_i}")
         .append()
         .nargs(argparse::nargs_pattern::at_least_one)
         .required()
         .scan<'g', double>();
 
-    program.add_argument("-y")
-        .help("Function values at interpolation points, len(y) == len(x)")
+    program.add_argument("-y", "--values")
+        .help("Function values at interpolation points, y_i = f(x_i).\n"
+              "Ignored when `--user-func` is provided")
         .append()
         .nargs(argparse::nargs_pattern::at_least_one)
         .scan<'g', double>();
 
-    program.add_argument("--use-fx")
-        .help("Toggle the use of user-defined function")
+    program.add_argument("--user-func")
+        .help("Toggle the use of user-defined function in user_func.h")
         .default_value(false)
         .implicit_value(true);
 
     try {
         program.parse_args(argc, argv);
-        const auto xi = program.get<dvec>("x");
+        const auto xi = program.get<dvec>("-x");
 
         if (xi.size() < 2U) {
-            throw std::invalid_argument("At least two interpolations points must be provided");
+            throw std::invalid_argument("At least two interpolations points must be provided: |{x_i}| >= 2");
         }
 
         if (not std::ranges::is_sorted(xi)) {
-            throw std::invalid_argument("x is not sorted");
+            throw std::invalid_argument("Interpolation points must be sorted in increasing order: x_{i} < x_{i + 1}");
         }
 
-        auto m = program.get<int>("m");
+        auto m = program.get<int>("-m");
         if (m < 1) {
-            throw std::invalid_argument("Number of interpolated points must be >= 1");
+            throw std::invalid_argument("Number of samples points must be larger than one: m > 1");
         }
 
-        auto use_fx = program.get<bool>("--use-fx");
-        if (not use_fx) {
-            const auto yi = program.get<dvec>("y");
-            if (xi.size() != yi.size()) {
-                throw std::invalid_argument("len(x) == len(f(x))");
-            }
-            echo_output(m, xi, yi, use_fx);
+        auto use_user_func = program.get<bool>("--user-func");
 
-            outlab02(m, xi, yi, use_fx);
+
+        if (not use_user_func) {
+            const auto yi = program.get<dvec>("-y");
+            if (xi.size() != yi.size()) {
+                throw std::invalid_argument("len({x_i}) == len({y_i})");
+            }
+
+            input_table_data.emplace("y", std::move(yi));
         }
         else {
             auto rg = xi | std::views::transform(user_func);
+            const dvec yi { rg.cbegin(), rg.cend() };
+            input_table_data.emplace("y", std::move(yi));
+        }
 
-#ifdef __cpp_lib_containers_ranges
-            const dvec ys { std::from_range, rg };
-#else
-            const dvec ys { rg.begin(), rg.end() };
-#endif
+        input_table_data.emplace("x", std::move(xi));
 
-            echo_output(m, xi, ys, use_fx);
+        std::cout << description;
+        echo_input(m, input_table_data.at("x"), input_table_data.at("y"), use_user_func);
 
-            outlab02(m, xi, ys, use_fx);
+        const auto [xs, Ls] = interpolate(m, xi, input_table_data.at("y"));
+
+        output_table_data.emplace("x", std::move(xs));
+        output_table_headers.emplace_back("x");
+
+        output_table_data.emplace("L(x)", std::move(Ls));
+        output_table_headers.emplace_back("L(x)");
+
+        if (use_user_func) {
+            const auto [fs, Es] = interpolation_error(xs, Ls);
+            output_table_data.emplace("f(x)", std::move(fs));
+            output_table_headers.emplace_back("f(x)");
+
+            output_table_data.emplace("E(x)", std::move(Es));
+            output_table_headers.emplace_back("E(x)");
+        }
+
+        std::cout << std::format("{: ^80s}\n", "Results")
+                  << std::format("{:-^80s}\n", "")
+                  << fmt::format("{: ^4s}{: ^19s}\n", "i", fmt::join(output_table_headers, ""))
+                  << std::format("{:-^80s}\n", "");
+
+        for (const std::size_t& i : std::views::iota(0, m)) {
+            std::cout << fmt::format("{: <4d}", i + 1);
+            for (const std::string& header : output_table_headers) {
+                std::cout << fmt::format("{: >19.11e}", output_table_data.at(header)[i]);
+            }
+            std::cout << std::endl;
         }
     }
     catch (const std::exception& err) {
         std::cerr << err.what() << std::endl;
         std::cerr << program;
-        return EXIT_FAILURE;
+        std::exit(EXIT_FAILURE);
     }
+
+
+    std::cout << "================================================================================\n"s;
 
     return EXIT_SUCCESS;
 }

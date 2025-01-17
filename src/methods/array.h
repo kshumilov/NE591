@@ -17,11 +17,7 @@ auto linspace(const T start, const T end, const int num) -> std::vector<T> {
     auto rg = std::views::iota(0, num)
             | std::views::transform([&](auto i) { return start + i * step; });
 
-#ifdef __cpp_lib_containers_ranges
-    return { std::from_range, rg }; // overload (6)
-#else
-    return { rg.begin(), rg.end() }; // overload (5)
-#endif
+    return { rg.cbegin(), rg.cend() };
 }
 
 

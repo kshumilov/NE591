@@ -4,9 +4,11 @@
 #include <cstddef>
 #include <concepts>
 #include <ranges>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 #include <bits/ranges_algo.h>
+
 
 template<std::floating_point T>
 class LagrangeInterpolation {
@@ -21,7 +23,7 @@ class LagrangeInterpolation {
         // }
 
         T result { 1.0 };
-        for (const auto i: std::ranges::iota(0U, m_x.size())) {
+        for (const auto i: std::views::iota(0U, m_x.size())) {
             if (i != j)
                 result *= (x - m_x[i]) / (m_x[j] - m_x[i]);
         }
@@ -50,13 +52,14 @@ public:
         //     throw std::logic_error("x is not in the interval [x[0], x[-1]]");
         // }
 
-        T result { 0.0 };
+        auto rg =
+            std::views::iota(0U, m_x.size())
+            | std::views::transform([&](auto j) {
+                return  m_y[j] * Lj(j, x);
+              })
+            | std::views::common;
 
-        for (const auto j: std::ranges::iota(0, m_x.size())) {
-            result += m_y[j] * Lk(j, x);
-        }
-
-        return result;
+        return std::accumulate(rg.cbegin(), rg.cend(), T{});
     }
 
     auto operator()(const std::span<const T> xs) const -> std::vector<T> {
@@ -64,7 +67,7 @@ public:
 #ifdef __cpp_lib_containers_ranges
         return { std::from_range, rg };
 #else
-        return { rg.begin(), rg.end() };
+        return { rg.cbegin(), rg.cend() };
 #endif
     }
 };

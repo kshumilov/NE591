@@ -16,7 +16,13 @@
 
 using dvec = std::vector<double>;
 
-
+/**
+ * \brief Calculates the error between true and interpolated points, based on user-defined function.
+ *
+ * @param xs vector of sampled points, x
+ * @param Ls values of Lagrange Interpolation at sampled points, L(x)
+ * @return Error between the true f(x) and L(x)
+ */
 auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec> {
     auto rgf = xs | std::views::transform(user_func);
     const dvec fs {rgf.cbegin(), rgf.cend()};
@@ -27,23 +33,35 @@ auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec
     return {fs, Es};
 }
 
-
+/**
+ * \brief Evaulates Lagrange Interpolation in the defined interval
+ *
+ * @param samples number of equidistant sampled to evaluate L(x) in the intreval [min(xi), max(xi)]
+ * @param xi Vector of interpolated points, x_i
+ * @param yi Vector of values of function at interpolated points, y_i = f(x_i)
+ * @return A pair of vectors, where the first vector is {x_n} - sampled points
+ */
 auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair<dvec, dvec> {
     const LagrangeInterpolation<double> inter {xi, yi};
     auto const xs = linspace(xi.front(), xi.back(), samples);
     return {xs, inter(xs)};
 }
 
-auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool use_fx) -> void {
+/**
+ * \brief Echoes back user input in a formated way
+ */
+auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool user_user_function) -> void {
     fmt::println("{:=^80s}", "");
     fmt::println("{: ^80s}", "Input Arguments");
     fmt::println("{:-^80s}", "");
     fmt::println("#samples: m = {:d}", m);
     fmt::println("#points : n = {:d}", xs.size());
-    fmt::println("user defined function: {}", use_fx);
+    fmt::println("user-defined function: {}", user_user_function);
     fmt::println("{:-^80s}", "");
     fmt::println("{: ^80s}", "Interpolation Points");
+    fmt::println("{:-^80s}", "");
     fmt::println("{: ^4s}{: ^38s}{: ^38s}", "i", "x", "f(x)");
+    fmt::println("{:-^80s}", "");
 
     for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xs, ys)) {
         fmt::print("{: >4d}", i);
@@ -51,7 +69,11 @@ auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool use_fx) 
         fmt::print("{: >28.12E}", y);
         std::cout << "\n";
     }
-
+    fmt::println("{:-^80s}", "");
+    fmt::println("Where");
+    fmt::println("i    : index of the intepolated point");
+    fmt::println("x    : position of the interpolated point");
+    fmt::println("f(x) : either user-supplied y-values or values from y = f(x) from the function");
     fmt::println( "{:=^80s}", "");
 }
 
@@ -177,15 +199,20 @@ auto main(int argc, char* argv[]) -> int {
             }
             std::cout << std::endl;
         }
+        fmt::println("{:-^80s}", "");
+        fmt::println("Where");
+        fmt::println("i    : index of the sampled point");
+        fmt::println("x    : position of the sampled point");
+        fmt::println("L(x) : interpolated value at x");
+        fmt::println("f(x) : True value, based on user-defined function");
+        fmt::println("E(x) : L(x) - f(x)");
+        fmt::println( "{:=^80s}", "");
     }
     catch (const std::exception& err) {
         std::cerr << err.what() << std::endl;
         std::cerr << program;
         std::exit(EXIT_FAILURE);
     }
-
-
-    std::cout << "================================================================================\n"s;
 
     return EXIT_SUCCESS;
 }

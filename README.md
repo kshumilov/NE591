@@ -51,18 +51,21 @@ Load the latest gcc compiler:
 module load gcc/13.2.0
 ```
 
-# Build and Install
-To build a desired inlab or outlab, from the root of the project execute the following commands:
+# Building
+To build `<[in/out]labNN>` run the following commands from the root of the project `<NE591>`:
 ```bash
-cmake -S. -Bbuild --config Release
-cmake --build build --target <labNN> -j
+cmake -S. -Bbuild
+cmake --build build --config Release --target <[in/out]labNN> -j
 cmake --install build --prefix <install_location>
 ```
-Where `<labNN>` is the name of the desired subproject, for instance `lab01`, and `<install_location>` 
-is the location of `bin`, `include`, and `lib` directories to be installed.
-The binary is located in `bin` directory.
+Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.
+The binary is located in `bin` directory. For instance, you can run to install the binaries into a current work project.
+```bash
+cmake --install build --prefix .
+```
+which will create `./bin/shumilov_<[in/out]labNN>`.
 
 To run the desired project:
 ```bash
-<install_location>/bin/shumilov_<labNN> [ARGS...]
+<install_location>/bin/shumilov_<[in/out]labNN> [ARGS...]
 ```

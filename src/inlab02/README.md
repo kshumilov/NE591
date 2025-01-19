@@ -34,17 +34,22 @@ module load gcc/13.2.0
 # Building
 To build `inlab02` run the following commands from the root of the project `<NE591>`:
 ```bash
-cmake -S. -Bbuild --config Release
-cmake --build build --target inlab02 -j
+cmake -S. -Bbuild
+cmake --build build --config Release --target inlab02 -j
 cmake --install build --prefix <install_location>
 ```
 Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.
-The binary is located in `bin` directory.
+The binary is located in `bin` directory. For instance, you can run to install the binaries into a current work project.
+```bash
+cmake --install build --prefix .
+```
+which will create `./bin/shumilov_inlabl02`.
 
 To run the desired project:
 ```bash
 <install_location>/bin/shumilov_inlab02 [ARGS...]
 ```
+
 ## User Supplied function
 If the user wishes to supply their own custom function, they should edit `user_func.h` header file.
 ```c++

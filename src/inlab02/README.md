@@ -60,6 +60,7 @@ cmake --build build --config Release -j
 ```
 
 ### Example
+```bash
 [kshumil@login02 NE591]$ cmake --build build --config Release  -j
 [ 14%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
 [ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
@@ -71,6 +72,7 @@ cmake --build build --config Release -j
 [ 85%] Built target outlab01
 [100%] Linking CXX executable shumilov_inlab02
 [100%] Built target inlab02
+```
 
 At this point the executable can be found in:
 ```bash

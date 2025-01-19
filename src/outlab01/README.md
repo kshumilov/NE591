@@ -23,9 +23,76 @@ module load gcc/13.2.0
 
 # Building
 To build `outlab01` run the following commands from the root of the project `<NE591>`:
+
+## 1. Initialize the build directory
 ```bash
 cmake -S. -Bbuild
+```
+### Example
+```bash
+[kshumil@login02 NE591]$ cmake -S. -Bbuild
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- {fmt} version: 11.1.2
+-- Build type:
+-- Configuring done (4.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/kshumil/ne591/NE591/build
+```
+
+## 2. Compile the code
+```bash
 cmake --build build --config Release --target outlab01 -j
+```
+
+### Example
+```bash
+[kshumil@login02 NE591]$ cmake --build build --config Release  -j
+[ 14%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
+[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
+[ 42%] Linking CXX static library libfmt.a
+[ 42%] Built target fmt
+[ 57%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
+[ 71%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
+[ 85%] Linking CXX executable shumilov_outlab01
+[ 85%] Built target outlab01
+[100%] Linking CXX executable shumilov_inlab02
+[100%] Built target inlab02
+```
+
+At this point the executable can be found in:
+```bash
+./build/src/outlab01/shumilov_outlab01 -h
+```
+
+### Example
+```bash
+[kshumil@login02 NE591]$ ./build/src/outlab01/shumilov_outlab01 -h
+Usage: ./build/src/outlab01/shumilov_outlab01 [--help] -k VAR -M VAR -N VAR -J VAR
+
+================================================================================
+NE 591 Outlab #01: Basic Math
+Author: Kirill Shumilov
+================================================================================
+This program showcases the use of matrix arithmetic,
+such as matrix-matrix addition and multiplication and matrix-scalar
+multiplication
+
+Optional arguments:
+  -h, --help  shows help message and exits
+  -k          Scalar multiplier of matrix A (a real number) [required]
+  -M          #rows for matrices A and B (positive integer) [required]
+  -N          #rows for matrix F,
+              #cols for matrices A and B (positive integer) [required]
+  -J          #cols for matrix F (positive integer) [required]
+```
+
+## 3. Install (Optional)
+```bash
 cmake --install build --prefix <install_location>
 ```
 Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.
@@ -33,11 +100,12 @@ The binary is located in `bin` directory. For instance, you can run to install t
 ```bash
 cmake --install build --prefix .
 ```
-which will create `./bin/shumilov_outlab01`.
+which will create `./bin/shumilov_outlab02`.
+
 
 To run the desired project:
 ```bash
-<install_location>/bin/shumilov_outlab02 [ARGS...]
+<install_location>/bin/shumilov_inlab02 [ARGS...]
 ```
 
 # Example run

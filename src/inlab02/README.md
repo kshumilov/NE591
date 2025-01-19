@@ -33,9 +33,74 @@ module load gcc/13.2.0
 
 # Building
 To build `inlab02` run the following commands from the root of the project `<NE591>`:
+
+## 1. Initialize the build directory
 ```bash
 cmake -S. -Bbuild
-cmake --build build --config Release --target inlab02 -j
+```
+### Example
+```bash
+[kshumil@login02 NE591]$ cmake -S. -Bbuild
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- {fmt} version: 11.1.2
+-- Build type:
+-- Configuring done (4.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/kshumil/ne591/NE591/build
+```
+
+## 2. Compile the code
+```bash
+cmake --build build --config Release -j
+```
+
+### Example
+[kshumil@login02 NE591]$ cmake --build build --config Release  -j
+[ 14%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
+[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
+[ 42%] Linking CXX static library libfmt.a
+[ 42%] Built target fmt
+[ 57%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
+[ 71%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
+[ 85%] Linking CXX executable shumilov_outlab01
+[ 85%] Built target outlab01
+[100%] Linking CXX executable shumilov_inlab02
+[100%] Built target inlab02
+
+At this point the executable can be found in:
+```bash
+./build/src/shumilov_inlab02/shumilov_inlab02 -h
+```
+
+### Example
+```bash
+Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
+
+================================================================================
+NE 591 Inlab #02: Lagrange Interpolation I/O
+Author: Kirill Shumilov
+Date: 01/17/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+
+
+Optional arguments:
+  -h, --help     shows help message and exits
+  -n             Number of interpolation points
+  -m, --samples  Number of samples to interpolate the function at [required]
+  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
+  -y, --values   Function values at interpolation points, y_i = f(x_i).
+                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
+  --user-func    Toggle the use of user-defined function in user_func.h
+```
+
+## 3. Install (Optional)
+```bash
 cmake --install build --prefix <install_location>
 ```
 Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.

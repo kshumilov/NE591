@@ -21,11 +21,6 @@ Make sure you are logged to the cluser with
 ssh -X $USER:login.hpc.ncsu.edu
 ```
 
-Request an interactive session on a compute node:
-```bash
-bsub -Is -n 4 -R "span[hosts=1]" -W 20 bash
-```
-
 Load the latest gcc compiler:
 ```bash
 module load gcc/13.2.0
@@ -161,7 +156,7 @@ Optional arguments:
 ```
 
 ## Example run
-### No Func Defition
+### No Func Definition
 ```bash
 [kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x 1 2 3 4 -y 1 2 3 4
 ================================================================================
@@ -183,6 +178,11 @@ user defined function: false
    2                    2.000000000000E+00          2.000000000000E+00
    3                    3.000000000000E+00          3.000000000000E+00
    4                    4.000000000000E+00          4.000000000000E+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the intepolated point
+x    : position of the interpolated point
+f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
                                     Results
 --------------------------------------------------------------------------------
@@ -198,6 +198,13 @@ user defined function: false
 8     3.33333333333e+00  3.33333333333e+00
 9     3.66666666667e+00  3.66666666667e+00
 10    4.00000000000e+00  4.00000000000e+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the sampled point
+x    : position of the sampled point
+L(x) : interpolated value at x
+f(x) : True value, based on user-defined function
+E(x) : L(x) - f(x)
 ================================================================================
 ```
 ### User Function Defined
@@ -222,6 +229,11 @@ user defined function: true
    2                    2.000000000000E+00          1.665436331219E+00
    3                    3.000000000000E+00          1.741559254738E-03
    4                    4.000000000000E+00         -8.516690103745E-06
+--------------------------------------------------------------------------------
+Where
+i    : index of the intepolated point
+x    : position of the interpolated point
+f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
                                     Results
 --------------------------------------------------------------------------------
@@ -237,5 +249,112 @@ user defined function: true
 8     3.33333333333e+00  1.09871554382e+00 -2.84810271715e-04 -1.09900035409e+00
 9     3.66666666667e+00  1.41868665142e+00 -7.26490243131e-05 -1.41875930044e+00
 10    4.00000000000e+00 -8.51669010374e-06 -8.51669010374e-06  0.00000000000e+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the sampled point
+x    : position of the sampled point
+L(x) : interpolated value at x
+f(x) : True value, based on user-defined function
+E(x) : L(x) - f(x)
 ================================================================================
 ```
+
+# Example
+## Build and Run on Login Node
+```bash
+[kshumil@login03 NE591]$ pwd -P
+/gpfs_common/share01/ne591s25/kshumil/NE591
+[kshumil@login03 NE591]$ cmake -S. -Bbuild
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- {fmt} version: 11.1.2
+-- Build type:
+-- Configuring done (4.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/kshumil/ne591/NE591/build
+[kshumil@login03 NE591]$ cmake --build build  --config Release -j
+[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
+[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
+[ 42%] Linking CXX static library libfmt.a
+[ 42%] Built target fmt
+[ 57%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
+[ 71%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
+[ 85%] Linking CXX executable shumilov_outlab01
+[ 85%] Built target outlab01
+[100%] Linking CXX executable shumilov_inlab02
+[100%] Built target inlab02
+[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -h
+Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
+
+================================================================================
+NE 591 Inlab #02: Lagrange Interpolation I/O
+Author: Kirill Shumilov
+Date: 01/17/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+
+
+Optional arguments:
+  -h, --help     shows help message and exits
+  -n             Number of interpolation points
+  -m, --samples  Number of samples to interpolate the function at [required]
+  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
+  -y, --values   Function values at interpolation points, y_i = f(x_i).
+                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
+  --user-func    Toggle the use of user-defined function in user_func.h
+[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x -0.5 0.0 0.5 1.0 --user-func
+================================================================================
+NE 591 Inlab #02: Lagrange Interpolation I/O
+Author: Kirill Shumilov
+Date: 01/17/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+================================================================================
+                                Input Arguments
+--------------------------------------------------------------------------------
+#samples: m = 10
+#points : n = 4
+user-defined function: true
+--------------------------------------------------------------------------------
+                              Interpolation Points
+--------------------------------------------------------------------------------
+ i                    x                                    f(x)
+--------------------------------------------------------------------------------
+   1                   -5.000000000000E-01         -3.733769848894E+01
+   2                    0.000000000000E+00          0.000000000000E+00
+   3                    5.000000000000E-01          3.733769848894E+01
+   4                    1.000000000000E+00          3.095598756531E+01
+--------------------------------------------------------------------------------
+Where
+i    : index of the intepolated point
+x    : position of the interpolated point
+f(x) : either user-supplied y-values or values from y = f(x) from the function
+================================================================================
+                                    Results
+--------------------------------------------------------------------------------
+ i           x                L(x)               f(x)               E(x)
+--------------------------------------------------------------------------------
+1    -5.00000000000e-01 -3.73376984889e+01 -3.73376984889e+01  0.00000000000e+00
+2    -3.33333333333e-01 -2.75905279687e+01 -2.92786678946e+01 -1.68813992593e+00
+3    -1.66666666667e-01 -1.46048826772e+01 -1.61351321394e+01 -1.53024946221e+00
+4     0.00000000000e+00  0.00000000000e+00  0.00000000000e+00  0.00000000000e+00
+5     1.66666666667e-01  1.46048826772e+01  1.61351321394e+01  1.53024946221e+00
+6     3.33333333333e-01  2.75905279687e+01  2.92786678946e+01  1.68813992593e+00
+7     5.00000000000e-01  3.73376984889e+01  3.73376984889e+01  0.00000000000e+00
+8     6.66666666667e-01  4.22271568522e+01  3.96486590526e+01 -2.57849779965e+00
+9     8.33333333333e-01  4.06396656729e+01  3.69608635523e+01 -3.67880212057e+00
+10    1.00000000000e+00  3.09559875653e+01  3.09559875653e+01  0.00000000000e+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the sampled point
+x    : position of the sampled point
+L(x) : interpolated value at x
+f(x) : True value, based on user-defined function
+E(x) : L(x) - f(x)
+================================================================================
+```
+

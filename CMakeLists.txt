@@ -38,4 +38,8 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(fmt argparse)
 
+# Contains definition for CMAKE_INSTALL_DATADIR
+# Only needs to be included once
+include(GNUInstallDirs)
+
 add_subdirectory(src)

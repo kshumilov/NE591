@@ -2,8 +2,6 @@
 #include <format>
 #include <argparse/argparse.hpp>
 
-#include <fstream>
-
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
@@ -11,7 +9,6 @@
 #include "array.h"
 
 #include "user_func.h"
-#include "fmt/os.h"
 
 
 using dvec = std::vector<double>;
@@ -21,6 +18,7 @@ using dvec = std::vector<double>;
  *
  * @param xs vector of sampled points, x
  * @param Ls values of Lagrange Interpolation at sampled points, L(x)
+ *
  * @return Error between the true f(x) and L(x)
  */
 auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec> {
@@ -34,11 +32,12 @@ auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec
 }
 
 /**
- * \brief Evaulates Lagrange Interpolation in the defined interval
+ * \brief Evaluates Lagrange Interpolation in the defined interval
  *
  * @param samples number of equidistant sampled to evaluate L(x) in the intreval [min(xi), max(xi)]
  * @param xi Vector of interpolated points, x_i
  * @param yi Vector of values of function at interpolated points, y_i = f(x_i)
+ *
  * @return A pair of vectors, where the first vector is {x_n} - sampled points
  */
 auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair<dvec, dvec> {
@@ -71,7 +70,7 @@ auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool user_use
     }
     fmt::println("{:-^80s}", "");
     fmt::println("Where");
-    fmt::println("i    : index of the intepolated point");
+    fmt::println("i    : index of the interpolated point");
     fmt::println("x    : position of the interpolated point");
     fmt::println("f(x) : either user-supplied y-values or values from y = f(x) from the function");
     fmt::println( "{:=^80s}", "");

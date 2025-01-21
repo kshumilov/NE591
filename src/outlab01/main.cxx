@@ -2,10 +2,10 @@
 #include <iostream>
 
 #include <argparse/argparse.hpp>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
-#include "matrix/matrix.hxx"
+#include <fmt/format.h>
+
+#include "matrix.h"
 
 /**
  * \brief Implementation of the Outlab01

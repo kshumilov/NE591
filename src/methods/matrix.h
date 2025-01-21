@@ -10,9 +10,8 @@
 #include <ranges>
 #include <numeric>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fmt/ranges.h>
-
 
 template<std::floating_point T>
 class Matrix {

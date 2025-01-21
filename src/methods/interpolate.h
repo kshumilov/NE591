@@ -17,7 +17,7 @@ class LagrangeInterpolation {
     std::span<const T> m_x{};  // Interpolated points
     std::span<const T> m_y{};  // y = f(x);
 
-    auto Lj(const std::size_t j, const T x) const -> double {
+    auto Lj(const std::size_t j, const T x) const -> T {
         // if (xs.size() <= k) {
         //     throw std::logic_error("k is not in the interval [0, xs.size() - 1]");
         // }

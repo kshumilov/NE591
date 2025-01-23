@@ -6,10 +6,9 @@
 #include <ranges>
 
 /**
+  * \brief Constructs a vector of equidistant #num points in the interval [start, end] inclusively
  *
- * \brief Constructes a vector of equidistant #num points in the interval [start, end] inclusively
- *
- * @tparam T Floating point type, can be float, double, long double
+ * @tparam T Floating point type, can be `float`, `double`, `long double`
  *
  * @param start left side of the interval, real
  * @param end right sie of the interval, real
@@ -26,10 +25,11 @@ auto linspace(const T start, const T end, const int num) -> std::vector<T> {
     T step { (end - start) / static_cast<T>(num - 1) };
 
     auto rg = std::views::iota(0, num)
-            | std::views::transform([&](auto i) { return start + i * step; });
+            | std::views::transform([&](auto i) {
+                return start + i * step;
+              });
 
     return { rg.cbegin(), rg.cend() };
 }
-
 
 #endif //ARRAY_H

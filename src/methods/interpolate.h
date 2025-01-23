@@ -1,74 +1,126 @@
 #ifndef INTERPOLATE_H
 #define INTERPOLATE_H
 
+
 #include <cstddef>
 #include <concepts>
 #include <ranges>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
-#include <bits/ranges_algo.h>
 
+#include "array.h"
 
+/**
+ * \brief Class that implement Lagrange polynomial interpolation
+ *
+ * \detail This class conforms to struct-of-arrays format of storing data.
+ *         It's based on the non-owning views (`std::span`) of the data.
+ *
+ * \tparam T type of data points, can be `float`, `double`, or `long double`
+ */
 template<std::floating_point T>
 class LagrangeInterpolation {
     using data = std::span<const T>;
 
-    std::span<const T> m_x{};  // Interpolated points
-    std::span<const T> m_y{};  // y = f(x);
+    std::span<const T> m_x{};  /** x, interpolated values, must be sorted in strictly increasing order */
+    std::span<const T> m_y{};  /** values of interpolated function, y_i = f(x_i) */
 
-    auto Lj(const std::size_t j, const T x) const -> T {
-        // if (xs.size() <= k) {
-        //     throw std::logic_error("k is not in the interval [0, xs.size() - 1]");
-        // }
+public:
+    /**
+     * \brief Constructor to build LagrangeInterpolation
+     *
+     * @param x sequence of interpolated points, \f${x}_i\f$
+     * @param y sequence of values at interpolated points, \f$y_i=f(x_i)\f$, must equal in size to \p x
+     *
+     * \throws std::invalid_argument x is empty
+     * \throws std::logic_error size(x) != size(y)
+     * \throws std::logic_error x is not sorted
+     */
+    LagrangeInterpolation(const std::span<const T>& x, const std::span<const T>& y)
+        : m_x{x}
+        , m_y{y}
+    {
+        if (x.empty()) {
+            throw std::invalid_argument("x is empty");
+        }
 
+        if (x.size() != y.size()) {
+            throw std::logic_error("x.size() != y.size()");
+        }
+    }
+
+    /**
+     * \brief a function to evaluate kth Lagrange Polynomial at a point [min(x), max(x)]
+     *
+     * \f[
+     * L_k(x) = \prod^n_{i=0,i\neq k}\frac{x - x_i}{x_k - x_i}
+     * \f]
+     *
+     * \warning: bound checks are not performed on x, use at your discretion
+     *
+     * \param[in] k index of the Lagrange polynomial
+     * \param[in] x value to evaluate \f$L_k\f$ at.
+     *
+     * \return \f$L_k(x)\f$
+     */
+    auto L(const std::size_t k, const T x) const -> T {
         T result { 1.0 };
+
         for (const auto i: std::views::iota(0U, m_x.size())) {
-            if (i != j)
-                result *= (x - m_x[i]) / (m_x[j] - m_x[i]);
+            if (i != k) {
+                result *= (x - m_x[i]) / (m_x[k]- m_x[i]);
+            }
         }
         return result;
     }
 
-public:
-    LagrangeInterpolation(const std::span<const T>& xi, const std::span<const T>& yi)
-    : m_x{xi}, m_y{yi}
-    {
-        if (xi.empty()) {
-            throw std::invalid_argument("xi is empty");
-        }
-
-        if (xi.size() != yi.size()) {
-            throw std::logic_error("xi.size() != yi.size()");
-        }
-
-        if (not std::ranges::is_sorted(xi)) {
-            throw std::logic_error("xi is not sorted");
-        }
-    }
-
+    /**
+     * \brief Evaluates Lagrange Interpolation Polynomial, \f$p_n(x)\f$
+     *
+     * \param x value to evaluate Lagrange Interpolation Polynomial
+     *
+     * \return \f$p_n(x)\f$
+     */
     auto operator()(const T x) const -> T {
-        // if (x < m_x[0U] || m_x[m_x.size() - 1U] < x) {
-        //     throw std::logic_error("x is not in the interval [x[0], x[-1]]");
-        // }
-
         auto rg =
-            std::views::iota(0U, m_x.size())
-            | std::views::transform([&](auto j) {
-                return  m_y[j] * Lj(j, x);
+            std::views::iota(0U, m_y.size())
+            | std::views::transform([&](auto k) {
+                return m_y[k] * this->L(k, x);
               })
             | std::views::common;
 
         return std::accumulate(rg.cbegin(), rg.cend(), T{});
     }
 
-    auto operator()(const std::span<const T> xs) const -> std::vector<T> {
-        auto rg = xs | std::views::transform(*this);
+    /**
+     * \brief operator() overload for sequence of input values
+     *
+     * @param x sequence of values to evaluate Lagrange Interpolation Polynomial at
+     *
+     * @return vector of evaluated \f$p_n(x)\f$
+     */
+    auto operator()(const std::span<const T> x) const -> std::vector<T> {
+        auto rg = x | std::views::transform(*this);
 #ifdef __cpp_lib_containers_ranges
         return { std::from_range, rg };
 #else
         return { rg.cbegin(), rg.cend() };
 #endif
+    }
+
+    /**
+     * \brief Sample LIP in [min(x), max(x)]
+     *
+     * @param num number of equidistant points in the interval [min(x), max(x)] to evaluate LIP
+     *            x(0) and x(-1) are included in the interpolation points
+     *
+     * @return pair of vectors {x, p_n(x)}
+     */
+    auto sample(const int num) const -> std::pair<std::vector<T>, std::vector<T>> {
+        const auto [min_x, max_x] = std::minmax_element(m_x.cbegin(), m_x.cend());
+        const auto x = linspace(*min_x, *max_x, num);
+        return { x, this->operator()(x) };
     }
 };
 

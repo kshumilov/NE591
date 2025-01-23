@@ -23,12 +23,12 @@ using dvec = std::vector<double>;
  */
 auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec> {
     auto rgf = xs | std::views::transform(user_func);
-    const dvec fs {rgf.cbegin(), rgf.cend()};
+    const dvec fs { rgf.cbegin(), rgf.cend() };
 
     auto error = [&](auto f, auto L) { return f - L; };
     auto rge = std::views::zip_transform(error, fs, Ls);
-    const dvec Es {rge.cbegin(), rge.cend()};
-    return {fs, Es};
+    const dvec Es { rge.cbegin(), rge.cend() };
+    return { fs, Es };
 }
 
 /**
@@ -41,28 +41,28 @@ auto interpolation_error(const dvec& xs, const dvec& Ls) -> std::pair<dvec, dvec
  * @return A pair of vectors, where the first vector is {x_n} - sampled points
  */
 auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair<dvec, dvec> {
-    const LagrangeInterpolation<double> inter {xi, yi};
+    const LagrangeInterpolation<double> inter { xi, yi };
     auto const xs = linspace(xi.front(), xi.back(), samples);
-    return {xs, inter(xs)};
+    return { xs, inter(xs) };
 }
 
 /**
  * \brief Echoes back user input in a formated way
  */
-auto echo_input(const int m, const dvec& xs, const dvec& ys, const bool user_user_function) -> void {
+auto print_input(const int samples, const dvec& xi, const dvec& y, const bool use_user_function) -> void {
     fmt::println("{:=^80s}", "");
     fmt::println("{: ^80s}", "Input Arguments");
     fmt::println("{:-^80s}", "");
-    fmt::println("#samples: m = {:d}", m);
-    fmt::println("#points : n = {:d}", xs.size());
-    fmt::println("user-defined function: {}", user_user_function);
+    fmt::println("#samples: m = {:d}", samples);
+    fmt::println("#points : n = {:d}", xi.size());
+    fmt::println("user-defined function: {}", use_user_function);
     fmt::println("{:-^80s}", "");
     fmt::println("{: ^80s}", "Interpolation Points");
     fmt::println("{:-^80s}", "");
     fmt::println("{: ^4s}{: ^38s}{: ^38s}", "i", "x", "f(x)");
     fmt::println("{:-^80s}", "");
 
-    for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xs, ys)) {
+    for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xi, y)) {
         fmt::print("{: >4d}", i);
         fmt::print("{: >38.12E}", x);
         fmt::print("{: >28.12E}", y);
@@ -167,7 +167,7 @@ auto main(int argc, char* argv[]) -> int {
         input_table_data.emplace("x", std::move(xi));
 
         std::cout << description;
-        echo_input(m, input_table_data.at("x"), input_table_data.at("y"), use_user_func);
+        print_input(m, input_table_data.at("x"), input_table_data.at("y"), use_user_func);
 
         const auto [xs, Ls] = interpolate(m, xi, input_table_data.at("y"));
 

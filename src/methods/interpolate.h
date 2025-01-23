@@ -67,11 +67,22 @@ public:
     auto L(const std::size_t k, const T x) const -> T {
         T result { 1.0 };
 
-        for (const auto i: std::views::iota(0U, m_x.size())) {
-            if (i != k) {
-                result *= (x - m_x[i]) / (m_x[k]- m_x[i]);
-            }
+        auto f = [&](const std::size_t i) {
+            return (x - m_x[i]) / (m_x[k] - m_x[i]);
+        };
+
+        // i < k
+        for (const auto i: std::views::iota(0U, k)) {
+            result *= f(i);
         }
+
+        // i == k -- skip
+
+        // i > k
+        for (const auto i: std::views::iota(k + 1U, m_x.size())) {
+            result *= f(i);
+        }
+
         return result;
     }
 
@@ -83,12 +94,12 @@ public:
      * \return \f$p_n(x)\f$
      */
     auto operator()(const T x) const -> T {
-        auto rg =
-            std::views::iota(0U, m_y.size())
-            | std::views::transform([&](auto k) {
-                return m_y[k] * this->L(k, x);
-              })
-            | std::views::common;
+        auto rg = std::views::zip_transform(
+            [&](auto y_k, auto k) {
+                return y_k * L(k, x);
+            },
+            m_y, std::views::iota(0U, m_y.size())
+        );
 
         return std::accumulate(rg.cbegin(), rg.cend(), T{});
     }
@@ -102,11 +113,7 @@ public:
      */
     auto operator()(const std::span<const T> x) const -> std::vector<T> {
         auto rg = x | std::views::transform(*this);
-#ifdef __cpp_lib_containers_ranges
-        return { std::from_range, rg };
-#else
         return { rg.cbegin(), rg.cend() };
-#endif
     }
 
     /**

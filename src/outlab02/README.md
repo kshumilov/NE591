@@ -1,4 +1,4 @@
-# Inlab #02
+# Outlab #02
 - Author: Kirill Shumilov
 - Date: 01/17/2024
 
@@ -7,6 +7,7 @@
 - CMake of version $>=3.26$
 
 # File Tree
+The project `main.cpp` function is located under `<project_root>/src/outlab02`
 ```
 <project_root>/src/outlab02
 ├── analysis
@@ -33,7 +34,15 @@
 └── user_func.h
 ```
 
-## Hazel HPC System (NCSU)
+While the implementation for Lagrange Interpolation Polynomial is located under `<project_root>/src/methods/` 
+```
+<project_root>/src/methods/
+├── array.h
+├── interpolate.h   <--- Here
+└── matrix.h
+```
+
+# Hazel HPC System (NCSU)
 Make sure you are logged to the cluser with
 ```bash
 ssh -X $USER:login.hpc.ncsu.edu
@@ -68,43 +77,53 @@ cmake -S. -Bbuild
 ```
 
 ## 2. Compile the code
+Now, compile the code:
 ```bash
-cmake --build build --config Release -j
+cmake --build build --config Release --target outlab02 -- -j
 ```
 
 ### Example
 ```bash
-[kshumil@login02 NE591]$ cmake --build build --config Release  -j
-[ 14%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
-[ 42%] Linking CXX static library libfmt.a
-[ 42%] Built target fmt
-[ 57%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
-[ 71%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
-[ 85%] Linking CXX executable shumilov_outlab01
-[ 85%] Built target outlab01
-[100%] Linking CXX executable shumilov_inlab02
-[100%] Built target inlab02
+[kshumil@login03 NE591]$ cmake --build build --config Release --target outlab02 -- -j
+[ 50%] Building CXX object src/outlab02/CMakeFiles/outlab02.dir/main.cxx.o
+/home/kshumil/ne591/NE591/src/outlab02/main.cxx: In function ‘std::tuple<Parameters, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > parse_and_validate(int, char**)’:
+/home/kshumil/ne591/NE591/src/outlab02/main.cxx:236:28: warning: unused variable ‘i’ [-Wunused-variable]
+  236 |             for (const int i : std::views::iota(0, params.n)) {
+      |                            ^
+/home/kshumil/ne591/NE591/src/outlab02/main.cxx:253:28: warning: unused variable ‘i’ [-Wunused-variable]
+  253 |             for (const int i : std::views::iota(0, params.n))
+      |                            ^
+[100%] Linking CXX executable shumilov_outlab02
+[100%] Built target outlab02
 ```
+
+Note, that the warnings are irrelevant to the validity of this code.
 
 At this point the executable can be found in:
 ```bash
-./src/outlab02/shumilov_outlab02 -h
-```
-## 3. Install (Optional)
-```bash
-cmake --install build --prefix <install_location>
-```
-Where `<install_location>` is the location of `bin`, `include`, and `lib` directories to be installed.
-The binary is located in `bin` directory. For instance, you can run to install the binaries into a current work project.
-```bash
-cmake --install build --prefix .
-```
-which will create `./bin/shumilov_inlabl02`.
+[kshumil@login03 NE591]$ cd ./src/outlab02/
+[kshumil@login03 outlab02]$ ./shumilov_outlab02 -h
+================================================================================
+NE 591 OutLab #02: Lagrange Interpolation
+Author: Kirill Shumilov
+Date: 01/23/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+Usage: shumilov_outlab02 [--help] [-n VAR] [--samples VAR] [--points VAR...]... [--values VAR...]... [--user-func] [--interactive] [--save-input VAR] [--output VAR]
 
-To run the desired project:
-```bash
-<install_location>/bin/shumilov_inlab02 [ARGS...]
+Optional arguments:
+  -h, --help     shows help message and exits
+  -n             Number of interpolation points.
+                 If `-x`, `-y` or `--input` are provided, takes first `n` points.
+  -m, --samples  Number of samples to interpolate the function at
+  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [may be repeated]
+  -y, --values   Function values at interpolation points, y_i = f(x_i).
+                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
+  --user-func    Toggle the use of user-defined function in user_func.h
+  --interactive  Toggle interactive mode.
+                 In this mode, the user is queried to enter missing values
+  --save-input   Save the input to the file in csv format
+  --output       Output filename (writes in csv format)
 ```
 
 ## User Supplied function
@@ -121,7 +140,7 @@ If the user wishes to supply their own custom function, they should edit `user_f
  * @param x real value
  */
 inline auto user_func(const double x) -> double {
-    return std::sin(x) * std::exp(-x * x) * 100.0;
+    return std::exp(x);
 }
 ```
 The program must be recompiled after `user_func.h` has been edited
@@ -129,53 +148,58 @@ The program must be recompiled after `user_func.h` has been edited
 # Running
 Please, find bellow the usage instructions:
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -h
-Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
-
+[kshumil@login03 outlab02]$ ./shumilov_outlab02 -h
 ================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
+NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
-Date: 01/17/2025
+Date: 01/23/2025
 ================================================================================
 This program perform Lagrange Interpolation of a 1D real function
-
+Usage: shumilov_outlab02 [--help] [-n VAR] [--samples VAR] [--points VAR...]... [--values VAR...]... [--user-func] [--interactive] [--save-input VAR] [--output VAR]
 
 Optional arguments:
-  -h, --help     shows help message and exits
-  -n             Number of interpolation points
-  -m, --samples  Number of samples to interpolate the function at [required]
-  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
-  -y, --values   Function values at interpolation points, y_i = f(x_i).
-                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
-  --user-func    Toggle the use of user-defined function in user_func.h
+-h, --help     shows help message and exits
+-n             Number of interpolation points.
+               If `-x`, `-y` or `--input` are provided, takes first `n` points.
+-m, --samples  Number of samples to interpolate the function at
+-x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [may be repeated]
+-y, --values   Function values at interpolation points, y_i = f(x_i).
+               Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
+--user-func    Toggle the use of user-defined function in user_func.h
+--interactive  Toggle interactive mode.
+               In this mode, the user is queried to enter missing values
+--save-input   Save the input to the file in csv format
+--output       Output filename (writes in csv format)
 ```
 
-## Example run
-### No Func Definition
+## Example: Running code in non-interactive mode (no user func)
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x 1 2 3 4 -y 1 2 3 4
+[kshumil@login03 outlab02]$ ./shumilov_outlab02 -m 10 -x -1.0 -0.5 0.0 0.5 1.0 -y 1.2 3.4 5.6 7.8 9.10
 ================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
+NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
-Date: 01/17/2025
+Date: 01/23/2025
 ================================================================================
 This program perform Lagrange Interpolation of a 1D real function
 ================================================================================
                                 Input Arguments
 --------------------------------------------------------------------------------
 #samples: m = 10
-#points : n = 4
-user defined function: false
+#points : n = 5
+user-defined function: false
 --------------------------------------------------------------------------------
                               Interpolation Points
+--------------------------------------------------------------------------------
  i                    x                                    f(x)
-   1                    1.000000000000E+00          1.000000000000E+00
-   2                    2.000000000000E+00          2.000000000000E+00
-   3                    3.000000000000E+00          3.000000000000E+00
-   4                    4.000000000000E+00          4.000000000000E+00
+--------------------------------------------------------------------------------
+   1                   -1.000000000000E+00          1.200000000000E+00
+   2                   -5.000000000000E-01          3.400000000000E+00
+   3                    0.000000000000E+00          5.600000000000E+00
+   4                    5.000000000000E-01          7.800000000000E+00
+   5                    1.000000000000E+00          9.100000000000E+00
 --------------------------------------------------------------------------------
 Where
-i    : index of the intepolated point
+i    : index of the interpolated point
 x    : position of the interpolated point
 f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
@@ -183,16 +207,16 @@ f(x) : either user-supplied y-values or values from y = f(x) from the function
 --------------------------------------------------------------------------------
  i           x                L(x)
 --------------------------------------------------------------------------------
-1     1.00000000000e+00  1.00000000000e+00
-2     1.33333333333e+00  1.33333333333e+00
-3     1.66666666667e+00  1.66666666667e+00
-4     2.00000000000e+00  2.00000000000e+00
-5     2.33333333333e+00  2.33333333333e+00
-6     2.66666666667e+00  2.66666666667e+00
-7     3.00000000000e+00  3.00000000000e+00
-8     3.33333333333e+00  3.33333333333e+00
-9     3.66666666667e+00  3.66666666667e+00
-10    4.00000000000e+00  4.00000000000e+00
+1    -1.00000000000e+00  1.20000000000e+00
+2    -7.77777777778e-01  2.21458619113e+00
+3    -5.55555555556e-01  3.16424325560e+00
+4    -3.33333333333e-01  4.11481481481e+00
+5    -1.11111111111e-01  5.09702789209e+00
+6     1.11111111111e-01  6.10649291267e+00
+7     3.33333333333e-01  7.10370370370e+00
+8     5.55555555556e-01  8.01403749428e+00
+9     7.77777777778e-01  8.72775491541e+00
+10    1.00000000000e+00  9.10000000000e+00
 --------------------------------------------------------------------------------
 Where
 i    : index of the sampled point
@@ -202,48 +226,124 @@ f(x) : True value, based on user-defined function
 E(x) : L(x) - f(x)
 ================================================================================
 ```
-### User Function Defined
+
+## Example: Running code in interactive mode (no user func)
+In interactive mode the inputs are read from `stdin` in the following order:
+1. Number of interpolation points (single integer)
+2. Number of sampled points (single integer)
+3. List of interpolation points
+4. list of values at interpolation points
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x 1 2 3 4 --user-func
+[kshumil@login03 outlab02]$ ./shumilov_outlab02 --interactive
 ================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
+NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
-Date: 01/17/2025
+Date: 01/23/2025
 ================================================================================
 This program perform Lagrange Interpolation of a 1D real function
+Enter number of interpolation points:
+5
+Enter number of sampled points:
+10
+Enter 5 interpolation points:
+-1.0 -0.5 0.0 0.5 1.0
+Enter 5 values of interpolation points:
+1.2 3.4 5.6 7.8 9.10
 ================================================================================
                                 Input Arguments
 --------------------------------------------------------------------------------
 #samples: m = 10
-#points : n = 4
-user defined function: true
+#points : n = 5
+user-defined function: false
 --------------------------------------------------------------------------------
                               Interpolation Points
+--------------------------------------------------------------------------------
  i                    x                                    f(x)
-   1                    1.000000000000E+00          3.095598756531E+01
-   2                    2.000000000000E+00          1.665436331219E+00
-   3                    3.000000000000E+00          1.741559254738E-03
-   4                    4.000000000000E+00         -8.516690103745E-06
+--------------------------------------------------------------------------------
+   1                   -1.000000000000E+00          1.200000000000E+00
+   2                   -5.000000000000E-01          3.400000000000E+00
+   3                    0.000000000000E+00          5.600000000000E+00
+   4                    5.000000000000E-01          7.800000000000E+00
+   5                    1.000000000000E+00          9.100000000000E+00
 --------------------------------------------------------------------------------
 Where
-i    : index of the intepolated point
+i    : index of the interpolated point
 x    : position of the interpolated point
 f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
                                     Results
 --------------------------------------------------------------------------------
- i           x                L(x)               f(x)               E(x)
+ i           x                L(x)
 --------------------------------------------------------------------------------
-1     1.00000000000e+00  3.09559875653e+01  3.09559875653e+01  0.00000000000e+00
-2     1.33333333333e+00  1.65200474380e+01  1.64270447078e+01 -9.30027302026e-02
-3     1.66666666667e+00  7.07708482624e+00  6.18910067970e+00 -8.87984146547e-01
-4     2.00000000000e+00  1.66543633122e+00  1.66543633122e+00  0.00000000000e+00
-5     2.33333333333e+00 -6.76561445790e-01  3.12390416945e-01  9.88951862735e-01
-6     2.66666666667e+00 -9.10571903530e-01  3.73128900646e-02  9.47884793595e-01
-7     3.00000000000e+00  1.74155925474e-03  1.74155925474e-03  0.00000000000e+00
-8     3.33333333333e+00  1.09871554382e+00 -2.84810271715e-04 -1.09900035409e+00
-9     3.66666666667e+00  1.41868665142e+00 -7.26490243131e-05 -1.41875930044e+00
-10    4.00000000000e+00 -8.51669010374e-06 -8.51669010374e-06  0.00000000000e+00
+1    -1.00000000000e+00  1.20000000000e+00
+2    -7.77777777778e-01  2.21458619113e+00
+3    -5.55555555556e-01  3.16424325560e+00
+4    -3.33333333333e-01  4.11481481481e+00
+5    -1.11111111111e-01  5.09702789209e+00
+6     1.11111111111e-01  6.10649291267e+00
+7     3.33333333333e-01  7.10370370370e+00
+8     5.55555555556e-01  8.01403749428e+00
+9     7.77777777778e-01  8.72775491541e+00
+10    1.00000000000e+00  9.10000000000e+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the sampled point
+x    : position of the sampled point
+L(x) : interpolated value at x
+f(x) : True value, based on user-defined function
+E(x) : L(x) - f(x)
+================================================================================
+```
+Some of the inputs can be piped-in if they are not present in optional arguments:
+```bash
+[kshumil@login03 outlab02]$ cat input
+3
+-1.0 0.0 1.0
+1.2 3.4 5.6
+[kshumil@login03 outlab02]$ cat input | ./shumilov_outlab02 -m 10 --interactive
+================================================================================
+NE 591 OutLab #02: Lagrange Interpolation
+Author: Kirill Shumilov
+Date: 01/23/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+Enter number of interpolation points:
+Enter 3 interpolation points:
+Enter 3 values of interpolation points:
+================================================================================
+                                Input Arguments
+--------------------------------------------------------------------------------
+#samples: m = 10
+#points : n = 3
+user-defined function: false
+--------------------------------------------------------------------------------
+                              Interpolation Points
+--------------------------------------------------------------------------------
+ i                    x                                    f(x)
+--------------------------------------------------------------------------------
+   1                   -1.000000000000E+00          1.200000000000E+00
+   2                    0.000000000000E+00          3.400000000000E+00
+   3                    1.000000000000E+00          5.600000000000E+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the interpolated point
+x    : position of the interpolated point
+f(x) : either user-supplied y-values or values from y = f(x) from the function
+================================================================================
+                                    Results
+--------------------------------------------------------------------------------
+ i           x                L(x)
+--------------------------------------------------------------------------------
+1    -1.00000000000e+00  1.20000000000e+00
+2    -7.77777777778e-01  1.68888888889e+00
+3    -5.55555555556e-01  2.17777777778e+00
+4    -3.33333333333e-01  2.66666666667e+00
+5    -1.11111111111e-01  3.15555555556e+00
+6     1.11111111111e-01  3.64444444444e+00
+7     3.33333333333e-01  4.13333333333e+00
+8     5.55555555556e-01  4.62222222222e+00
+9     7.77777777778e-01  5.11111111111e+00
+10    1.00000000000e+00  5.60000000000e+00
 --------------------------------------------------------------------------------
 Where
 i    : index of the sampled point
@@ -254,95 +354,54 @@ E(x) : L(x) - f(x)
 ================================================================================
 ```
 
-# Example
-## Build and Run on Login Node
+## Example: Running in interactive-mode with user-defined function
 ```bash
-[kshumil@login03 NE591]$ pwd -P
-/gpfs_common/share01/ne591s25/kshumil/NE591
-[kshumil@login03 NE591]$ cmake -S. -Bbuild
--- The CXX compiler identification is GNU 13.2.0
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- {fmt} version: 11.1.2
--- Build type:
--- Configuring done (4.4s)
--- Generating done (0.0s)
--- Build files have been written to: /home/kshumil/ne591/NE591/build
-[kshumil@login03 NE591]$ cmake --build build  --config Release -j
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
-[ 42%] Linking CXX static library libfmt.a
-[ 42%] Built target fmt
-[ 57%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
-[ 71%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
-[ 85%] Linking CXX executable shumilov_outlab01
-[ 85%] Built target outlab01
-[100%] Linking CXX executable shumilov_inlab02
-[100%] Built target inlab02
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -h
-Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
-
+[kshumil@login03 outlab02]$ cat input
+3
+-1.0 0.0 1.0
+[kshumil@login03 outlab02]$ cat input | ./shumilov_outlab02 -m 10 --user-func --interactive
 ================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
+NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
-Date: 01/17/2025
+Date: 01/23/2025
 ================================================================================
 This program perform Lagrange Interpolation of a 1D real function
-
-
-Optional arguments:
-  -h, --help     shows help message and exits
-  -n             Number of interpolation points
-  -m, --samples  Number of samples to interpolate the function at [required]
-  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
-  -y, --values   Function values at interpolation points, y_i = f(x_i).
-                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
-  --user-func    Toggle the use of user-defined function in user_func.h
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x -0.5 0.0 0.5 1.0 --user-func
-================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
-Author: Kirill Shumilov
-Date: 01/17/2025
-================================================================================
-This program perform Lagrange Interpolation of a 1D real function
+Enter number of interpolation points:
+Enter 3 interpolation points:
 ================================================================================
                                 Input Arguments
 --------------------------------------------------------------------------------
 #samples: m = 10
-#points : n = 4
+#points : n = 3
 user-defined function: true
 --------------------------------------------------------------------------------
                               Interpolation Points
 --------------------------------------------------------------------------------
  i                    x                                    f(x)
 --------------------------------------------------------------------------------
-   1                   -5.000000000000E-01         -3.733769848894E+01
-   2                    0.000000000000E+00          0.000000000000E+00
-   3                    5.000000000000E-01          3.733769848894E+01
-   4                    1.000000000000E+00          3.095598756531E+01
+   1                   -1.000000000000E+00          3.678794411714E-01
+   2                    0.000000000000E+00          1.000000000000E+00
+   3                    1.000000000000E+00          2.718281828459E+00
 --------------------------------------------------------------------------------
 Where
-i    : index of the intepolated point
+i    : index of the interpolated point
 x    : position of the interpolated point
 f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
                                     Results
 --------------------------------------------------------------------------------
- i           x                L(x)               f(x)               E(x)
+ i           x                f(x)               L(x)               E(x)
 --------------------------------------------------------------------------------
-1    -5.00000000000e-01 -3.73376984889e+01 -3.73376984889e+01  0.00000000000e+00
-2    -3.33333333333e-01 -2.75905279687e+01 -2.92786678946e+01 -1.68813992593e+00
-3    -1.66666666667e-01 -1.46048826772e+01 -1.61351321394e+01 -1.53024946221e+00
-4     0.00000000000e+00  0.00000000000e+00  0.00000000000e+00  0.00000000000e+00
-5     1.66666666667e-01  1.46048826772e+01  1.61351321394e+01  1.53024946221e+00
-6     3.33333333333e-01  2.75905279687e+01  2.92786678946e+01  1.68813992593e+00
-7     5.00000000000e-01  3.73376984889e+01  3.73376984889e+01  0.00000000000e+00
-8     6.66666666667e-01  4.22271568522e+01  3.96486590526e+01 -2.57849779965e+00
-9     8.33333333333e-01  4.06396656729e+01  3.69608635523e+01 -3.67880212057e+00
-10    1.00000000000e+00  3.09559875653e+01  3.09559875653e+01  0.00000000000e+00
+1    -1.00000000000e+00  3.67879441171e-01  3.67879441171e-01  0.00000000000e+00
+2    -7.77777777778e-01  4.59425824036e-01  4.14484887733e-01  4.49409363027e-02
+3    -5.55555555556e-01  5.73753420737e-01  5.14727927857e-01  5.90254928805e-02
+4    -3.33333333333e-01  7.16531310574e-01  6.68608561543e-01  4.79227490311e-02
+5    -1.11111111111e-01  8.94839316814e-01  8.76126788790e-01  1.87125280240e-02
+6     1.11111111111e-01  1.11751906874e+00  1.13728260960e+00 -1.97635408583e-02
+7     3.33333333333e-01  1.39561242509e+00  1.45207602397e+00 -5.64635988858e-02
+8     5.55555555556e-01  1.74290899863e+00  1.82050703191e+00 -7.75980332721e-02
+9     7.77777777778e-01  2.17662993172e+00  2.24257563340e+00 -6.59457016851e-02
+10    1.00000000000e+00  2.71828182846e+00  2.71828182846e+00  0.00000000000e+00
 --------------------------------------------------------------------------------
 Where
 i    : index of the sampled point
@@ -353,3 +412,65 @@ E(x) : L(x) - f(x)
 ================================================================================
 ```
 
+# Analysis
+The report and the code that is used to generate it is located under `<project_root>/src/outlab02/analysis`.
+
+The input files for the cases $n=3$, $n=4$, and $n=8$ is located under `<project_root>/src/outlab02/analysis/data`.
+
+## Example:
+```bash
+[kshumil@login03 outlab02]$ cat analysis/data/n3/input
+3
+100
+-1.0 0.0 1.0
+[kshumil@login03 outlab02]$ cat analysis/data/n3/input | ./shumilov_outlab02 --interactive --user-func --output analysis/data/n3/output.csv
+================================================================================
+NE 591 OutLab #02: Lagrange Interpolation
+Author: Kirill Shumilov
+Date: 01/23/2025
+================================================================================
+This program perform Lagrange Interpolation of a 1D real function
+Enter number of interpolation points:
+Enter number of sampled points:
+Enter 3 interpolation points:
+================================================================================
+Input Arguments
+--------------------------------------------------------------------------------
+#samples: m = 100
+#points : n = 3
+user-defined function: true
+--------------------------------------------------------------------------------
+                              Interpolation Points
+--------------------------------------------------------------------------------
+i                    x                                    f(x)
+--------------------------------------------------------------------------------
+1                   -1.000000000000E+00          3.678794411714E-01
+2                    0.000000000000E+00          1.000000000000E+00
+3                    1.000000000000E+00          2.718281828459E+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the interpolated point
+x    : position of the interpolated point
+f(x) : either user-supplied y-values or values from y = f(x) from the function
+================================================================================
+Results
+--------------------------------------------------------------------------------
+i           x                f(x)               L(x)               E(x)
+--------------------------------------------------------------------------------
+1    -1.00000000000e+00  3.67879441171e-01  3.67879441171e-01  0.00000000000e+00
+2    -9.79797979798e-01  3.75386926935e-01  3.69899870464e-01  5.48705647081e-03
+3    -9.59595959596e-01  3.83047621429e-01  3.72363585653e-01  1.06840357758e-02
+4    -9.39393939394e-01  3.90864651256e-01  3.75270586740e-01  1.55940645163e-02
+...
+98    9.59595959596e-01  2.61064145567e+00  2.62780021992e+00 -1.71587642451e-02
+99    9.79797979798e-01  2.66391802231e+00  2.67281938124e+00 -8.90135893189e-03
+100   1.00000000000e+00  2.71828182846e+00  2.71828182846e+00  0.00000000000e+00
+--------------------------------------------------------------------------------
+Where
+i    : index of the sampled point
+x    : position of the sampled point
+L(x) : interpolated value at x
+f(x) : True value, based on user-defined function
+E(x) : L(x) - f(x)
+================================================================================
+```

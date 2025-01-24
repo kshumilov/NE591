@@ -49,7 +49,7 @@ auto interpolate(const int samples, const dvec& xi, const dvec& yi) -> std::pair
 /**
  * \brief Echoes back user input in a formated way
  */
-auto print_input(const int samples, const dvec& xi, const dvec& y, const bool use_user_function) -> void {
+auto print_input(const int samples, const dvec& xi, const dvec& yi, const bool use_user_function) -> void {
     fmt::println("{:=^80s}", "");
     fmt::println("{: ^80s}", "Input Arguments");
     fmt::println("{:-^80s}", "");
@@ -62,7 +62,7 @@ auto print_input(const int samples, const dvec& xi, const dvec& y, const bool us
     fmt::println("{: ^4s}{: ^38s}{: ^38s}", "i", "x", "f(x)");
     fmt::println("{:-^80s}", "");
 
-    for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xi, y)) {
+    for (const auto [i, x, y] : std::views::zip(std::views::iota(1), xi, yi)) {
         fmt::print("{: >4d}", i);
         fmt::print("{: >38.12E}", x);
         fmt::print("{: >28.12E}", y);

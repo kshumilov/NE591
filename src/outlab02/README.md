@@ -8,10 +8,28 @@
 
 # File Tree
 ```
-<NE591>/src/inlab02
+<project_root>/src/outlab02
+├── analysis
+│   ├── data
+│   │   ├── n3
+│   │   │   ├── input
+│   │   │   ├── input.csv
+│   │   │   ├── output.csv
+│   │   │   └── plot.png
+│   │   ├── n4
+│   │   │   ├── input
+│   │   │   ├── input.csv
+│   │   │   ├── output.csv
+│   │   │   └── plot.png
+│   │   └── n8
+│   │       ├── input
+│   │       ├── input.csv
+│   │       ├── output.csv
+│   │       └── plot.png
+│   └── report.ipynb
 ├── CMakeLists.txt
-├── README.md
 ├── main.cxx
+├── README.md
 └── user_func.h
 ```
 
@@ -35,7 +53,7 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login02 NE591]$ cmake -S. -Bbuild
+[kshumil@login03 NE591]$ cmake -S. -Bbuild
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -44,8 +62,8 @@ cmake -S. -Bbuild
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type:
--- Configuring done (4.2s)
--- Generating done (0.0s)
+-- Configuring done (4.9s)
+-- Generating done (0.2s)
 -- Build files have been written to: /home/kshumil/ne591/NE591/build
 ```
 
@@ -71,31 +89,8 @@ cmake --build build --config Release -j
 
 At this point the executable can be found in:
 ```bash
-./build/src/shumilov_inlab02/shumilov_inlab02 -h
+./src/outlab02/shumilov_outlab02 -h
 ```
-
-### Example
-```bash
-Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
-
-================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
-Author: Kirill Shumilov
-Date: 01/17/2025
-================================================================================
-This program perform Lagrange Interpolation of a 1D real function
-
-
-Optional arguments:
-  -h, --help     shows help message and exits
-  -n             Number of interpolation points
-  -m, --samples  Number of samples to interpolate the function at [required]
-  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
-  -y, --values   Function values at interpolation points, y_i = f(x_i).
-                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
-  --user-func    Toggle the use of user-defined function in user_func.h
-```
-
 ## 3. Install (Optional)
 ```bash
 cmake --install build --prefix <install_location>

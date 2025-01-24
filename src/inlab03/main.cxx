@@ -12,6 +12,7 @@
 
 #include "user_func.h"
 
+
 using real = double;
 
 
@@ -31,13 +32,14 @@ struct fmt::formatter<Quadrature, char> {
             case Quadrature::Simpson:
                 return fmt::format_to(ctx.out(), "Simpson");
             case Quadrature::Gauss:
-                return fmt::format_to(ctx.out(), "Gauss");
+                return fmt::format_to(ctx.out(), "Gauss-Legendre");
         }
         return ctx.out();
     }
 };
 
-auto str_to_quadrature(std::string_view str) -> std::optional<Quadrature>
+
+auto str_to_quadrature(const std::string_view str) -> std::optional<Quadrature>
 {
     if (str.starts_with("trap")) {
         return Quadrature::Trapezoidal;
@@ -53,10 +55,11 @@ auto str_to_quadrature(std::string_view str) -> std::optional<Quadrature>
     return std::nullopt;
 }
 
+
 struct Inputs {
     double start {};
     double end {};
-    std::size_t subintervals {};
+    int subintervals {};
     Quadrature quadrature;
 
     [[nodiscard]]
@@ -66,11 +69,12 @@ struct Inputs {
     }
 
     [[nodiscard]]
-    constexpr auto points() const -> std::size_t
+    constexpr auto points() const -> int
     {
-        return subintervals + 1U;
+        return subintervals + 1;
     }
 };
+
 
 auto parse_and_validate(int argc, char* argv[]) -> Inputs
 {
@@ -82,49 +86,84 @@ auto parse_and_validate(int argc, char* argv[]) -> Inputs
 
     program.add_argument("-a","--start")
            .help("Start of interval integration")
-           .required()
            .scan<'g', real>();
 
     program.add_argument("-b", "--end")
            .help("End of interval integration")
-           .required()
            .scan<'g', real>();
 
     program.add_argument("-m","--subintervals")
            .help("Number of subintervals")
-           .required()
            .scan<'d', int>();
 
     program.add_argument("--quad")
            .help("Quadrature type (trap, simp, gauss)")
-           .default_value(std::string{"trap"})
            .choices("trap", "simp", "gauss");
+
+    program.add_argument("--interactive")
+           .help("Toggle interactive mode")
+           .flag();
 
     try {
         program.parse_args(argc, argv);
-        const double start = program.get<real>("-a");
-        const double end = program.get<real>("-b");
 
-        const auto subintervals = program.get<int>("-m");
-        if (subintervals < 1) {
+        Inputs inputs{};
+
+        const auto start_opt = program.present<real>("-a");
+        const auto end_opt = program.present<real>("-b");
+        const auto subintervals_opt = program.present<int>("-m");
+        const auto quad_str_opt = program.present<std::string>("--quad");
+
+        const auto interactive = program.get<bool>("--interactive");
+
+        if (not start_opt.has_value() || interactive) {
+            std::cout << "Enter interval start:\n";
+            std::cin >> inputs.start;
+        } else if (start_opt.has_value()) {
+            inputs.start = start_opt.value();
+        } else {
+            throw std::runtime_error("Must specify `-a` or `--interactive` to provide interval start.");
+        }
+
+        if (not end_opt.has_value() || interactive) {
+            std::cout << "Enter interval end:\n";
+            std::cin >> inputs.end;
+        } else if (end_opt.has_value()) {
+            inputs.end = end_opt.value();
+        } else {
+            throw std::runtime_error("Must specify `-b` or `--interactive` to provide interval end.");
+        }
+
+        if (not subintervals_opt.has_value() || interactive) {
+            std::cout << "Enter interval number of intervals:\n";
+            std::cin >> inputs.subintervals;
+        } else if (subintervals_opt.has_value()) {
+            inputs.subintervals = subintervals_opt.value();
+        } else {
+            throw std::runtime_error("Must specify `-m` or `--interactive` to provide number of subintervals.");
+        }
+
+        if (inputs.subintervals < 1) {
             throw std::runtime_error(
-                fmt::format("Number of subintervals must be positive: m({}) < 1", subintervals)
+                fmt::format("Number of subintervals must be positive: m({}) < 1", inputs.subintervals)
             );
         }
 
-        Quadrature quadrature = Quadrature::Trapezoidal;
-        if (const auto q = str_to_quadrature(program.get<std::string>("--quad"))) {
-            quadrature = q.value();
+        if (not quad_str_opt.has_value() || interactive) {
+            int quad_int {};
+            std::cout << "Enter type of quadrature 0/1/2 (Trapezoidal/Simpson/Gauss):\n";
+            std::cin >> quad_int;
+            if (quad_int < 0 || 2 < quad_int) {
+                throw std::runtime_error("Unknown quadrature");
+            }
+            inputs.quadrature = Quadrature{quad_int};
+        } else if (const auto q = str_to_quadrature(quad_str_opt.value())) {
+            inputs.quadrature = q.value();
         } else {
-            throw std::runtime_error("Unknown quadrature");
+            throw std::runtime_error("Must specify `--quad` or `--interactive` to provide quadrature.");
         }
 
-        return {
-            .start = start,
-            .end = end,
-            .subintervals = static_cast<std::size_t>(subintervals),
-            .quadrature = quadrature,
-        };
+        return inputs;
     }
     catch (const std::exception& err) {
         std::cerr << "\n"

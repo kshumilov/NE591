@@ -154,3 +154,39 @@ Quadrature.............: Trapezoidal
 Integrals..............: 147.632315031182
 ================================================================================
 ```
+
+# Example Run in Interactive mode
+```bash
+[kshumil@login03 inlab03]$  ./shumilov_inlab03
+================================================================================
+NE 591 Inlab #03: Numerical Integration
+Author: Kirill Shumilov
+Date: 01/24/2025
+================================================================================
+This program performs composite numerical integration of user-defined function
+using three quadratures: Trapezoidal, Simpson, and Gauss
+Enter interval start:
+1
+Enter interval end:
+5
+Enter interval number of intervals:
+10
+Enter type of quadrature 0/1/2 (Trapezoidal/Simpson/Gauss):
+1
+================================================================================
+Input Arguments
+--------------------------------------------------------------------------------
+Integration Interval...: [1, 5]
+Integration Step.......: 0.4
+Number of Subintervals.: 10
+Quadrature.............: Simpson
+================================================================================
+Results
+--------------------------------------------------------------------------------
+Integration Interval...: [1, 5]
+Integration Step.......: 0.4
+Number of Subintervals.: 10
+Quadrature.............: Simpson
+Integral...............: 145.715210160708
+================================================================================
+```

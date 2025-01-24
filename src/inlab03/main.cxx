@@ -179,14 +179,23 @@ auto main(int argc, char* argv[]) -> int {
     // fmt::println("{:=^80s}", "");
     // #endif
 
-    const double integral = integrate<double>(y, inputs.quadrature, inputs.step());
+    try {
+        const double integral = integrate<double>(y, inputs.quadrature, inputs.step());
 
-    fmt::println("{: ^80s}", "Results");
-    fmt::println("{:-^80s}", "");
-    fmt::println("Integration Interval...: [{:g}, {:g}]", inputs.start, inputs.end);
-    fmt::println("Integration Step.......: {:g}", inputs.step());
-    fmt::println("Number of Subintervals.: {:d}", inputs.subintervals);
-    fmt::println("Quadrature.............: {}", inputs.quadrature);
-    fmt::println("Integral...............: {:.12f}", integral);
-    fmt::println("{:=^80s}", "");
+        fmt::println("{: ^80s}", "Results");
+        fmt::println("{:-^80s}", "");
+        fmt::println("Integration Interval...: [{:g}, {:g}]", inputs.start, inputs.end);
+        fmt::println("Integration Step.......: {:g}", inputs.step());
+        fmt::println("Number of Subintervals.: {:d}", inputs.subintervals);
+        fmt::println("Quadrature.............: {}", inputs.quadrature);
+        fmt::println("Integral...............: {:.12f}", integral);
+        fmt::println("{:=^80s}", "");
+    }
+    catch (const std::exception& err) {
+        std::cerr << "\n"
+          << fmt::format(fmt::emphasis::bold | fg(fmt::color::red), "Error: ")
+          << err.what() << "\n\n";
+        std::exit(EXIT_FAILURE);
+    }
+
 }

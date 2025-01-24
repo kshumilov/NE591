@@ -96,7 +96,7 @@ auto parse_and_validate(int argc, char* argv[]) -> Inputs
            .scan<'d', int>();
 
     program.add_argument("--quad")
-           .help("Quadrature type")
+           .help("Quadrature type (trap, simp, gauss)")
            .default_value(std::string{"trap"})
            .choices("trap", "simp", "gauss");
 
@@ -169,15 +169,15 @@ auto main(int argc, char* argv[]) -> int {
     std::vector<double> y {};
     std::ranges::transform(x, std::back_inserter(y), user_func);
 
-    #ifndef NDEBUG
-    fmt::println("Integrating Points:");
-    fmt::println("{: ^12}|{: ^12s}", "x", "f(x)");
-    fmt::println("{:-^12s}+{:-^12s}", "", "");
-    for (const auto &[xi, yi] : std::views::zip(x, y)) {
-        fmt::println("{: >12g}|{: >12g}", xi, yi);
-    }
-    fmt::println("{:=^80s}", "");
-    #endif
+    // #ifndef NDEBUG
+    // fmt::println("Integrating Points:");
+    // fmt::println("{: ^12}|{: ^12s}", "x", "f(x)");
+    // fmt::println("{:-^12s}+{:-^12s}", "", "");
+    // for (const auto &[xi, yi] : std::views::zip(x, y)) {
+    //     fmt::println("{: >12g}|{: >12g}", xi, yi);
+    // }
+    // fmt::println("{:=^80s}", "");
+    // #endif
 
     const double integral = integrate<double>(y, inputs.quadrature, inputs.step());
 
@@ -187,6 +187,6 @@ auto main(int argc, char* argv[]) -> int {
     fmt::println("Integration Step.......: {:g}", inputs.step());
     fmt::println("Number of Subintervals.: {:d}", inputs.subintervals);
     fmt::println("Quadrature.............: {}", inputs.quadrature);
-    fmt::println("Integrals..............: {:.12f}", integral);
+    fmt::println("Integral...............: {:.12f}", integral);
     fmt::println("{:=^80s}", "");
 }

@@ -3,18 +3,21 @@
 - Date: 01/17/2024
 
 # Requirements
-- C++ Compiler: GCC/Clang supporing C++23 standard
-- CMake of version $>=3.26$
+```requirements
+- C++ Compiler: GCC/Clang supporting C++23 standard
+- CMake: >=3.26
+```
 
 # File Tree
-The project `main.cpp` function is located under `<project_root>/src/outlab02`
+The project `main.cpp` function is located under ``
 ```
-shumilov_outlab02
-├── CMakeLists.txt
-├── analysis
-│   ├── data
-│   │   ├── n3
-│   │   │   ├── input
+shumilov_outlab02  <-- Root Directory (Run commands from this directory)
+├── CMakeLists.txt   <-- Compilation Script (do not edit)
+├── README.md        <-- Instructions
+├── analysis         <-- Analysis, input files, and report
+│   ├── data
+│   │   ├── n3
+│   │   │   ├── input
 │   │   │   ├── input.csv
 │   │   │   ├── output.csv
 │   │   │   └── plot.png
@@ -28,40 +31,34 @@ shumilov_outlab02
 │   │       ├── input.csv
 │   │       ├── output.csv
 │   │       └── plot.png
-│   ├── report.ipynb
-│   └── report.pdf
-├── external
+│   ├── report.ipynb  <-- Code that generates plots and report
+│   └── report.pdf    <-- PDF version of the code that generates plots and report
+├── external   <-- Location of user-defined function
 │   ├── CMakeLists.txt
-│   ├── user_func.cpp
+│   ├── user_func.cpp   <-- Definition of the user-defined function (EDIT HERE)
 │   └── user_func.h
 ├── include
-│   ├── array.h
-│   └── interpolate.h
+│   ├── array.h   <-- Utility functions for working with arrays
+│   └── interpolate.h   <-- Lagrange Interpolation Polynomial Implementation
 └── src
     └── main.cxx
 ```
 
-While the implementation for Lagrange Interpolation Polynomial is located under `<project_root>/src/methods/` 
-```
-<project_root>/src/methods/
-├── array.h
-├── interpolate.h   <--- Here
-└── matrix.h
-```
-
 # Hazel HPC System (NCSU)
-Make sure you are logged to the cluser with
+The code has been run and tested on Hazel. Before continuing login in on the login node of the cluster:
 ```bash
 ssh -X $USER:login.hpc.ncsu.edu
 ```
-
 Load the latest gcc compiler:
 ```bash
 module load gcc/13.2.0
 ```
 
+Further compilation is done on the login node. If you wish to run the code on a compute node, make sure
+you have compiled the code on a login node first.
+
 # Building
-To build `inlab02` run the following commands from the root of the project `<NE591>`:
+To build `outlab02` run the following commands from the root of the project `shumilob_outlab02`:
 
 ## 1. Initialize the build directory
 ```bash
@@ -69,7 +66,7 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login03 NE591]$ cmake -S. -Bbuild
+[kshumil@login02 shumilov_inlab02]$ cmake -S. -Bbuild
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -78,38 +75,36 @@ cmake -S. -Bbuild
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type:
--- Configuring done (4.9s)
--- Generating done (0.2s)
--- Build files have been written to: /home/kshumil/ne591/NE591/build
+-- Configuring done (5.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/kshumil/shumilov_outlab02/build
 ```
 
 ## 2. Compile the code
-Now, compile the code:
 ```bash
 cmake --build build --config Release --target outlab02 -- -j
 ```
-
 ### Example
 ```bash
-[kshumil@login03 NE591]$ cmake --build build --config Release --target outlab02 -- -j
-[ 50%] Building CXX object src/outlab02/CMakeFiles/outlab02.dir/main.cxx.o
-/home/kshumil/ne591/NE591/src/outlab02/main.cxx: In function ‘std::tuple<Parameters, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > parse_and_validate(int, char**)’:
-/home/kshumil/ne591/NE591/src/outlab02/main.cxx:236:28: warning: unused variable ‘i’ [-Wunused-variable]
-  236 |             for (const int i : std::views::iota(0, params.n)) {
+[kshumil@login02 shumilov_outlab02]$ cmake --build build --config Release --target outlab02 -- -j
+[ 25%] Building CXX object external/CMakeFiles/user_func.dir/user_func.cpp.o
+[ 50%] Linking CXX shared library libuser_func.so
+[ 50%] Built target user_func
+[ 75%] Building CXX object CMakeFiles/outlab02.dir/src/main.cxx.o
+/home/kshumil/shumilov_outlab02/src/main.cxx: In function ‘std::tuple<Parameters, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::optional<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > parse_and_validate(int, char**)’:
+/home/kshumil/shumilov_outlab02/src/main.cxx:235:28: warning: unused variable ‘i’ [-Wunused-variable]
+  235 |             for (const int i : std::views::iota(0, params.n)) {
       |                            ^
-/home/kshumil/ne591/NE591/src/outlab02/main.cxx:253:28: warning: unused variable ‘i’ [-Wunused-variable]
-  253 |             for (const int i : std::views::iota(0, params.n))
+/home/kshumil/shumilov_outlab02/src/main.cxx:252:28: warning: unused variable ‘i’ [-Wunused-variable]
+  252 |             for (const int i : std::views::iota(0, params.n))
       |                            ^
 [100%] Linking CXX executable shumilov_outlab02
 [100%] Built target outlab02
 ```
 
-Note, that the warnings are irrelevant to the validity of this code.
-
-At this point the executable can be found in:
+At this point the executable can be found in project root directory, `shumilov_outlab02`
 ```bash
-[kshumil@login03 NE591]$ cd ./src/outlab02/
-[kshumil@login03 outlab02]$ ./shumilov_outlab02 -h
+[kshumil@login02 shumilov_outlab02]$ ./shumilov_outlab02 -h
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
@@ -134,7 +129,7 @@ Optional arguments:
 ```
 
 ## User Supplied function
-If the user wishes to supply their own custom function, they should edit `user_func.h` header file.
+If the user wishes to supply their own custom function, they should edit `external/user_func.cpp` header file.
 ```c++
 /**
  * \brief User defined function
@@ -147,10 +142,22 @@ If the user wishes to supply their own custom function, they should edit `user_f
  * @param x real value
  */
 inline auto user_func(const double x) -> double {
-    return std::exp(x);
+    return std::sin(x) * std::exp(-x * x) * 100.0;
 }
 ```
-The program must be recompiled after `user_func.h` has been edited
+The library, containing user-defined function must be recompiled after `user_func.cpp` has been edited:
+```bash
+cmake --build build --config Release --target user_func -- -j
+```
+
+### Example
+```bash
+[kshumil@login02 shumilov_outlab02]$ vim external/user_func.cpp
+[kshumil@login02 shumilov_outlab02]$ cmake --build build --config Release --target user_func -- -j
+[ 50%] Building CXX object external/CMakeFiles/user_func.dir/user_func.cpp.o
+[100%] Linking CXX shared library libuser_func.so
+[100%] Built target user_func
+```
 
 # Running
 Please, find bellow the usage instructions:
@@ -181,7 +188,7 @@ Optional arguments:
 
 ## Example: Running code in non-interactive mode (no user func)
 ```bash
-[kshumil@login03 outlab02]$ ./shumilov_outlab02 -m 10 -x -1.0 -0.5 0.0 0.5 1.0 -y 1.2 3.4 5.6 7.8 9.10
+[kshumil@login03 shumilov_outlab02]$ ./shumilov_outlab02 -m 10 -x -1.0 -0.5 0.0 0.5 1.0 -y 1.2 3.4 5.6 7.8 9.10
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
@@ -241,7 +248,7 @@ In interactive mode the inputs are read from `stdin` in the following order:
 3. List of interpolation points
 4. list of values at interpolation points
 ```bash
-[kshumil@login03 outlab02]$ ./shumilov_outlab02 --interactive
+[kshumil@login03 shumilov_outlab02]$ ./shumilov_outlab02 --interactive
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
@@ -303,11 +310,11 @@ E(x) : L(x) - f(x)
 ```
 Some of the inputs can be piped-in if they are not present in optional arguments:
 ```bash
-[kshumil@login03 outlab02]$ cat input
+[kshumil@login03 shumilov_outlab02]$ cat input
 3
 -1.0 0.0 1.0
 1.2 3.4 5.6
-[kshumil@login03 outlab02]$ cat input | ./shumilov_outlab02 -m 10 --interactive
+[kshumil@login03 shuilov_outlab02]$ cat input | ./shumilov_outlab02 -m 10 --interactive
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
@@ -363,10 +370,10 @@ E(x) : L(x) - f(x)
 
 ## Example: Running in interactive-mode with user-defined function
 ```bash
-[kshumil@login03 outlab02]$ cat input
+[kshumil@login03 shumilov_outlab02]$ cat input
 3
 -1.0 0.0 1.0
-[kshumil@login03 outlab02]$ cat input | ./shumilov_outlab02 -m 10 --user-func --interactive
+[kshumil@login03 shumilov_outlab02]$ cat input | ./shumilov_outlab02 -m 10 --user-func --interactive
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov
@@ -420,17 +427,17 @@ E(x) : L(x) - f(x)
 ```
 
 # Analysis
-The report and the code that is used to generate it is located under `<project_root>/src/outlab02/analysis`.
+The report and the code that is used to generate it is located under `shumilov_outlab02/analysis`.
 
-The input files for the cases $n=3$, $n=4$, and $n=8$ is located under `<project_root>/src/outlab02/analysis/data`.
+The input files for the cases $n=3$, $n=4$, and $n=8$ is located under `shumilov_outlab02/analysis/data`.
 
 ## Example:
 ```bash
-[kshumil@login03 outlab02]$ cat analysis/data/n3/input
+[kshumil@login03 shumilov_outlab02]$ cat analysis/data/n3/input
 3
 100
 -1.0 0.0 1.0
-[kshumil@login03 outlab02]$ cat analysis/data/n3/input | ./shumilov_outlab02 --interactive --user-func --output analysis/data/n3/output.csv
+[kshumil@login03 shumilov_outlab02]$ cat analysis/data/n3/input | ./shumilov_outlab02 --interactive --user-func --output analysis/data/n3/output.csv
 ================================================================================
 NE 591 OutLab #02: Lagrange Interpolation
 Author: Kirill Shumilov

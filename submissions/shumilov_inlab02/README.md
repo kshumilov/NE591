@@ -10,26 +10,35 @@
 
 # File Tree
 ```
-<NE591>/src/inlab02
-├── CMakeLists.txt
-├── README.md
-├── main.cxx
-└── user_func.h
+shumilov_inlab02   <-- Root Directory (Run commands from this directory)
+├── CMakeLists.txt  <-- Compilation Script (do not edit)
+├── README.md       <-- Instructions
+├── external        <-- Location of user-defined function
+│   ├── CMakeLists.txt  <-- Compilation Script for user-defined function as shared library (do not edit)
+│   ├── user_func.cpp   <-- Definition of the user-defined function (EDIT HERE)
+│   └── user_func.h     <-- Declaration of user-defined function (do not edit)
+├── include
+│   ├── array.h         <-- Utility functions for working with arrays
+│   └── interpolate.h   <-- Lagrange Interpolation Polynomial Implementation
+└── src
+    └── main.cxx        <-- Code for the executable
 ```
 
-## Hazel HPC System (NCSU)
-Make sure you are logged to the cluser with
+# Hazel HPC System (NCSU)
+The code has been run and tested on Hazel. Before continuing login in on the login node of the cluster:
 ```bash
 ssh -X $USER:login.hpc.ncsu.edu
 ```
-
 Load the latest gcc compiler:
 ```bash
 module load gcc/13.2.0
 ```
 
+Further compilation is done on the login node. If you wish to run the code on a compute node, make sure
+you have compiled the code on a login node first.
+
 # Building
-To build `inlab02` run the following commands from the root of the project `<NE591>`:
+To build `inlab02` run the following commands from the root of the project `shumilov_inlab02`.
 
 ## 1. Initialize the build directory
 ```bash
@@ -37,7 +46,7 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login02 NE591]$ cmake -S. -Bbuild
+[kshumil@login02 shumilov_inlab02]$ cmake -S. -Bbuild
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -46,38 +55,29 @@ cmake -S. -Bbuild
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type:
--- Configuring done (4.2s)
--- Generating done (0.0s)
--- Build files have been written to: /home/kshumil/ne591/NE591/build
+-- Configuring done (5.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/kshumil/shumilov_inlab02/build
 ```
 
 ## 2. Compile the code
 ```bash
-cmake --build build --config Release -j
+cmake --build build --config Release --target inlab02 -- -j
 ```
-
 ### Example
 ```bash
-[kshumil@login02 NE591]$ cmake --build build --config Release  -j
-[ 14%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
-[ 42%] Linking CXX static library libfmt.a
-[ 42%] Built target fmt
-[ 57%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
-[ 71%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
-[ 85%] Linking CXX executable shumilov_outlab01
-[ 85%] Built target outlab01
+[kshumil@login02 shumilov_inlab02]$ cmake --build build --config Release --target inlab02 -- -j
+[ 25%] Building CXX object external/CMakeFiles/user_func.dir/user_func.cpp.o
+[ 50%] Linking CXX shared library libuser_func.so
+[ 50%] Built target user_func
+[ 75%] Building CXX object CMakeFiles/inlab02.dir/src/main.cxx.o
 [100%] Linking CXX executable shumilov_inlab02
 [100%] Built target inlab02
 ```
 
-At this point the executable can be found in:
+At this point the executable can be found in project root directory, `shumilov_inlab02`
 ```bash
-./build/src/shumilov_inlab02/shumilov_inlab02 -h
-```
-
-### Example
-```bash
+[kshumil@login02 shumilov_inlab02]$ ./shumilov_inlab02 -h
 Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
 
 ================================================================================
@@ -99,7 +99,7 @@ Optional arguments:
 ```
 
 ## User Supplied function
-If the user wishes to supply their own custom function, they should edit `user_func.h` header file.
+If the user wishes to supply their own custom function, they should edit `external/user_func.cpp` header file.
 ```c++
 /**
  * \brief User defined function
@@ -115,12 +115,24 @@ inline auto user_func(const double x) -> double {
     return std::sin(x) * std::exp(-x * x) * 100.0;
 }
 ```
-The program must be recompiled after `user_func.h` has been edited
+The library, containing user-defined function must be recompiled after `user_func.cpp` has been edited:
+```bash
+cmake --build build --config Release --target user_func -- -j
+```
+
+### Example
+```bash
+[kshumil@login02 shumilov_inlab02]$ vim external/user_func.cpp
+[kshumil@login02 shumilov_inlab02]$ cmake --build build --config Release --target user_func -- -j
+[ 50%] Building CXX object external/CMakeFiles/user_func.dir/user_func.cpp.o
+[100%] Linking CXX shared library libuser_func.so
+[100%] Built target user_func
+```
 
 # Running
 Please, find bellow the usage instructions:
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -h
+[kshumil@login03 shumilov_inlab02]$ ./shumilov_inlab02 -h
 Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
 
 ================================================================================
@@ -141,10 +153,13 @@ Optional arguments:
   --user-func    Toggle the use of user-defined function in user_func.h
 ```
 
+WARNING: This function accepts only key-word arguments. Please, see `shumilov_outlab02`,
+for program that accepts input from `stdin`.
+
 ## Example run
 ### No Func Definition
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x 1 2 3 4 -y 1 2 3 4
+[kshumil@login02 shumilov_inlab02]$ ./shumilov_inlab02 -m 10 -x 1 2 3 4 -y 1 2 3 4
 ================================================================================
 NE 591 Inlab #02: Lagrange Interpolation I/O
 Author: Kirill Shumilov
@@ -156,17 +171,19 @@ This program perform Lagrange Interpolation of a 1D real function
 --------------------------------------------------------------------------------
 #samples: m = 10
 #points : n = 4
-user defined function: false
+user-defined function: false
 --------------------------------------------------------------------------------
                               Interpolation Points
+--------------------------------------------------------------------------------
  i                    x                                    f(x)
+--------------------------------------------------------------------------------
    1                    1.000000000000E+00          1.000000000000E+00
    2                    2.000000000000E+00          2.000000000000E+00
    3                    3.000000000000E+00          3.000000000000E+00
    4                    4.000000000000E+00          4.000000000000E+00
 --------------------------------------------------------------------------------
 Where
-i    : index of the intepolated point
+i    : index of the interpolated point
 x    : position of the interpolated point
 f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
@@ -193,9 +210,10 @@ f(x) : True value, based on user-defined function
 E(x) : L(x) - f(x)
 ================================================================================
 ```
+
 ### User Function Defined
 ```bash
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x 1 2 3 4 --user-func
+[kshumil@login02 shumilov_inlab02]$ ./shumilov_inlab02 -m 10 -x 1 2 3 4 --user-func
 ================================================================================
 NE 591 Inlab #02: Lagrange Interpolation I/O
 Author: Kirill Shumilov
@@ -207,17 +225,19 @@ This program perform Lagrange Interpolation of a 1D real function
 --------------------------------------------------------------------------------
 #samples: m = 10
 #points : n = 4
-user defined function: true
+user-defined function: true
 --------------------------------------------------------------------------------
                               Interpolation Points
+--------------------------------------------------------------------------------
  i                    x                                    f(x)
+--------------------------------------------------------------------------------
    1                    1.000000000000E+00          3.095598756531E+01
    2                    2.000000000000E+00          1.665436331219E+00
    3                    3.000000000000E+00          1.741559254738E-03
    4                    4.000000000000E+00         -8.516690103745E-06
 --------------------------------------------------------------------------------
 Where
-i    : index of the intepolated point
+i    : index of the interpolated point
 x    : position of the interpolated point
 f(x) : either user-supplied y-values or values from y = f(x) from the function
 ================================================================================
@@ -244,103 +264,3 @@ f(x) : True value, based on user-defined function
 E(x) : L(x) - f(x)
 ================================================================================
 ```
-
-# Example
-## Build and Run on Login Node
-```bash
-[kshumil@login03 NE591]$ pwd -P
-/gpfs_common/share01/ne591s25/kshumil/NE591
-[kshumil@login03 NE591]$ cmake -S. -Bbuild
--- The CXX compiler identification is GNU 13.2.0
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- {fmt} version: 11.1.2
--- Build type:
--- Configuring done (4.4s)
--- Generating done (0.0s)
--- Build files have been written to: /home/kshumil/ne591/NE591/build
-[kshumil@login03 NE591]$ cmake --build build  --config Release -j
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
-[ 28%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
-[ 42%] Linking CXX static library libfmt.a
-[ 42%] Built target fmt
-[ 57%] Building CXX object src/inlab02/CMakeFiles/inlab02.dir/main.cxx.o
-[ 71%] Building CXX object src/outlab01/CMakeFiles/outlab01.dir/main.cxx.o
-[ 85%] Linking CXX executable shumilov_outlab01
-[ 85%] Built target outlab01
-[100%] Linking CXX executable shumilov_inlab02
-[100%] Built target inlab02
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -h
-Usage: shumilov_inlab02 [--help] [-n VAR] --samples VAR --points VAR...... [--values VAR...]... [--user-func]
-
-================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
-Author: Kirill Shumilov
-Date: 01/17/2025
-================================================================================
-This program perform Lagrange Interpolation of a 1D real function
-
-
-Optional arguments:
-  -h, --help     shows help message and exits
-  -n             Number of interpolation points
-  -m, --samples  Number of samples to interpolate the function at [required]
-  -x, --points   Distinct real interpolation points in increasing order: {x_i} [nargs: 1 or more] [required] [may be repeated]
-  -y, --values   Function values at interpolation points, y_i = f(x_i).
-                 Ignored when `--user-func` is provided [nargs: 1 or more] [may be repeated]
-  --user-func    Toggle the use of user-defined function in user_func.h
-[kshumil@login03 NE591]$ ./build/src/inlab02/shumilov_inlab02 -m 10 -x -0.5 0.0 0.5 1.0 --user-func
-================================================================================
-NE 591 Inlab #02: Lagrange Interpolation I/O
-Author: Kirill Shumilov
-Date: 01/17/2025
-================================================================================
-This program perform Lagrange Interpolation of a 1D real function
-================================================================================
-                                Input Arguments
---------------------------------------------------------------------------------
-#samples: m = 10
-#points : n = 4
-user-defined function: true
---------------------------------------------------------------------------------
-                              Interpolation Points
---------------------------------------------------------------------------------
- i                    x                                    f(x)
---------------------------------------------------------------------------------
-   1                   -5.000000000000E-01         -3.733769848894E+01
-   2                    0.000000000000E+00          0.000000000000E+00
-   3                    5.000000000000E-01          3.733769848894E+01
-   4                    1.000000000000E+00          3.095598756531E+01
---------------------------------------------------------------------------------
-Where
-i    : index of the intepolated point
-x    : position of the interpolated point
-f(x) : either user-supplied y-values or values from y = f(x) from the function
-================================================================================
-                                    Results
---------------------------------------------------------------------------------
- i           x                L(x)               f(x)               E(x)
---------------------------------------------------------------------------------
-1    -5.00000000000e-01 -3.73376984889e+01 -3.73376984889e+01  0.00000000000e+00
-2    -3.33333333333e-01 -2.75905279687e+01 -2.92786678946e+01 -1.68813992593e+00
-3    -1.66666666667e-01 -1.46048826772e+01 -1.61351321394e+01 -1.53024946221e+00
-4     0.00000000000e+00  0.00000000000e+00  0.00000000000e+00  0.00000000000e+00
-5     1.66666666667e-01  1.46048826772e+01  1.61351321394e+01  1.53024946221e+00
-6     3.33333333333e-01  2.75905279687e+01  2.92786678946e+01  1.68813992593e+00
-7     5.00000000000e-01  3.73376984889e+01  3.73376984889e+01  0.00000000000e+00
-8     6.66666666667e-01  4.22271568522e+01  3.96486590526e+01 -2.57849779965e+00
-9     8.33333333333e-01  4.06396656729e+01  3.69608635523e+01 -3.67880212057e+00
-10    1.00000000000e+00  3.09559875653e+01  3.09559875653e+01  0.00000000000e+00
---------------------------------------------------------------------------------
-Where
-i    : index of the sampled point
-x    : position of the sampled point
-L(x) : interpolated value at x
-f(x) : True value, based on user-defined function
-E(x) : L(x) - f(x)
-================================================================================
-```
-

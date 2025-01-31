@@ -43,7 +43,7 @@ class Matrix {
     }
 
     [[nodiscard]]
-    auto flat_idx(const idx_t row, const idx_t col) const -> idx_t
+    constexpr auto flat_idx(const idx_t row, const idx_t col) const -> idx_t
     {
         return flat_from_pair_idx(row, col, m_cols);
     }
@@ -62,19 +62,22 @@ class Matrix {
 
 public:
     // Constructor for initializing matrix with a constant value
-    Matrix(const idx_t rows, const idx_t cols, const scalar_t init_value)
+    [[nodiscard]]
+    constexpr Matrix(const idx_t rows, const idx_t cols, const scalar_t init_value)
         : m_rows{rows}
         , m_cols{cols}
         , m_data(rows * cols, init_value)
     {}
 
     // Move constructor by moving in vector of data
-    Matrix(const idx_t rows, const idx_t cols, std::vector<scalar_t>&& data)
+    constexpr Matrix(const idx_t rows, const idx_t cols, std::vector<scalar_t>&& data) noexcept
         : m_rows{rows}, m_cols{cols}
         , m_data{std::move(data)}
     {}
 
-    static auto from_func(const idx_t rows, const idx_t cols, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+
+    [[nodiscard]] static constexpr
+    auto from_func(const idx_t rows, const idx_t cols, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
     {
         auto r = std::views::iota(0U, rows * cols)
                  | std::views::transform([&](const idx_t flat_idx) -> scalar_t {
@@ -86,32 +89,38 @@ public:
         return Matrix{rows, cols, std::move(data)};
     }
 
-    static auto from_func(const idx_t rows, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+    [[nodiscard]] static constexpr
+    auto from_func(const idx_t rows, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
     {
         return Matrix::from_func(rows, rows, func);
     }
 
+    [[nodiscard]] static constexpr
     static auto zeros(const idx_t rows, const idx_t cols) -> Matrix
     {
         return Matrix{rows, cols, scalar_t{0}};
     }
 
-    static auto zeros(const idx_t rows) -> Matrix
+    [[nodiscard]] static constexpr
+    auto zeros(const idx_t rows) -> Matrix
     {
         return Matrix::zeros(rows, rows);
     }
 
-    static auto ones(const idx_t rows, const idx_t cols) -> Matrix
+    [[nodiscard]] static constexpr
+    auto ones(const idx_t rows, const idx_t cols) -> Matrix
     {
         return Matrix{rows, cols, scalar_t(1)};
     }
 
-    static auto ones(const idx_t rows) -> Matrix
+    [[nodiscard]] static constexpr
+    auto ones(const idx_t rows) -> Matrix
     {
         return Matrix::ones(rows, rows);
     }
 
-    static auto eye(const idx_t rows) -> Matrix
+    [[nodiscard]] static constexpr
+    auto eye(const idx_t rows) -> Matrix
     {
         return Matrix::from_func(rows,
             [](const idx_t row, const idx_t col) -> scalar_t {
@@ -120,6 +129,7 @@ public:
     }
 
     // Const accessor for matrix elements
+    [[nodiscard]]
     constexpr auto operator()(const idx_t row, const idx_t col) const -> const scalar_t&
     {
         check_idx(row, col);
@@ -128,31 +138,31 @@ public:
 
     // Get number of rows
     [[nodiscard]]
-    constexpr auto rows() const -> std::size_t
+    constexpr auto rows() const noexcept -> idx_t
     {
         return m_rows;
     }
 
     // Get number of columns
     [[nodiscard]]
-    constexpr auto cols() const -> std::size_t
+    constexpr auto cols() const noexcept -> idx_t
     {
         return m_cols;
     }
 
     [[nodiscard]]
-    constexpr auto size() const -> std::size_t
+    constexpr auto size() const noexcept -> idx_t
     {
         return m_rows * m_cols;
     }
 
     [[nodiscard]]
-    constexpr auto is_square() const -> bool
+    constexpr auto is_square() const noexcept -> bool
     {
        return rows() == cols();
     }
 
-    auto row_view(const idx_t idx) const
+    constexpr auto row_view(const idx_t idx) const
     {
         return m_data
                | std::views::drop(idx * m_cols) // find first element of idx'th row
@@ -160,7 +170,7 @@ public:
                | std::views::as_const;
     }
 
-    auto col_view(const idx_t idx) const
+    constexpr auto col_view(const idx_t idx) const
     {
         return m_data
                | std::views::drop(idx)  // Find first element of idx'th col
@@ -168,7 +178,7 @@ public:
                | std::views::as_const;
     }
 
-    auto transpose() -> void
+    constexpr auto transpose() -> void
     {
         for (const auto r: std::views::iota(0U, rows())) {
             for (const auto c: std::views::iota(r + 1U, cols())) {
@@ -217,7 +227,8 @@ public:
         return *this * scalar_t{-1.0};
     }
 
-    auto operator*=(const scalar_t value) -> Matrix
+    [[nodiscard]]
+    constexpr auto operator*=(const scalar_t value) -> Matrix
     {
         for (auto& elem: m_data) {
             elem *= value;

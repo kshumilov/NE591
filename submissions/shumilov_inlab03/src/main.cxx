@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 #include <fmt/color.h>
 
-#include "integrate/integrate.h"
+#include "integrate.h"
 #include "array.h"
 
 #include "user_func.h"
@@ -56,7 +56,7 @@ auto str_to_quadrature(const std::string_view str) -> std::optional<Quadrature>
 }
 
 
-struct Outlab03 {
+struct Inputs {
     double start {};
     double end {};
     int subintervals {};
@@ -76,7 +76,7 @@ struct Outlab03 {
 };
 
 
-auto parse_and_validate(int argc, char* argv[]) -> Outlab03
+auto parse_and_validate(int argc, char* argv[]) -> Inputs
 {
     argparse::ArgumentParser program{
         "shumilov_inlab03",
@@ -107,7 +107,7 @@ auto parse_and_validate(int argc, char* argv[]) -> Outlab03
     try {
         program.parse_args(argc, argv);
 
-        Outlab03 inputs{};
+        Inputs inputs{};
 
         const auto start_opt = program.present<real>("-a");
         const auto end_opt = program.present<real>("-b");
@@ -175,7 +175,7 @@ auto parse_and_validate(int argc, char* argv[]) -> Outlab03
 }
 
 
-auto print_input(const Outlab03& inputs) -> void
+auto print_input(const Inputs& inputs) -> void
 {
     fmt::println("{:=^80s}", "");
     fmt::println("{: ^80s}", "Input Arguments");

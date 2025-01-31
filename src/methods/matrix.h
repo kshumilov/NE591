@@ -62,6 +62,7 @@ public:
 //              | std::ranges::to<std::vector>()
 //          }
     {
+    // TODO: Debug GEMM call
 	auto r = std::ranges::iota_view(0U, size())
                  | std::views::transform([&](const idx_t flat_idx) -> T {
                   auto [row, col] = pair_idx(flat_idx);
@@ -208,6 +209,8 @@ auto operator/(const T scalar, const Matrix<T>& matrix) -> Matrix<T> {
 template<std::floating_point T>
 auto operator*(const Matrix<T>& left, const Matrix<T>& right) -> Matrix<T> {
     assert(left.cols() == right.rows());
+
+    // TODO: Debug GEMM call
     return Matrix<T>{
         left.rows(), right.cols(),
         [&](const std::size_t i, const std::size_t j) -> T {

@@ -9,7 +9,7 @@
 ```
 
 # File Tree
-The project `main.cpp` function is located under ``
+The project `main.cpp` function is located under `src`
 ```
 shumilov_outlab02  <-- Root Directory (Run commands from this directory)
 ├── CMakeLists.txt   <-- Compilation Script (do not edit)

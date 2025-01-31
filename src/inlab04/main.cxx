@@ -1,3 +1,5 @@
+#include <limits>
+#include <ios>
 #include <iostream>
 #include <istream>
 #include <cstdlib>
@@ -16,30 +18,43 @@ using idx_t = std::size_t;
 using namespace std::literals;
 
 
-auto read_matrix_rank(std::istream& is, std::string_view propmpt = ""sv) -> idx_t
+template<class T>
+auto read_value(std::istream& is) -> T
 {
-    if (not propmpt.empty()) {
-        fmt::println("{:s}", propmpt);
+    T value{};
+    while (not(is >> value)) {
+        std::cout
+                << std::endl
+                << fmt::format(fmt::emphasis::bold | fg(fmt::color::red), "Error: ")
+                << "Invalid Input, pleas enter a valid number" << std::endl;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard remaining input
+    }
+    return value;
+}
+
+
+auto read_matrix_rank(std::istream& is, std::string_view prompt = ""sv) -> idx_t
+{
+    if (not prompt.empty()) {
+        fmt::println("{:s}", prompt);
     }
 
-    std::size_t rank {0};
-    is >> rank;
-    return rank;
+    return read_value<idx_t>(is);
 }
 
 
 template<std::floating_point scalar_t>
-auto read_lt_matrix(std::istream& is, const std::size_t rows, const std::size_t cols, std::string_view prompt = ""sv) -> Matrix<scalar_t>
+auto read_lt_matrix(std::istream& is, const std::size_t rows, const std::size_t cols,
+                    std::string_view prompt = ""sv) -> Matrix<scalar_t>
 {
     if (not prompt.empty()) {
         fmt::println("{:s}", prompt);
     }
 
     auto func = [&](const std::size_t row, const std::size_t col) -> scalar_t {
-        scalar_t value {};
         if (row >= col) {
-            is >> value;
-            return value;
+            return read_value<scalar_t>(is);
         }
         return scalar_t{0.0};
     };
@@ -49,7 +64,26 @@ auto read_lt_matrix(std::istream& is, const std::size_t rows, const std::size_t 
 
 
 template<std::floating_point scalar_t>
-auto read_vector(std::istream&, const std::size_t size, std::string_view prompt = ""sv) -> std::vector<scalar_t>
+auto read_ut_matrix(std::istream& is, const std::size_t rows, const std::size_t cols,
+                    std::string_view prompt = ""sv) -> Matrix<scalar_t>
+{
+    if (not prompt.empty()) {
+        fmt::println("{:s}", prompt);
+    }
+
+    auto func = [&](const std::size_t row, const std::size_t col) -> scalar_t {
+        if (row <= col) {
+            return read_value<scalar_t>(is);
+        }
+        return scalar_t{0.0};
+    };
+
+    return Matrix<scalar_t>::from_func(rows, cols, func);
+}
+
+
+template<std::floating_point scalar_t>
+auto read_vector(std::istream& is, const std::size_t size, std::string_view prompt = ""sv) -> std::vector<scalar_t>
 {
     if (not prompt.empty()) {
         fmt::println("{:s}", prompt);
@@ -58,32 +92,10 @@ auto read_vector(std::istream&, const std::size_t size, std::string_view prompt 
     std::vector<scalar_t> values{};
 
     while (values.size() < size) {
-        scalar_t value {};
-        std::cin >> value;
-        values.emplace_back(value);
+        values.emplace_back(read_value<scalar_t>(is));
     }
 
     return values;
-}
-
-
-template<std::floating_point scalar_t>
-auto read_ut_matrix(std::istream& is, const std::size_t rows, const std::size_t cols, std::string_view prompt = ""sv) -> Matrix<scalar_t>
-{
-    if (not prompt.empty()) {
-        fmt::println("{:s}", prompt);
-    }
-
-    auto func = [&](const std::size_t row, const std::size_t col) -> scalar_t {
-        scalar_t value {};
-        if (row <= col) {
-            is >> value;
-            return value;
-        }
-        return scalar_t{0.0};
-    };
-
-    return Matrix<scalar_t>::from_func(rows, cols, func);
 }
 
 
@@ -122,7 +134,7 @@ int main()
 
         fmt::println("--------------------------------------------------------------------------------");
         fmt::println("RHS Vector, b:");
-        fmt::println("{:}", b);
+        fmt::println("{:12.6f}", fmt::join(b, " "));
 
         const auto x = solve_lu<double>(L, U, b);
 
@@ -130,16 +142,16 @@ int main()
         fmt::println("{:^80s}", "Results");
         fmt::println("--------------------------------------------------------------------------------");
         fmt::println("Solution vector, x:");
-        fmt::println("{:}", x);
+        fmt::println("{:12.6f}", fmt::join(x, " "));
         fmt::println("================================================================================");
     }
     catch (const std::exception& err) {
-        std::cerr << "\n"
+        std::cerr
+                << std::endl
                 << fmt::format(fmt::emphasis::bold | fg(fmt::color::red), "Error: ")
                 << err.what() << "\n\n";
         std::exit(EXIT_FAILURE);
     }
 
     return EXIT_SUCCESS;
-
 }

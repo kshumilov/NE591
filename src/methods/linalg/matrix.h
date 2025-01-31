@@ -96,7 +96,7 @@ public:
     }
 
     [[nodiscard]] static constexpr
-    static auto zeros(const idx_t rows, const idx_t cols) -> Matrix
+    auto zeros(const idx_t rows, const idx_t cols) -> Matrix
     {
         return Matrix{rows, cols, scalar_t{0}};
     }

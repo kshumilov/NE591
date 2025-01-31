@@ -54,7 +54,7 @@ constexpr auto gauss(
         return 0.5 * (a * (1.0 - x) + b * (1.0 + x));
     };
 
-    return std::transform_reduce(
+    return (b - a) / 2.0 * std::transform_reduce(
         nodes.cbegin(), nodes.cend(),
         0.0, std::plus<scalar_t>{},
         [&](const auto x) {

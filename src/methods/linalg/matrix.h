@@ -4,11 +4,11 @@
 #include <cstddef>  // for size_t
 #include <iostream>
 #include <cassert>
-#include <functional>
-#include <concepts>
 
 #include <vector>
+#include <concepts>
 #include <ranges>
+#include <utility>
 #include <numeric>
 
 #include <fmt/format.h>
@@ -21,10 +21,11 @@ constexpr auto flat_from_pair_idx(const std::size_t row, const std::size_t col, 
     return row * cols + col;
 }
 
+
 [[nodiscard]]
 constexpr auto pair_from_flat_idx(const std::size_t flat, const std::size_t cols) -> std::pair<std::size_t, std::size_t>
 {
-    return {flat / cols, flat % cols};
+    return std::make_pair(flat / cols, flat % cols);
 }
 
 
@@ -61,6 +62,11 @@ class Matrix {
     }
 
 public:
+    // Default Constructors
+    explicit Matrix() = default;
+    Matrix(const Matrix& other) = default;
+    Matrix(Matrix&& other) = default;
+
     // Constructor for initializing matrix with a constant value
     [[nodiscard]]
     constexpr Matrix(const idx_t rows, const idx_t cols, const scalar_t init_value)
@@ -70,27 +76,30 @@ public:
     {}
 
     // Move constructor by moving in vector of data
+    [[nodiscard]]
     constexpr Matrix(const idx_t rows, const idx_t cols, std::vector<scalar_t>&& data) noexcept
-        : m_rows{rows}, m_cols{cols}
+        : m_rows{rows}
+        , m_cols{cols}
         , m_data{std::move(data)}
     {}
 
-
     [[nodiscard]] static constexpr
-    auto from_func(const idx_t rows, const idx_t cols, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+    auto from_func(const idx_t rows, const idx_t cols, std::invocable<idx_t, idx_t> auto func) -> Matrix
     {
-        auto r = std::views::iota(0U, rows * cols)
-                 | std::views::transform([&](const idx_t flat_idx) -> scalar_t {
-                     const auto [row, col] = pair_from_flat_idx(flat_idx, cols);
-                     return func(row, col);
-                 })
-                 | std::views::common;
-        std::vector<scalar_t> data{r.cbegin(), r.cend()};
+        auto r_rows = std::views::iota(idx_t{}, rows);
+        auto r_cols = std::views::iota(idx_t{}, cols);
+        auto r_data = std::views::cartesian_product(r_rows, r_cols)
+                    | std::views::transform([&func](const auto& idx_pair) -> scalar_t {
+                        return func(std::get<0>(idx_pair), std::get<1>(idx_pair));
+                      })
+                    | std::views::common;
+
+        std::vector<scalar_t> data{r_data.cbegin(), r_data.cend()};
         return Matrix{rows, cols, std::move(data)};
     }
 
     [[nodiscard]] static constexpr
-    auto from_func(const idx_t rows, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+    auto from_func(const idx_t rows, std::invocable<idx_t, idx_t> auto func) -> Matrix
     {
         return Matrix::from_func(rows, rows, func);
     }
@@ -130,6 +139,14 @@ public:
 
     // Const accessor for matrix elements
     [[nodiscard]]
+    constexpr auto operator()(const idx_t row, const idx_t col) -> scalar_t&
+    {
+        check_idx(row, col);
+        return m_data[flat_idx(row, col)];
+    }
+
+    // Const accessor for matrix elements
+    [[nodiscard]]
     constexpr auto operator()(const idx_t row, const idx_t col) const -> const scalar_t&
     {
         check_idx(row, col);
@@ -151,9 +168,22 @@ public:
     }
 
     [[nodiscard]]
+    constexpr auto data() const noexcept -> std::span<const scalar_t>
+    {
+        return m_data;
+    }
+
+    [[nodiscard]]
     constexpr auto size() const noexcept -> idx_t
     {
-        return m_rows * m_cols;
+        return m_data.size();
+    }
+
+
+    [[nodiscard]]
+    constexpr auto empty() const -> idx_t
+    {
+        return m_data.empty();
     }
 
     [[nodiscard]]
@@ -162,37 +192,39 @@ public:
        return rows() == cols();
     }
 
-    constexpr auto row_view(const idx_t idx) const
+    [[nodiscard]]
+    constexpr auto row(const idx_t idx) const
     {
         return m_data
-               | std::views::drop(idx * m_cols) // find first element of idx'th row
-               | std::views::take(m_cols)       // select the entire row
+               | std::views::drop(idx * cols()) // find first element of idx'th row
+               | std::views::take(cols())       // select the entire row
                | std::views::as_const;
     }
 
-    constexpr auto col_view(const idx_t idx) const
+    [[nodiscard]]
+    constexpr auto col(const idx_t idx) const
     {
         return m_data
                | std::views::drop(idx)  // Find first element of idx'th col
-               | std::views::stride(m_cols)
+               | std::views::stride(cols())
                | std::views::as_const;
     }
 
-    constexpr auto transpose() -> void
+    constexpr auto transpose() noexcept -> void
     {
-        for (const auto r: std::views::iota(0U, rows())) {
+        for (const auto r: std::views::iota(idx_t{}, rows())) {
             for (const auto c: std::views::iota(r + 1U, cols())) {
                 std::swap(m_data[flat_idx(r, c)], m_data[flat_idx(c, r)]);
             }
         }
-        std::swap(m_rows, m_rows);
+        std::swap(m_rows, m_cols);
     }
 
     auto operator+=(const Matrix& rhs) -> Matrix&
     {
         assert(same_shape(rhs));
-        for (std::tuple<scalar_t&, scalar_t> elem: std::views::zip(m_data, rhs.m_data)) {
-            std::get<0>(elem) += std::get<1>(elem);
+        for (auto &[left, right]: std::views::zip(m_data, rhs.m_data)) {
+            left += right;
         }
         return *this;
     }
@@ -200,8 +232,8 @@ public:
     auto operator-=(const Matrix& rhs) -> Matrix&
     {
         assert(same_shape(rhs));
-        for (std::tuple<scalar_t&, scalar_t> elem: std::views::zip(m_data, rhs.m_data)) {
-            std::get<0>(elem) -= std::get<1>(elem);
+        for (auto &[left, right]: std::views::zip(m_data, rhs.m_data)) {
+            left -= right;
         }
         return *this;
     }
@@ -209,7 +241,7 @@ public:
     auto operator+(const Matrix& rhs) -> Matrix
     {
         assert(same_shape(rhs));
-        Matrix new_matrix = {*this};
+        Matrix new_matrix{*this};
         new_matrix += rhs;
         return new_matrix;
     }
@@ -217,12 +249,13 @@ public:
     auto operator-(const Matrix& rhs) -> Matrix
     {
         assert(same_shape(rhs));
-        Matrix new_matrix = {*this};
+        Matrix new_matrix{*this};
         new_matrix -= rhs;
         return new_matrix;
     }
 
-    auto operator-() const -> Matrix
+    [[nodiscard]]
+    constexpr auto operator-() const -> Matrix
     {
         return *this * scalar_t{-1.0};
     }
@@ -246,12 +279,42 @@ public:
         std::cout << fmt::format("{}<{} x {}, {}> {}\n", name, m_rows, m_cols, typeid(scalar_t).name(), expr);
         std::cout << *this << "\n";
     }
+
+    [[nodiscard]]
+    constexpr auto to_string() const -> std::string
+    {
+        using namespace std::literals;
+
+        if (this->empty()) {
+            return "[[]]"s;
+        }
+
+        auto lines = this->data() | std::views::as_const | std::views::chunk(this->cols()) | std::views::transform(
+                         [](const auto c) {
+                             return fmt::format("{:: 12.6g}", c);
+                         }
+                     );
+
+        if (lines.size() == 1) {
+            return fmt::format("[{:s}]", lines.front());
+        }
+
+        std::string result{};
+        std::format_to(std::back_inserter(result), "[{:s}\n", lines.front());
+        for (const auto& line: lines | std::views::drop(1) | std::views::take(lines.size() - 2)) {
+            fmt::format_to(std::back_inserter(result), " {:s} \n", line);
+        }
+        std::format_to(std::back_inserter(result), " {:s}]", lines.back());
+
+        return result;
+    }
 };
+
 
 template<std::floating_point T>
 auto operator<<(std::ostream &out, const Matrix<T>& matrix) -> std::ostream & {
     auto fmt_row = [&](const size_t row_idx) -> std::string {
-        return fmt::format("[{: 6.2f}]", fmt::join(matrix.row_view(row_idx), " "));
+        return fmt::format("[{: 6.2f}]", fmt::join(matrix.row(row_idx), " "));
     };
 
     std::vector<std::string> lines {};
@@ -278,17 +341,20 @@ auto operator*(const Matrix<U>& matrix, const U scalar) -> Matrix<U>
     return scaled_matrix;
 }
 
+
 template<std::floating_point U>
 auto operator*(const U scalar, const Matrix<U>& matrix) -> Matrix<U>
 {
     return matrix * scalar;
 }
 
+
 template<std::floating_point T>
 auto operator/(const Matrix<T>& matrix, const T scalar) -> Matrix<T>
 {
-    return matrix * (1 / scalar);
+    return matrix * (T{1} / scalar);
 }
+
 
 template<std::floating_point T>
 auto operator/(const T scalar, const Matrix<T>& matrix) -> Matrix<T>
@@ -296,30 +362,31 @@ auto operator/(const T scalar, const Matrix<T>& matrix) -> Matrix<T>
     return matrix / scalar;
 }
 
+
 template<std::floating_point T>
-auto operator*(const Matrix<T>& left, const Matrix<T>& right) -> Matrix<T>
+auto operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) -> Matrix<T>
 {
-    assert(left.cols() == right.rows());
+    assert(lhs.cols() == rhs.rows());
 
     return Matrix<T>::from_func(
-        left.rows(), right.cols(),
-        [&](const std::size_t i, const std::size_t j) -> T {
-            auto row = left.row_view(i);
-            auto col = right.col_view(j);
-            T val{std::inner_product(row.cbegin(), row.cend(), col.cbegin(), T{})};
-            return val;
+        lhs.rows(), rhs.cols(),
+        [&lhs, &rhs](const std::size_t i, const std::size_t j) -> T {
+            auto row = lhs.row(i);
+            auto col = rhs.col(j);
+            return std::inner_product(row.cbegin(), row.cend(), col.cbegin(), T{});
         }
     );
 }
 
-template<std::floating_point T>
-auto operator*(const Matrix<T>& mat, const std::vector<T>& vec) -> std::vector<T>
-{
-    assert(mat.cols() == vec.size());
 
-    std::vector<T> result(vec.size(), 0.0);
-    for (const auto r : std::views::iota(0U, mat.rows())) {
-        result[r] = std::inner_product(vec.cbegin(), vec.cend(), mat.row_view(r).cbegin(), T{});
+template<std::floating_point T>
+auto operator*(const Matrix<T>& M, const std::vector<T>& v) -> std::vector<T>
+{
+    assert(M.cols() == v.size());
+
+    std::vector<T> result(v.size(), T{});
+    for (const auto r : std::views::iota(0U, M.rows())) {
+        result[r] = std::inner_product(v.cbegin(), v.cend(), M.row(r).cbegin(), T{});
     }
 
     return result;

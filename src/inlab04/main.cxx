@@ -4,6 +4,9 @@
 #include <istream>
 #include <cstdlib>
 #include <cstddef>
+
+#include <string_view>
+#include <string>
 #include <vector>
 #include <span>
 
@@ -34,7 +37,7 @@ auto read_value(std::istream& is) -> T
 }
 
 
-auto read_matrix_rank(std::istream& is, std::string_view prompt = ""sv) -> idx_t
+auto read_rank(std::istream& is, std::string_view prompt = ""sv) -> idx_t
 {
     if (not prompt.empty()) {
         fmt::println("{:s}", prompt);
@@ -45,37 +48,17 @@ auto read_matrix_rank(std::istream& is, std::string_view prompt = ""sv) -> idx_t
 
 
 template<std::floating_point scalar_t>
-auto read_lt_matrix(std::istream& is, const std::size_t rows, const std::size_t cols,
-                    std::string_view prompt = ""sv) -> Matrix<scalar_t>
+auto read_matrix(std::istream& is, const std::size_t rows, const std::size_t cols, std::invocable<std::size_t, std::size_t> auto select, std::string_view prompt = ""sv)
 {
     if (not prompt.empty()) {
         fmt::println("{:s}", prompt);
     }
 
-    auto func = [&](const std::size_t row, const std::size_t col) -> scalar_t {
-        if (row >= col) {
+    auto func = [&is, &select](const std::size_t row, const std::size_t col) -> scalar_t {
+        if (select(row, col)) {
             return read_value<scalar_t>(is);
         }
-        return scalar_t{0.0};
-    };
-
-    return Matrix<scalar_t>::from_func(rows, cols, func);
-}
-
-
-template<std::floating_point scalar_t>
-auto read_ut_matrix(std::istream& is, const std::size_t rows, const std::size_t cols,
-                    std::string_view prompt = ""sv) -> Matrix<scalar_t>
-{
-    if (not prompt.empty()) {
-        fmt::println("{:s}", prompt);
-    }
-
-    auto func = [&](const std::size_t row, const std::size_t col) -> scalar_t {
-        if (row <= col) {
-            return read_value<scalar_t>(is);
-        }
-        return scalar_t{0.0};
+        return scalar_t{};
     };
 
     return Matrix<scalar_t>::from_func(rows, cols, func);
@@ -114,11 +97,19 @@ int main()
     );
 
     try {
-        const idx_t rows = read_matrix_rank(std::cin, "Enter matrix rank:");
-        const auto L = read_lt_matrix<double>(std::cin, rows, rows,
-                                              "Enter non-zero values of lower triangular matrix in row-major order:");
-        const auto U = read_ut_matrix<double>(std::cin, rows, rows,
-                                              "Enter non-zero values of upper triangular matrix in row-major order:");
+        const idx_t rows = read_rank(std::cin, "Enter matrix rank:");
+        const auto L = read_matrix<double>(
+            std::cin,
+            rows, rows,
+            std::greater_equal<std::size_t>{},
+            "Enter non-zero values of lower triangular matrix in row-major order:"sv
+        );
+        const auto U = read_matrix<double>(
+            std::cin,
+            rows, rows,
+            std::less_equal<std::size_t>{},
+            "Enter non-zero values of upper triangular matrix in row-major order:"sv
+        );
         const auto b = read_vector<double>(std::cin, rows, "Enter RHS vector:");
 
         fmt::println("================================================================================");
@@ -131,6 +122,7 @@ int main()
 
         const auto A = L * U;
         A.display("Original Matrix: ", "A = L * U");
+        std::cout << A.to_string() << std::endl;
 
         fmt::println("--------------------------------------------------------------------------------");
         fmt::println("RHS Vector, b:");

@@ -4,7 +4,7 @@ add_custom_command(TARGET inlab04
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:inlab04> ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(inlab04 PRIVATE methods ne591_compiler_flags fmt::fmt-header-only argparse)
+target_link_libraries(inlab04 PRIVATE methods ne591_compiler_flags fmt::fmt argparse)
 
 set_property(TARGET inlab04 PROPERTY OUTPUT_NAME shumilov_inlab04)
 

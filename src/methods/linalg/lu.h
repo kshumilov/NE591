@@ -21,14 +21,14 @@ auto forward_substitution(const Matrix<scalar_t>& L, std::span<const scalar_t> b
     for (const auto r: std::views::iota(0U, L.rows())) {
         // \sum_{j=0}^{r} l_{rj} * x_{j}
         const auto sum_lx_ = std::ranges::fold_left(
-            std::views::zip(x, L.row_view(r))
+            std::views::zip(x, L.row(r))
             | std::views::take(r)
             | std::views::transform(
                 [](const auto& v) {
                     return std::get<0>(v) * std::get<1>(v);
                 })
             | std::views::as_const,
-            0.0, std::plus<scalar_t>{}
+            scalar_t{}, std::plus<scalar_t>{}
         );
 
         x[r] = (b[r] - sum_lx_) / L(r, r);
@@ -49,14 +49,14 @@ auto backward_substitution(const Matrix<scalar_t>& U, std::span<const scalar_t> 
     for (const auto r : std::views::iota(0U, U.rows()) | std::views::reverse) {
         // \sum_{j=r}^{n} u_{rj} * x_{j}
         const auto sum_ux = std::ranges::fold_left(
-            std::views::zip(x, U.row_view(r))
+            std::views::zip(x, U.row(r))
             | std::views::drop(r + 1)
             | std::views::transform(
                 [](const auto& v) {
                     return std::get<0>(v) * std::get<1>(v);
                 })
             | std::views::as_const,
-            0.0, std::plus<scalar_t>{}
+            scalar_t{}, std::plus<scalar_t>{}
         );
 
         x[r] = (b[r] - sum_ux) / U(r, r);

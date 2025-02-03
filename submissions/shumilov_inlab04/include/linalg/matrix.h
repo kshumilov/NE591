@@ -8,6 +8,7 @@
 #include <concepts>
 
 #include <vector>
+#include <concepts>
 #include <ranges>
 #include <numeric>
 
@@ -77,20 +78,22 @@ public:
 
 
     [[nodiscard]] static constexpr
-    auto from_func(const idx_t rows, const idx_t cols, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+    auto from_func(const idx_t rows, const idx_t cols, std::invocable<idx_t, idx_t> auto func) -> Matrix
     {
-        auto r = std::views::iota(0U, rows * cols)
-                 | std::views::transform([&](const idx_t flat_idx) -> scalar_t {
-                     const auto [row, col] = pair_from_flat_idx(flat_idx, cols);
-                     return func(row, col);
-                 })
-                 | std::views::common;
-        std::vector<scalar_t> data{r.cbegin(), r.cend()};
+        auto r_rows = std::views::iota(0U, rows);
+        auto r_cols = std::views::iota(0U, cols);
+        auto r_data = std::views::cartesian_product(r_rows, r_cols)
+                    | std::views::transform([&func](const auto& idx_pair) -> scalar_t {
+                        return func(idx_pair.first, idx_pair.second);
+                      })
+                    | std::views::common;
+
+        std::vector<scalar_t> data{r_data.cbegin(), r_data.cend()};
         return Matrix{rows, cols, std::move(data)};
     }
 
     [[nodiscard]] static constexpr
-    auto from_func(const idx_t rows, std::function<scalar_t(idx_t, idx_t)> func) -> Matrix
+    auto from_func(const idx_t rows, std::invocable<idx_t, idx_t> auto func) -> Matrix
     {
         return Matrix::from_func(rows, rows, func);
     }

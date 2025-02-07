@@ -63,19 +63,15 @@ cmake --build build --config Release --target inlab05 -- -j
 ```bash
 [kshumil@login02 shumilov_inlab05]$ cmake --build build --config Release --target inlab05 -- -j
 [ 50%] Building CXX object CMakeFiles/inlab05.dir/src/main.cxx.o
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx: In lambda function:
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:161:37: warning: declaration of ‘const auto:91 b’ shadows a parameter [-Wshadow]
-  161 |         [](const auto a, const auto b) {
-      |                          ~~~~~~~~~~~^
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:118:67: note: shadowed declaration is here
-  118 | void inlab05(const Matrix<double>& A, const std::vector<double>& b)
-      |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-In file included from /home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:21:
+In file included from /home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:17:
 /home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h: In instantiation of ‘std::vector<scalar_t> backward_substitution(const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double]’:
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h:130:43:   required from ‘std::vector<scalar_t> solve_lu(const Matrix<T>&, const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double; bool LowerUnitDiag = true]’
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:150:42:   required from here
-/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h:114:41: warning: comparison of integer expressions of different signedness: ‘std::ptrdiff_t’ {aka ‘long int’} and ‘Matrix<double>::idx_t’ {aka ‘long unsigned int’} [-Wsign-compare]
-  114 |         for (std::ptrdiff_t j{r + 1}; j < U.cols(); ++j) {
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h:142:43:   required from ‘constexpr std::vector<scalar_t> solve_lu(const Matrix<T>&, const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double; Diag UnitLower = Diag::NonUnit]’
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h:150:41:   required from ‘std::vector<scalar_t> solve_lup(const Matrix<T>&, const Matrix<T>&, const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double; Diag UnitLower = Diag::NonUnit]’
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:63:37:   required from ‘constexpr Inlab05<scalar_t>::Result Inlab05<scalar_t>::solve() const [with scalar_t = double]’
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:72:29:   required from ‘Inlab05<scalar_t>::Result Inlab05<scalar_t>::run() const [with scalar_t = double]’
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/src/main.cxx:146:20:   required from here
+/home/kshumil/ne591/NE591/submissions/shumilov_inlab05/include/linalg/lu.h:122:41: warning: comparison of integer expressions of different signedness: ‘std::ptrdiff_t’ {aka ‘long int’} and ‘Matrix<double>::idx_t’ {aka ‘long unsigned int’} [-Wsign-compare]
+  122 |         for (std::ptrdiff_t j{r + 1}; j < U.cols(); ++j) {
       |                                       ~~^~~~~~~~~~
 [100%] Linking CXX executable shumilov_inlab05
 [100%] Built target inlab05
@@ -112,7 +108,7 @@ Optional arguments:
 
 # Examples
 ```bash
-[kshumil@login02 shumilov_inlab05]$ cat examples/inp
+[kshumil@login02 shumilov_inlab05]$ cat examples/test1.txt
 5
 
 1.00 0.00 0.00 0.00 0.00
@@ -134,7 +130,7 @@ Optional arguments:
 1.00 0.00 0.00 0.00 0.00
 
 1.10 1.20 1.30 1.40 1.50
-[kshumil@login02 shumilov_inlab05]$ ./shumilov_inlab05 inp
+[kshumil@login02 shumilov_inlab05]$ ./shumilov_inlab05 examples/test1.txt
 ================================================================================
 NE 591 Inlab #05: Solution of Ax=b using LUP Factorization Result
 Author: Kirill Shumilov

@@ -1,4 +1,4 @@
-# Outlab #04
+# Inlab #05
 - Author: Kirill Shumilov
 - Date: 02/07/2025
 
@@ -50,13 +50,13 @@ cmake -S. -Bbuild
 -- Build type:
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_outlab04/build
+-- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_inlab05/build
 ```
 
 ## 2. Compile the code
 Now, compile the code:
 ```bash
-cmake --build build --config Release --target outlab04 -- -j
+cmake --build build --config Release --target inlab05 -- -j
 ```
 
 ### Example
@@ -83,7 +83,7 @@ In file included from /home/kshumil/ne591/NE591/submissions/shumilov_outlab04/sr
 
 At this point the executable can be found in:
 ```bash
-[kshumil@login02 shumilov_outlab04]$ ./shumilov_outlab04 -h
+[kshumil@login02 shumilov_outlab04]$ ./shumilov_inlab04 -h
 Usage: shumilov_outlab04 [--help] [--version] filename
 
 This program solves system of equations Ax=LUx=b
@@ -101,7 +101,7 @@ Optional arguments:
 
 # Examples
 ```bash
-[kshumil@login02 shumilov_outlab04]$ cat examples/inp
+[kshumil@login02 shumilov_outlab04]$ cat inp
 3
 
  2 -1 -2
@@ -109,7 +109,7 @@ Optional arguments:
 -4 -2  8
 
 -6 17 16
-[kshumil@login02 shumilov_outlab04]$ ./shumilov_outlab04 examples/inp
+[kshumil@login02 shumilov_outlab04]$ ./shumilov_outlab04 inp
 ================================================================================
 NE 591 Outlab #04: Solution of Ax=b using LU Factorization
 Author: Kirill Shumilov

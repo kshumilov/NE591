@@ -108,10 +108,16 @@ auto read_data_from_file(std::string filename) -> std::pair<Matrix<scalar_t>, st
             std::format("Could not open '{}'", filename)); // Indicate an error occurred
     }
 
-    const auto rank{read_rank(in)};
-    const auto A = read_general_matrix<scalar_t>(in, rank, rank);
-    const auto b = read_vector<scalar_t>(in, rank);
-    return std::make_pair(A, b);
+    try {
+        const auto rank{read_rank(in)};
+        const auto A = read_general_matrix<scalar_t>(in, rank, rank);
+        const auto b = read_vector<scalar_t>(in, rank);
+        return std::make_pair(A, b);
+    }
+    catch (const std::exception& err) {
+        in.close();
+        throw;
+    }
 }
 
 
@@ -123,7 +129,8 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
         "NE 591 Outlab #04: Solution of Ax=b using LU Factorization\n"
         "Author: Kirill Shumilov\n"
         "Date: 01/31/2025\n"
-        "================================================================================\n");
+        "================================================================================\n"
+    );
 
     fmt::println("{:^80s}", "Inputs");
     fmt::println("--------------------------------------------------------------------------------");
@@ -147,7 +154,7 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
     fmt::println("\nMatrix Residual, R = LU - A, with norm |R| = {: 12.6e}", norm);
     std::cout << R.to_string() << '\n';
 
-    const auto x = solve_lu<double, true>(L, U, b);
+    const auto x = solve_lu<double>(L, U, b);
     const auto bp = A * x;
     const auto max_residual = std::transform_reduce(
         b.cbegin(), b.cend(), bp.cbegin(),

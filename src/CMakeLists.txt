@@ -12,4 +12,5 @@ add_subdirectory(inlab03)
 add_subdirectory(outlab03)
 
 add_subdirectory(inlab04)
+add_subdirectory(outlab04)
 

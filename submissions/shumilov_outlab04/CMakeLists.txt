@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.24)
 
 project(
         ne591
         VERSION 1.0.0
-        DESCRIPTION "Implementation for NE 591 Math & Comp (Spring 2025): Inlab #02"
+        DESCRIPTION "Implementation for NE 591 Math & Comp (Spring 2025): Outlab #04"
         LANGUAGES CXX
 )
 

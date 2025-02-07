@@ -1,5 +1,5 @@
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef LINALG_MATRIX_H
+#define LINALG_MATRIX_H
 
 #include <cstddef>  // for size_t
 #include <iostream>
@@ -13,6 +13,22 @@
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+
+
+enum class MatrixSymmetry : char {
+    Upper   = 'U',
+    Lower   = 'L',
+    Symmetric = 'S',
+    Diagonal = 'D',
+    // Hermitian = 'H',
+    General = 'G',
+};
+
+
+enum class Diag : char {
+    NonUnit = 'N',
+    Unit = 'U'
+};
 
 
 [[nodiscard]]
@@ -107,7 +123,13 @@ public:
     [[nodiscard]] static constexpr
     auto zeros(const idx_t rows, const idx_t cols) -> Matrix
     {
-        return Matrix{rows, cols, scalar_t{0}};
+        return Matrix{rows, cols, scalar_t{}};
+    }
+
+    [[nodiscard]] static constexpr
+    auto zeros_like(const Matrix& other) -> Matrix
+    {
+        return Matrix::zeros(other.rows(), other.cols());
     }
 
     [[nodiscard]] static constexpr
@@ -119,7 +141,13 @@ public:
     [[nodiscard]] static constexpr
     auto ones(const idx_t rows, const idx_t cols) -> Matrix
     {
-        return Matrix{rows, cols, scalar_t(1)};
+        return Matrix{rows, cols, scalar_t{1}};
+    }
+
+    [[nodiscard]] static constexpr
+    auto ones_like(const Matrix& other) -> Matrix
+    {
+        return Matrix::ones(other.rows(), other.cols());
     }
 
     [[nodiscard]] static constexpr
@@ -223,9 +251,9 @@ public:
     constexpr auto norm() const noexcept -> scalar_t
     {
         return std::sqrt(
-            std::inner_product(
-                m_data.cbegin(), m_data.cend(),
-                m_data.cbegin(), scalar_t{0}
+            std::transform_reduce(
+                m_data.cbegin(), m_data.cend(), m_data.cbegin(),
+                scalar_t{}, std::plus<scalar_t>{}, std::multiplies<scalar_t>{}
             )
         );
     }
@@ -263,7 +291,8 @@ public:
         return *this;
     }
 
-    auto operator/=(const scalar_t value) -> Matrix
+    [[nodiscard]]
+    constexpr auto operator/=(const scalar_t value) -> Matrix
     {
         return *this *= scalar_t{1.0} / value;
     }
@@ -295,21 +324,7 @@ public:
 
 template<std::floating_point T>
 auto operator<<(std::ostream &out, const Matrix<T>& matrix) -> std::ostream & {
-    auto fmt_row = [&](const size_t row_idx) -> std::string {
-        return fmt::format("[{: 6.2f}]", fmt::join(matrix.row(row_idx), " "));
-    };
-
-    std::vector<std::string> lines {};
-
-    lines.push_back(fmt::format("[{} ", fmt_row(0)));
-
-    for (std::size_t i = 1; i < matrix.rows() - 1; ++i) {
-        lines.push_back(fmt::format(" {} ", fmt_row(i)));
-    }
-
-    lines.push_back(fmt::format(" {}]", fmt_row(matrix.rows() - 1)));
-
-    out << fmt::format("{}", fmt::join(lines, "\n"));
+    out << matrix.to_string();
     return out;
 }
 
@@ -378,7 +393,7 @@ auto operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) -> Matrix<T>
 
 
 template<std::floating_point T>
-auto operator*(const Matrix<T>& M, const std::vector<T>& v) -> std::vector<T>
+auto operator*(const Matrix<T>& M, std::span<const T> v) -> std::vector<T>
 {
     assert(M.cols() == v.size());
 
@@ -390,4 +405,4 @@ auto operator*(const Matrix<T>& M, const std::vector<T>& v) -> std::vector<T>
     return result;
 }
 
-#endif //MATRIX_H
+#endif // LINALG_MATRIX_H

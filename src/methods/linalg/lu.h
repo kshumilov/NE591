@@ -1,10 +1,14 @@
-#ifndef LU_H
-#define LU_H
+#ifndef LINALG_LU_H
+#define LINALG_LU_H
 
-#include <concepts>
+#include <algorithm>  // min
+#include <concepts>  // floating_point
+#include <cstddef>  // size_t, ptrdiff_t
+#include <stdexcept> // invalid_argument
+
 #include <span>
+#include <utility>  // pair
 #include <vector>
-#include <functional>
 
 #include "linalg/matrix.h"
 
@@ -42,12 +46,13 @@ constexpr auto lu_inplace(Matrix<scalar_t>& A) -> void
 
 
 template<std::floating_point scalar_t>
-constexpr auto split_lu(const Matrix<scalar_t>& LU) -> std::pair<Matrix<scalar_t>, Matrix<scalar_t>> {
+[[nodiscard]]
+constexpr auto separate_lu(const Matrix<scalar_t>& LU) -> std::pair<Matrix<scalar_t>, Matrix<scalar_t>> {
     auto L = Matrix<scalar_t>::eye(LU.rows(), LU.cols());
-    auto U = Matrix<scalar_t>::zeros(LU.rows(), LU.cols());
+    auto U = Matrix<scalar_t>::zeros_like(LU);
 
-    for (std::size_t i{}; i < LU.rows(); i++) {
-        for (std::size_t j{}; j < LU.cols(); j++) {
+    for (const auto i : std::views::iota(0U, LU.rows())) {
+        for (const auto j : std::views::iota(0U, LU.cols())) {
             if (i > j) {
                 L(i, j) = LU(i, j);
             }
@@ -62,6 +67,7 @@ constexpr auto split_lu(const Matrix<scalar_t>& LU) -> std::pair<Matrix<scalar_t
 
 
 template<std::floating_point scalar_t>
+[[nodiscard]]
 constexpr auto lu(Matrix<scalar_t> A) -> std::pair<Matrix<scalar_t>, Matrix<scalar_t>>
 {
     lu_inplace<scalar_t>(A);
@@ -69,7 +75,8 @@ constexpr auto lu(Matrix<scalar_t> A) -> std::pair<Matrix<scalar_t>, Matrix<scal
 }
 
 
-template<std::floating_point scalar_t, bool UnitDiag = false>
+template<std::floating_point scalar_t, Diag UnitLower = Diag::NonUnit>
+[[nodiscard]]
 constexpr auto forward_substitution(const Matrix<scalar_t>& L, std::span<const scalar_t> b) -> std::vector<scalar_t>
 {
     if (L.rows() != b.size()) {
@@ -88,8 +95,9 @@ constexpr auto forward_substitution(const Matrix<scalar_t>& L, std::span<const s
 
         x[r] = b[r] - sum_lx;
 
-        if constexpr (not UnitDiag)
+        if constexpr (UnitLower == Diag::NonUnit) {
             x[r] /= L(r, r);
+        }
     }
 
     return x;
@@ -121,13 +129,25 @@ auto backward_substitution(const Matrix<scalar_t>& U, std::span<const scalar_t> 
 }
 
 
-template<std::floating_point scalar_t, bool LowerUnitDiag = false>
-auto solve_lu(const Matrix<scalar_t>& L, const Matrix<scalar_t>& U, std::span<const scalar_t> b) -> std::vector<scalar_t>
+template<std::floating_point scalar_t, Diag UnitLower = Diag::NonUnit>
+constexpr auto solve_lu(const Matrix<scalar_t>& L, const Matrix<scalar_t>& U, std::span<const scalar_t> b) -> std::vector<scalar_t>
 {
-    if (L.cols() != U.rows()) {}
+    if (L.cols() != U.rows()) {
+        throw std::invalid_argument(
+            fmt::format("Incompatible shapes: L({}, {}) and U({}, {})", L.rows(), L.cols(), U.rows(), U.cols())
+        );
+    }
 
-    const auto y = forward_substitution<scalar_t, LowerUnitDiag>(L, b);
+    const auto y = forward_substitution<scalar_t, UnitLower>(L, b);
     return backward_substitution<scalar_t>(U, y);
 }
 
-#endif //LU_H
+
+template<std::floating_point scalar_t, Diag UnitLower = Diag::NonUnit>
+auto solve_lup(const Matrix<scalar_t>& L, const Matrix<scalar_t>& U, const Matrix<scalar_t>& P, std::span<const scalar_t> b) -> std::vector<scalar_t>
+{
+    const auto z = P * b;
+    return solve_lu<scalar_t, UnitLower>(L, U, z);
+}
+
+#endif //LINALG_LU_H

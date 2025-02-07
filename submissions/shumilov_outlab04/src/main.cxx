@@ -127,7 +127,7 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
 
     fmt::println("{:^80s}", "Inputs");
     fmt::println("--------------------------------------------------------------------------------");
-    fmt::println("Original Matrix, A:");
+    fmt::println("Original Matrix, A(rank = {:d}):", A.rows());
     std::cout << A.to_string() << '\n';
     fmt::println("\nRHS vector, b:");
     fmt::println("[{:12.6f}]", fmt::join(b, " "));
@@ -169,8 +169,9 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
     fmt::println("--------------------------------------------------------------------------------");
     fmt::println("Solution vector, x:");
     fmt::println("[{:12.6f}]", fmt::join(x, " "));
-    fmt::println("--------------------------------------------------------------------------------");
-    fmt::println("Max Element of residual vector, r = b - Ax: {: 12.6}", max_residual);
+
+    fmt::println("\nResidual vector, r = b - Ax, max|r| = {: 12.6f}", max_residual);
+    fmt::println("[{:12.6f}]", fmt::join(residual, " "));
     fmt::println("================================================================================");
 }
 
@@ -196,8 +197,8 @@ int main(int argc, char *argv[])
 
     try {
         program.parse_args(argc, argv);
-        const auto filename = program.get<std::string>("filename");
-        const auto& [A, b] = read_data_from_file<double>(filename);
+
+        const auto& [A, b] = read_data_from_file<double>(program.get<std::string>("filename"));
 
         outlab04(A, b);
     }
@@ -207,18 +208,6 @@ int main(int argc, char *argv[])
           << err.what() << "\n\n";
         std::exit(EXIT_FAILURE);
     }
-
-    // Matrix<double> A{
-    //     3, 3,
-    //     {
-    //         2, -1, -2,
-    //         -4, 6, 3,
-    //         -4, -2, 8
-    //     }
-    // };
-    //
-    // const std::vector<double> b{-6, 17, 16};
-
 
     return EXIT_SUCCESS;
 }

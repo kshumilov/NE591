@@ -45,7 +45,7 @@ struct Inlab05 {
         fmt::println(out, "Lower Triangular Matrix, L:");
         out << L << "\n\n";
 
-        fmt::println(out, "Upper Triangular Matrix, L:");
+        fmt::println(out, "Upper Triangular Matrix, U:");
         out << U << "\n\n";
 
         fmt::println(out, "Permutation Matrix, P:");

@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
 
-
 project(
   ne591
   VERSION 1.0.0
@@ -36,10 +35,11 @@ FetchContent_Declare(
     GIT_TAG        8303d140a1a11f19b982a9f664bbe59a1ccda3f4
 )
 
-FetchContent_MakeAvailable(fmt argparse)
+FetchContent_MakeAvailable(argparse fmt)
 
 # Contains definition for CMAKE_INSTALL_DATADIR
 # Only needs to be included once
 include(GNUInstallDirs)
 
+add_subdirectory(include)
 add_subdirectory(src)

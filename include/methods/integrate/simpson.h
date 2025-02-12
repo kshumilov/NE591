@@ -23,6 +23,7 @@ constexpr auto simpson(std::span<const scalar_t> y, const scalar_t step = scalar
     if (y.size() == 0)
         return {0.0};
 
+    // number of points for Simpson Quadrature must be even
     assert((y.size() - 1U) % 2 == 0);
 
     scalar_t result {y.front() + y.back()};

@@ -7,7 +7,7 @@
 #include <fmt/ranges.h>
 #include <fmt/color.h>
 
-#include "interpolate.h"
+#include "methods/interpolate.h"
 
 #include "user_func.h"
 

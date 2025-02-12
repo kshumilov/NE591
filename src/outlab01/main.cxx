@@ -5,7 +5,7 @@
 
 #include <fmt/format.h>
 
-#include "matrix.h"
+#include "methods/linalg/matrix.h"
 
 /**
  * \brief Implementation of the Outlab01
@@ -23,42 +23,43 @@
 auto outlab01(const double k, const std::size_t M, const std::size_t N, const std::size_t J) -> int {
   using namespace std::literals;
 
-  Matrix<double> A {
+  const auto A = Matrix<double>::from_func(
     M, N,
-    [](std::size_t m, std::size_t n) -> double {
+    [](const std::size_t m, const std::size_t n) -> double {
       return m == n ? 1.0 : 0.5;
     }
-  };
+  );
+
   A.display("A"sv, "where a_{m,n} = 1.0 if (m == n) else 0.5"sv);
   std::cout << "\n";
 
-  Matrix<double> B {
+  const auto B = Matrix<double>::from_func (
     M, N,
-    [](std::size_t m, std::size_t n) -> double {
+    [](const std::size_t m, const std::size_t n) -> double {
       return m <= n ? 0.25 : 0.75;
     }
-  };
+  );
   B.display("B"sv, "where b_{m,n} = 0.25 if (m <= n) else 0.75"sv);
   std::cout << "\n";
 
-  Matrix<double> F {
+  const auto F = Matrix<double>::from_func(
     N, J,
     [](std::size_t n, std::size_t j) -> double {
       return 1 / static_cast<double>((n + 1) + (j + 1));
     }
-  };
+  );
   F.display("F"sv, "where f_{n,j} = 1.0 / (n + j)"sv);
   std::cout << "\n";
 
-  auto C { A + B };
+  const auto C { A + B };
   C.display("C"sv, "= A + B"sv);
   std::cout << "\n";
 
-  auto D { k * A };
+  const auto D { k * A };
   D.display("D"sv, " = k * A"sv);
   std::cout << "\n";
 
-  auto E { A * F };
+  const auto E { A * F };
   E.display("E"sv, "= A * F"sv);
   std::cout << "\n";
 

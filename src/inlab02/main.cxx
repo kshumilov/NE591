@@ -5,8 +5,8 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
-#include "interpolate.h"
-#include "array.h"
+#include "methods/interpolate.h"
+#include "methods/array.h"
 
 #include "user_func.h"
 

@@ -6,20 +6,43 @@
 #include <concepts>
 #include <functional>
 #include <stdexcept>
+#include <cmath>
 
-#include "utils/io.h"
-#include "linalg/matrix.h"
+#include "methods/utils/io.h"
+#include "methods/linalg/matrix.h"
+#include "methods/linalg/lu.h"
 
 
 inline auto read_rank(std::istream& in) -> std::ptrdiff_t
 {
-    if (const auto result = read_value<std::ptrdiff_t>(in); result.has_value() and result.value() > 0) {
+    if (const auto result = read_value<std::ptrdiff_t>(in);
+        result.has_value() and result.value() > 0) {
         return result.value();
     }
 
     throw std::runtime_error("Could not read `rank`.\n"
                              "Must be an integer larger than 1.");
 }
+
+
+inline auto read_pivoting_method(std::istream& input) -> PivotingMethod {
+    if (const auto flag = read_value<int>(input); flag.has_value()) {
+        switch (flag.value()) {
+            case 0:
+                return PivotingMethod::NoPivoting;
+            case 1:
+                return PivotingMethod::PartialPivoting;
+            default:
+                throw std::runtime_error(
+                    fmt::format("Invalid pivoting flag `{}`", flag.value())
+                );
+        }
+    }
+    throw std::runtime_error(
+        fmt::format("Invalid pivoting flag")
+    );
+}
+
 
 
 template<std::floating_point scalar_t>
@@ -65,4 +88,5 @@ auto read_matrix(std::istream& in, const std::size_t rows, const std::size_t col
 
     return read_matrix_elements<scalar_t>(in, rows, cols, func);
 }
+
 #endif // LINALG_UTILS_H

@@ -17,8 +17,8 @@
 
 #include <argparse/argparse.hpp>
 
-#include "linalg/matrix.h"
-#include "linalg/lu.h"
+#include "methods/linalg/matrix.h"
+#include "methods/linalg/lu.h"
 
 
 template<class T>
@@ -139,7 +139,7 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
     fmt::println("\nRHS vector, b:");
     fmt::println("[{:12.6f}]", fmt::join(b, " "));
 
-    const auto& [L, U] = lu(A);
+    const auto& [L, U] = lu_factor(A);
     const auto Ap = L * U;
     const auto R = A - Ap;
     const auto norm = R.norm();
@@ -154,7 +154,7 @@ void outlab04(const Matrix<double>& A, const std::vector<double>& b)
     fmt::println("\nMatrix Residual, R = LU - A, with norm |R| = {: 12.6e}", norm);
     std::cout << R.to_string() << '\n';
 
-    const auto x = solve_lu<double>(L, U, b);
+    const auto x = lu_solve<double>(L, U, b);
     const auto bp = A * x;
     const auto max_residual = std::transform_reduce(
         b.cbegin(), b.cend(), bp.cbegin(),

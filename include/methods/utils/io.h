@@ -39,4 +39,6 @@ auto read_vector(std::istream& is, const std::size_t size) -> std::vector<T>
 
     return values;
 }
+
+
 #endif // UTILS_IO_H

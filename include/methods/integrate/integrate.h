@@ -1,21 +1,15 @@
 #ifndef INTEGRATE_H
 #define INTEGRATE_H
 
-
 #include <concepts>
-#include <stdexcept>
+#include <utility>
 
+#include "methods/array.h"
+
+#include "quadrature.h"
 #include "trapezoidal.h"
 #include "simpson.h"
 #include "gauss.h"
-#include "array.h"
-
-
-enum class Quadrature {
-    Trapezoidal,
-    Simpson,
-    Gauss,
-};
 
 
 /**
@@ -33,25 +27,25 @@ enum class Quadrature {
  */
 template <std::floating_point scalar_t>
 auto integrate(
-    std::function<scalar_t(scalar_t)> f,
+    std::invocable<scalar_t> auto& f,
     const scalar_t a, const scalar_t b, const int points,
-    Quadrature quad
+    const Quadrature quad
 ) -> scalar_t
 {
     switch (quad) {
         case Quadrature::Trapezoidal: {
             const auto y = linspace<scalar_t>(f, a, b, points);
-            return trapezoidal<scalar_t>(y, subdivide<scalar_t>(a, b, points - 1));
+            return trapezoidal<scalar_t>(y, step<scalar_t>(a, b, points - 1));
         }
         case Quadrature::Simpson: {
             const auto y = linspace<scalar_t>(f, a, b, points);
-            return simpson<scalar_t>(y, subdivide<scalar_t>(a, b, points - 1));
+            return simpson<scalar_t>(y, step<scalar_t>(a, b, points - 1));
         }
         case Quadrature::Gauss: {
             return gauss<scalar_t>(f, a, b, points);
         }
         default: {
-            throw std::runtime_error("Invalid quadrature type");
+            std::unreachable();
         }
     }
 }

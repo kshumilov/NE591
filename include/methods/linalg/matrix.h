@@ -14,6 +14,8 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
+#include "methods/linalg/ops.h"
+
 
 enum class MatrixSymmetry : char {
     Upper   = 'U',
@@ -48,6 +50,37 @@ constexpr auto pair_from_flat_idx(const std::size_t flat, const std::size_t cols
 template<std::floating_point scalar_t>
 class Matrix {
     using idx_t = std::size_t;
+
+    class Shape {
+        std::ptrdiff_t m_rows{};
+        std::ptrdiff_t m_cols{};
+
+    public:
+        [[nodiscard]] constexpr
+        Shape(const std::ptrdiff_t rows, const std::ptrdiff_t cols) : m_rows{rows}, m_cols{cols}
+        {
+            if (rows < 0 or cols < 0) {
+                throw std::invalid_argument(
+                    fmt::format("#rows and #cols must be non-negative integers: ({:d},{:d})", m_rows, m_cols)
+                );
+            }
+        }
+
+        [[nodiscard]] explicit constexpr
+        Shape(const std::ptrdiff_t rows) : Shape{rows, rows} {}
+
+        [[nodiscard]] constexpr
+        auto square() const noexcept -> bool
+        {
+            return m_rows == m_cols;
+        }
+
+        [[nodiscard]] constexpr
+        auto size() const noexcept -> std::ptrdiff_t
+        {
+            return m_rows * m_cols;
+        }
+    };
 
     idx_t m_rows{};          // Number of rows
     idx_t m_cols{};          // Number of columns
@@ -118,6 +151,16 @@ public:
     auto from_func(const idx_t rows, std::invocable<idx_t, idx_t> auto func) -> Matrix
     {
         return Matrix::from_func(rows, rows, func);
+    }
+
+    [[nodiscard]] static constexpr
+    auto from_permutation(std::span<const std::size_t> permutation) -> Matrix
+    {
+        auto P = Matrix<scalar_t>::zeros(permutation.size());
+        for (std::size_t i = 0; i < P.rows(); ++i) {
+            P(i, permutation[i]) = scalar_t{1};
+        }
+        return P;
     }
 
     [[nodiscard]] static constexpr
@@ -248,14 +291,17 @@ public:
         std::swap(m_rows, m_cols);
     }
 
+    [[nodiscard]]
     constexpr auto norm() const noexcept -> scalar_t
     {
-        return std::sqrt(
-            std::transform_reduce(
-                m_data.cbegin(), m_data.cend(), m_data.cbegin(),
-                scalar_t{}, std::plus<scalar_t>{}, std::multiplies<scalar_t>{}
-            )
-        );
+        return norm_l2<scalar_t>(m_data);
+    }
+
+    constexpr void swaprows(const idx_t r1, const idx_t r2)
+    {
+        for (const auto c : std::views::iota(0U, cols())) {
+            std::swap(this->operator()(r1, c), this->operator()(r2, c));
+        }
     }
 
     constexpr auto operator+=(const Matrix& rhs) noexcept -> Matrix&
@@ -299,8 +345,14 @@ public:
 
     void display(std::string_view name = "Matrix", std::string_view expr = "") const
     {
-        std::cout << fmt::format("{}<{} x {}, {}> {}\n", name, m_rows, m_cols, typeid(scalar_t).name(), expr);
+        std::cout << fmt::format("{}{:s} {}\n", name, shape_info(), expr);
         std::cout << *this << "\n";
+    }
+
+    [[nodiscard]]
+    constexpr std::string shape_info() const
+    {
+       return fmt::format("<{:d} x {:d}, {:s}>", rows(), cols(), typeid(scalar_t).name());
     }
 
     [[nodiscard]]
@@ -403,6 +455,12 @@ auto operator*(const Matrix<T>& M, std::span<const T> v) -> std::vector<T>
     }
 
     return result;
+}
+
+template<std::floating_point T>
+auto operator*(const Matrix<T>& M, const std::vector<T>& v) -> std::vector<T>
+{
+   return operator*(M, std::span{v});
 }
 
 #endif // LINALG_MATRIX_H

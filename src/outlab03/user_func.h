@@ -14,7 +14,7 @@
  * @param x real value
  */
 inline auto user_func(const double x) -> double {
-    return x < 0.25 ? std::exp(-x + 0.25) : std::exp(x - 0.25);
+    return std::exp(x);
 }
 
 #endif //FX_H

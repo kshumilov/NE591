@@ -2,8 +2,10 @@
 #include <iostream>
 #include <concepts>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <fstream>  // ifstream
+#include <utility>
 
 // 3rd-party Dependencies
 #include <fmt/core.h>
@@ -16,25 +18,67 @@
 #include "methods/linalg/matrix.h"
 #include "methods/linalg/lu.h"
 #include "methods/linalg/utils/io.h"
+#include "methods/linalg/ops.h"
+
+#include "methods/utils/io.h"
 
 
 template <std::floating_point scalar_t>
-struct Inlab05 {
-    Matrix<scalar_t> L {};
-    Matrix<scalar_t> U {};
-    Matrix<scalar_t> P {};
+struct Outlab5 {
+    Matrix<scalar_t> A{};
     std::vector<scalar_t> b {};
+    PivotingMethod pivoting_method {PivotingMethod::PartialPivoting};
 
     struct Result {
-        const Inlab05* problem {};
+        const Outlab5* problem {};
+        Matrix<scalar_t> L {};
+        Matrix<scalar_t> U {};
+        std::optional<Matrix<scalar_t>> P {std::nullopt};
         std::vector<scalar_t> x{};
 
         auto echo(std::ostream& out) const -> void
         {
             fmt::println(out, "{:^80s}", "Results");
             fmt::println(out, "--------------------------------------------------------------------------------");
+            fmt::println(out, "Lower Triangular Matrix, L{}:", L.shape_info());
+            out << L << "\n\n";
+
+            fmt::println(out, "Upper Triangular Matrix, U{}:", U.shape_info());
+            out << U << "\n\n";
+
+            if (P.has_value()) {
+                fmt::println(out, "Permutation Matrix, P{}:", P.value().shape_info());
+                out << P.value() << "\n\n";
+            }
+
+            const auto R = lu_residual();
+            fmt::println("Matrix Residual, R{} = LU - P * A, with norm |R| = {: 12.6e}", R.shape_info(), R.norm());
+            out << R << "\n\n";
+
+            fmt::println(out, "--------------------------------------------------------------------------------");
             fmt::println(out, "Solution Vector, x:");
-            fmt::println(out, "[{: 12.6e}]", fmt::join(x, " "));
+            fmt::println(out, "[{: 12.6e}]\n", fmt::join(x, " "));
+
+            const auto r = x_residual();
+            fmt::println(out, "Solution Residual, r = b - A * x, with |r| = {: 12.6e}:", norm_l2<scalar_t>(r));
+            fmt::println(out, "[{: 12.6e}]", fmt::join(r, " "));
+        }
+
+        [[nodiscard]] constexpr
+        auto lu_residual() const -> Matrix<scalar_t>
+        {
+            auto R = P.has_value() ? P.value() * problem->A : problem -> A;
+            R -= L * U;
+
+            return R;
+        }
+
+        [[nodiscard]] constexpr
+        auto x_residual() const -> std::vector<scalar_t>
+        {
+            const auto bp = problem->A * x;
+            const auto res = problem->b - bp;
+            return res;
         }
     };
 
@@ -42,28 +86,45 @@ struct Inlab05 {
     {
         fmt::println(out, "{:^80s}", "Inputs");
         fmt::println(out, "--------------------------------------------------------------------------------");
-        fmt::println(out, "Lower Triangular Matrix, L{}:", L.shape_info());
-        out << L << "\n\n";
-
-        fmt::println(out, "Upper Triangular Matrix, U{}:", U.shape_info());
-        out << U << "\n\n";
-
-        fmt::println(out, "Permutation Matrix, P{}:", P.shape_info());
-        out << P << "\n\n";
+        fmt::println(out, "Original Matrix, A{}:", A.shape_info());
+        out << A << "\n\n";
 
         fmt::println(out, "RHS vector, b:");
-        fmt::println(out, "[{: 12.6e}]", fmt::join(b, " "));
+        fmt::println(out, "[{: 12.6e}]\n", fmt::join(b, " "));
+
+        fmt::println(out, "Pivoting Method: {}", pivoting_method);
     }
 
     [[nodiscard]] constexpr
     auto solve() const -> Result
     {
+        if (pivoting_method == PivotingMethod::NoPivoting) {
+            const auto& [L, U] = lu_factor(A);
+            const auto& x = lu_solve<scalar_t>(L, U, b);
+
+            return {
+                .problem = this,
+                .L = L,
+                .U = U,
+                .P = std::nullopt,
+                .x = x
+            };
+        }
+
+        const auto& [L, U, P] = lup_factor(A);
+        const auto& x = lup_solve<scalar_t>(L, U, P, b);
+
         return {
             .problem = this,
-            .x = lup_solve<scalar_t>(L, U, P, b)
+            .L = L,
+            .U = U,
+            .P = std::make_optional(P),
+            .x = x
         };
+
     }
 
+    [[maybe_unused]]
     auto run() const -> Result
     {
         echo(std::cout);
@@ -77,9 +138,9 @@ struct Inlab05 {
     }
 
     [[nodiscard]]
-    static auto from_file(std::string filename) -> Inlab05
+    static auto from_file(std::string_view filename) -> Outlab5
     {
-        std::ifstream in{filename};
+        std::ifstream in{filename.data()};
 
         if (!in.is_open()) {
             in.close();
@@ -91,16 +152,15 @@ struct Inlab05 {
         try {
             const auto rank = read_rank(in);
 
-            const Inlab05 result {
-                .L = read_matrix<scalar_t, MatrixSymmetry::General>(in, rank, rank),
-                .U = read_matrix<scalar_t, MatrixSymmetry::General>(in, rank, rank),
-                .P = read_matrix<scalar_t, MatrixSymmetry::General>(in, rank, rank),
-                .b = read_vector<scalar_t>(in, rank)
+            const Outlab5 problem {
+                .A = read_matrix<scalar_t, MatrixSymmetry::General>(in, rank, rank),
+                .b = read_vector<scalar_t>(in, rank),
+                .pivoting_method = read_pivoting_method(in)
             };
 
             in.close();
 
-            return result;
+            return problem;
         }
         catch ([[maybe_unused]] const std::exception& err) {
             in.close();
@@ -116,7 +176,7 @@ int main(int argc, char* argv[])
     const std::string author {"Kirill Shumilov"};
     const std::string description {
         "This program solves system of equations Ax=b\n"
-        "using LUP Factorization, PAx=LUx=Pb,"
+        "using LUP Factorization, PAx=LUx=Pb,\n"
         "using forward and backward substitution based on\n"
         "lower triangular matrix (L), upper-triangular matrix (U),\n"
         "row permutation matrix (P), and RHS vector (b)\n"

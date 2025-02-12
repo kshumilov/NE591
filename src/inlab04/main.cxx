@@ -14,8 +14,8 @@
 #include <fmt/format.h>
 #include <fmt/color.h>
 
-#include <linalg/matrix.h>
-#include <linalg/lu.h>
+#include <methods/linalg/matrix.h>
+#include <methods/linalg/lu.h>
 
 using idx_t = std::size_t;
 using namespace std::literals;
@@ -128,7 +128,7 @@ int main()
         fmt::println("RHS Vector, b:");
         fmt::println("{:12.6f}", fmt::join(b, " "));
 
-        const auto x = solve_lu<double>(L, U, b);
+        const auto x = lu_solve<double>(L, U, b);
 
         fmt::println("================================================================================");
         fmt::println("{:^80s}", "Results");

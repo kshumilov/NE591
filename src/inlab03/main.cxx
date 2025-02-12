@@ -7,36 +7,13 @@
 #include <fmt/format.h>
 #include <fmt/color.h>
 
-#include "integrate/integrate.h"
-#include "array.h"
+#include "methods/integrate/integrate.h"
+#include "methods/array.h"
 
 #include "user_func.h"
 
 
 using real = double;
-
-
-template <>
-struct fmt::formatter<Quadrature, char> {
-    template<class ParseContext>
-    constexpr ParseContext::iterator parse(ParseContext& ctx)
-    {
-        return ctx.begin();
-    }
-
-    template<class FmtContext>
-    constexpr auto format(Quadrature q, FmtContext& ctx) const {
-        switch (q) {
-            case Quadrature::Trapezoidal:
-                return fmt::format_to(ctx.out(), "Trapezoidal");
-            case Quadrature::Simpson:
-                return fmt::format_to(ctx.out(), "Simpson");
-            case Quadrature::Gauss:
-                return fmt::format_to(ctx.out(), "Gauss-Legendre");
-        }
-        return ctx.out();
-    }
-};
 
 
 auto str_to_quadrature(const std::string_view str) -> std::optional<Quadrature>
@@ -219,6 +196,7 @@ auto main(int argc, char* argv[]) -> int {
     // #endif
 
     try {
+        // TODO: Fix this function call
         const double integral = integrate<double>(y, inputs.quadrature, inputs.step());
 
         fmt::println("{: ^80s}", "Results");

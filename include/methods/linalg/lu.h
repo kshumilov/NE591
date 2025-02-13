@@ -15,6 +15,12 @@
 #include "methods/linalg/matrix.h"
 
 
+enum class LUResult {
+    Success,
+    SmallPivotEncountered,
+};
+
+
 enum class PivotingMethod {
     NoPivoting,
     PartialPivoting,
@@ -46,11 +52,14 @@ struct fmt::formatter<PivotingMethod, char> {
 
 
 template<std::floating_point scalar_t>
-constexpr void lu_factor_inplace_update(Matrix<scalar_t>& A, const std::size_t k)
+constexpr void lu_factor_inplace_update(Matrix<scalar_t>& A, const std::size_t k, LUResult& result, const scalar_t tol)
 {
     assert(k < A.rows() and k < A.cols());
 
     for (std::size_t i{k + 1U}; i < A.rows(); ++i) {
+        if (A(k, k) < tol) {
+            result = LUResult::SmallPivotEncountered;
+        }
         A(i, k) /= A(k, k);
         for (std::size_t j{k + 1U}; j < A.cols(); ++j) {
             A(i, j) -= A(i, k) * A(k, j);
@@ -58,23 +67,28 @@ constexpr void lu_factor_inplace_update(Matrix<scalar_t>& A, const std::size_t k
     }
 }
 
-
 template<std::floating_point scalar_t>
-constexpr void lu_factor_inplace(Matrix<scalar_t>& A)
+constexpr LUResult lu_factor_inplace(Matrix<scalar_t>& A, const scalar_t tol = scalar_t{1.0e-8})
 {
     const auto n{std::min(A.rows(), A.cols())};
 
+    auto result = LUResult::Success;
+
     for (std::size_t k{0U}; k < n - 1U; ++k) {
-        lu_factor_inplace_update(A, k);
+        lu_factor_inplace_update(A, k, result, tol);
     }
+
+    return result;
 }
 
 
 template<std::floating_point scalar_t>
 [[nodiscard]] constexpr
-Matrix<scalar_t> lup_factor_inplace(Matrix<scalar_t>& A)
+std::pair<Matrix<scalar_t>, LUResult> lup_factor_inplace(Matrix<scalar_t>& A, const scalar_t tol = scalar_t{1.0e-8})
 {
     const auto n{std::min(A.rows(), A.cols())};
+
+    auto result = LUResult::Success;
 
     std::vector<std::size_t> row_perm(A.rows());
     std::iota(row_perm.begin(), row_perm.end(), 0U);
@@ -94,10 +108,10 @@ Matrix<scalar_t> lup_factor_inplace(Matrix<scalar_t>& A)
         std::swap(row_perm[k], row_perm[pivot_row]);
         A.swaprows(k, pivot_row);
 
-        lu_factor_inplace_update(A, k);
+        lu_factor_inplace_update(A, k, result, tol);
     }
 
-    return Matrix<scalar_t>::from_permutation(row_perm);
+    return std::make_pair(Matrix<scalar_t>::from_permutation(row_perm), result);
 }
 
 
@@ -119,19 +133,19 @@ Matrix<scalar_t> separate_lu(Matrix<scalar_t>& LU)
 
 template<std::floating_point scalar_t>
 [[nodiscard]] constexpr
-auto lu_factor(Matrix<scalar_t> A) -> std::pair<Matrix<scalar_t>, Matrix<scalar_t>>
+auto lu_factor(Matrix<scalar_t> A) -> std::tuple<Matrix<scalar_t>, Matrix<scalar_t>, LUResult>
 {
-    lu_factor_inplace<scalar_t>(A);
-    return std::make_pair(separate_lu<scalar_t>(A), A);
+    const auto result = lu_factor_inplace<scalar_t>(A);
+    return std::make_tuple(separate_lu<scalar_t>(A), A, result);
 }
 
 
 template<std::floating_point scalar_t>
 [[nodiscard]] constexpr
-auto lup_factor(Matrix<scalar_t> A) -> std::tuple<Matrix<scalar_t>, Matrix<scalar_t>, Matrix<scalar_t>>
+auto lup_factor(Matrix<scalar_t> A) -> std::tuple<Matrix<scalar_t>, Matrix<scalar_t>, Matrix<scalar_t>, LUResult>
 {
-    const auto P = lup_factor_inplace<scalar_t>(A);
-    return std::make_tuple(separate_lu<scalar_t>(A), A, P);
+    const auto& [P, result] = lup_factor_inplace<scalar_t>(A);
+    return std::make_tuple(separate_lu<scalar_t>(A), A, P, result);
 }
 
 

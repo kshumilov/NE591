@@ -95,12 +95,19 @@ struct Outlab5 {
         fmt::println(out, "Pivoting Method: {}", pivoting_method);
     }
 
-    [[nodiscard]] constexpr
+    [[nodiscard]]
     auto solve() const -> Result
     {
         if (pivoting_method == PivotingMethod::NoPivoting) {
-            const auto& [L, U] = lu_factor(A);
+            const auto& [L, U, result] = lu_factor(A);
             const auto& x = lu_solve<scalar_t>(L, U, b);
+
+            if (result == LUResult::SmallPivotEncountered) {
+                std::cerr << fmt::format(
+                    fmt::emphasis::bold | fg(fmt::color::red),
+                    "Error: Small Pivot Encountered"
+                ) << std::endl;
+            }
 
             return {
                 .problem = this,
@@ -111,7 +118,14 @@ struct Outlab5 {
             };
         }
 
-        const auto& [L, U, P] = lup_factor(A);
+        const auto& [L, U, P, result] = lup_factor(A);
+        if (result == LUResult::SmallPivotEncountered) {
+            std::cerr << fmt::format(
+                fmt::emphasis::bold | fg(fmt::color::red),
+                "Error: Small Pivot Encountered"
+            ) << std::endl;
+        }
+
         const auto& x = lup_solve<scalar_t>(L, U, P, b);
 
         return {

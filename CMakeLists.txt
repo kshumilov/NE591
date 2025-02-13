@@ -35,7 +35,12 @@ FetchContent_Declare(
     GIT_TAG        8303d140a1a11f19b982a9f664bbe59a1ccda3f4
 )
 
-FetchContent_MakeAvailable(argparse fmt)
+FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+
+FetchContent_MakeAvailable(argparse fmt json)
 
 # Contains definition for CMAKE_INSTALL_DATADIR
 # Only needs to be included once

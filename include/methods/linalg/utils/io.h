@@ -7,39 +7,42 @@
 #include <functional>
 #include <stdexcept>
 #include <cmath>
+#include <string_view>
+
+#include <fmt/core.h>
 
 #include "methods/utils/io.h"
 #include "methods/linalg/matrix.h"
 #include "methods/linalg/lu.h"
 
+using namespace std::literals;
 
-inline auto read_rank(std::istream& in) -> std::ptrdiff_t
+inline auto read_rank(std::istream& in, std::string_view dim_name = ""sv) -> std::ptrdiff_t
 {
-    if (const auto result = read_value<std::ptrdiff_t>(in);
-        result.has_value() and result.value() > 0) {
-        return result.value();
-    }
-
-    throw std::runtime_error("Could not read `rank`.\n"
-                             "Must be an integer larger than 1.");
+    return read_positive_value<std::ptrdiff_t>(in, dim_name);
 }
 
 
 inline auto read_pivoting_method(std::istream& input) -> PivotingMethod {
-    if (const auto flag = read_value<int>(input); flag.has_value()) {
-        switch (flag.value()) {
-            case 0:
-                return PivotingMethod::NoPivoting;
-            case 1:
-                return PivotingMethod::PartialPivoting;
-            default:
-                throw std::runtime_error(
-                    fmt::format("Invalid pivoting flag `{}`", flag.value())
-                );
+    return read_and_validate<PivotingMethod, int>(
+        input,
+        [](const auto v) {
+            switch (v) {
+                case 0:
+                    return PivotingMethod::NoPivoting;
+                case 1:
+                    return PivotingMethod::PartialPivoting;
+                default:
+                    throw std::runtime_error(fmt::format(
+                        "Invalid pivoting flag `{}`", v
+                    ));
+            }
+        },
+        [&input]() {
+            return std::runtime_error(fmt::format(
+                "Invalid pivoting flag"
+            ));
         }
-    }
-    throw std::runtime_error(
-        fmt::format("Invalid pivoting flag")
     );
 }
 

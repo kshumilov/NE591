@@ -1,20 +1,28 @@
 #ifndef LINALG_MATRIX_H
 #define LINALG_MATRIX_H
 
+// Types and IO
 #include <cstddef>  // for size_t
 #include <iostream>
 #include <cassert>
-
-#include <vector>
 #include <concepts>
+
+// Data Structures and Algoritms
+#include <vector>
 #include <ranges>
 #include <utility>
 #include <numeric>
 
+// 3rd-party Dependencies
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <nlohmann/json.hpp>
 
+// LinAlg operations on Vectors
 #include "methods/linalg/ops.h"
+
+
+using json = nlohmann::json;
 
 
 enum class MatrixSymmetry : char {
@@ -50,37 +58,6 @@ constexpr auto pair_from_flat_idx(const std::size_t flat, const std::size_t cols
 template<std::floating_point scalar_t>
 class Matrix {
     using idx_t = std::size_t;
-
-    class Shape {
-        std::ptrdiff_t m_rows{};
-        std::ptrdiff_t m_cols{};
-
-    public:
-        [[nodiscard]] constexpr
-        Shape(const std::ptrdiff_t rows, const std::ptrdiff_t cols) : m_rows{rows}, m_cols{cols}
-        {
-            if (rows < 0 or cols < 0) {
-                throw std::invalid_argument(
-                    fmt::format("#rows and #cols must be non-negative integers: ({:d},{:d})", m_rows, m_cols)
-                );
-            }
-        }
-
-        [[nodiscard]] explicit constexpr
-        Shape(const std::ptrdiff_t rows) : Shape{rows, rows} {}
-
-        [[nodiscard]] constexpr
-        auto square() const noexcept -> bool
-        {
-            return m_rows == m_cols;
-        }
-
-        [[nodiscard]] constexpr
-        auto size() const noexcept -> std::ptrdiff_t
-        {
-            return m_rows * m_cols;
-        }
-    };
 
     idx_t m_rows{};          // Number of rows
     idx_t m_cols{};          // Number of columns
@@ -130,7 +107,9 @@ public:
         : m_rows{rows}
         , m_cols{cols}
         , m_data{std::move(data)}
-    {}
+    {
+        assert(m_rows * m_cols == m_data.size());
+    }
 
     [[nodiscard]] static constexpr
     auto from_func(const idx_t rows, const idx_t cols, std::invocable<idx_t, idx_t> auto func) -> Matrix
@@ -371,6 +350,8 @@ public:
 
         return fmt::format("[{}]", fmt::join(lines, " \n "));
     }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Matrix, m_rows, m_cols, m_data)
 };
 
 

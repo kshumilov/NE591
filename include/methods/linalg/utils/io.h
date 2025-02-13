@@ -38,7 +38,7 @@ inline auto read_pivoting_method(std::istream& input) -> PivotingMethod {
                     ));
             }
         },
-        [&input]() {
+        []() {
             return std::runtime_error(fmt::format(
                 "Invalid pivoting flag"
             ));

@@ -6,6 +6,7 @@
 #include <span>
 #include <cassert>
 #include <cmath>
+#include <numeric>
 
 
 template<std::floating_point T>

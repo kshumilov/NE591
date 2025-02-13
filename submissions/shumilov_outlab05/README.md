@@ -53,7 +53,7 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab04]$ cmake -S. -Bbuild
+[kshumil@login02 shumilov_outlab05]$ cmake -S. -Bbuild
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -62,6 +62,7 @@ cmake -S. -Bbuild
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type:
+-- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_outlab05/build/_deps/json-src/include/
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_outlab05/build
@@ -75,90 +76,186 @@ cmake --build build --config Release --target outlab05 -- -j
 
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab04]$ cmake --build build --config Release --target outlab04 -- -j
-[ 50%] Building CXX object CMakeFiles/outlab04.dir/src/main.cxx.o
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/src/main.cxx: In lambda function:
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/src/main.cxx:161:37: warning: declaration of ‘const auto:91 b’ shadows a parameter [-Wshadow]
-  161 |         [](const auto a, const auto b) {
-      |                          ~~~~~~~~~~~^
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/src/main.cxx:118:67: note: shadowed declaration is here
-  118 | void outlab04(const Matrix<double>& A, const std::vector<double>& b)
-      |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-In file included from /home/kshumil/ne591/NE591/submissions/shumilov_outlab04/src/main.cxx:21:
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/include/linalg/lu.h: In instantiation of ‘std::vector<scalar_t> backward_substitution(const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double]’:
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/include/linalg/lu.h:130:43:   required from ‘std::vector<scalar_t> solve_lu(const Matrix<T>&, const Matrix<T>&, std::span<const scalar_t>) [with scalar_t = double; bool LowerUnitDiag = true]’
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/src/main.cxx:150:42:   required from here
-/home/kshumil/ne591/NE591/submissions/shumilov_outlab04/include/linalg/lu.h:114:41: warning: comparison of integer expressions of different signedness: ‘std::ptrdiff_t’ {aka ‘long int’} and ‘Matrix<double>::idx_t’ {aka ‘long unsigned int’} [-Wsign-compare]
-  114 |         for (std::ptrdiff_t j{r + 1}; j < U.cols(); ++j) {
-      |                                       ~~^~~~~~~~~~
-[100%] Linking CXX executable shumilov_outlab04
-[100%] Built target outlab04
+[kshumil@login02 shumilov_outlab05]$ cmake --build build --config Release --target outlab05 -- -j
+[ 20%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
+[ 40%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
+[ 60%] Linking CXX static library libfmt.a
+[ 60%] Built target fmt
+[ 80%] Building CXX object CMakeFiles/outlab05.dir/src/main.cxx.o
+[100%] Linking CXX executable shumilov_outlab05
+[100%] Built target outlab05
 ```
 
 At this point the executable can be found in:
 ```bash
-[kshumil@login02 shumilov_outlab04]$ ./shumilov_inlab04 -h
-Usage: shumilov_outlab04 [--help] [--version] filename
-
-This program solves system of equations Ax=LUx=b
-by performing LU factorization of A and then
+[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 -h
+================================================================================
+NE 591 Outlab #05: Solution of Ax=b using LUP Factorization Result
+Author: Kirill Shumilov
+Date: 02/07/2025
+--------------------------------------------------------------------------------
+This program solves system of equations Ax=b
+using LUP Factorization, PAx=LUx=Pb,
 using forward and backward substitution based on
-lower triangular (L), upper-triangular (U), and RHS vector (b)
+lower triangular matrix (L), upper-triangular matrix (U),
+row permutation matrix (P), and RHS vector (b)
+================================================================================
+Usage: shumilov_inlab05 [--help] filename
+
+This program solves system of equations Ax=b
+using LUP Factorization, PAx=LUx=Pb,
+using forward and backward substitution based on
+lower triangular matrix (L), upper-triangular matrix (U),
+row permutation matrix (P), and RHS vector (b)
+
 
 Positional arguments:
-  filename       Path to input fle
+  filename    Path to input file
 
 Optional arguments:
-  -h, --help     shows help message and exits
-  -v, --version  prints version information and exits
+  -h, --help  shows help message and exits
 ```
 
 # Examples
+## Successful LUP Factorization and Solution
 ```bash
-[kshumil@login02 shumilov_outlab04]$ cat inp
-3
+[kshumil@login02 shumilov_outlab05]$ cat examples/test3.inp
+5
 
- 2 -1 -2
--4  6  3
--4 -2  8
+1.00 2.00 3.00 4.00 5.00
+2.00 3.00 4.00 5.00 1.00
+3.00 4.00 5.00 1.00 2.00
+4.00 5.00 1.00 2.00 3.00
+5.00 1.00 2.00 3.00 4.00
 
--6 17 16
-[kshumil@login02 shumilov_outlab04]$ ./shumilov_outlab04 inp
+1.10 1.20 1.30 1.40 1.50
+
+1
+[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 examples/test3.inp
 ================================================================================
-NE 591 Outlab #04: Solution of Ax=b using LU Factorization
+NE 591 Inlab #05: Solution of Ax=b using LUP Factorization Result
 Author: Kirill Shumilov
-Date: 01/31/2025
+Date: 02/07/2025
+--------------------------------------------------------------------------------
+This program solves system of equations Ax=b
+using LUP Factorization, PAx=LUx=Pb,
+using forward and backward substitution based on
+lower triangular matrix (L), upper-triangular matrix (U),
+row permutation matrix (P), and RHS vector (b)
 ================================================================================
                                      Inputs
 --------------------------------------------------------------------------------
-Original Matrix, A:
-[[ 2.000000e+00 -1.000000e+00 -2.000000e+00]
- [-4.000000e+00  6.000000e+00  3.000000e+00]
- [-4.000000e+00 -2.000000e+00  8.000000e+00]]
+Original Matrix, A<5 x 5, e>:
+[[ 1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00  5.000000e+00]
+ [ 2.000000e+00  3.000000e+00  4.000000e+00  5.000000e+00  1.000000e+00]
+ [ 3.000000e+00  4.000000e+00  5.000000e+00  1.000000e+00  2.000000e+00]
+ [ 4.000000e+00  5.000000e+00  1.000000e+00  2.000000e+00  3.000000e+00]
+ [ 5.000000e+00  1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00]]
 
 RHS vector, b:
-[   -6.000000    17.000000    16.000000]
+[ 1.100000e+00  1.200000e+00  1.300000e+00  1.400000e+00  1.500000e+00]
+
+Pivoting Method: Partial Pivoting
 ================================================================================
                                     Results
 --------------------------------------------------------------------------------
-Lower Triangular Matrix, L:
-[[ 1.000000e+00  0.000000e+00  0.000000e+00]
- [-2.000000e+00  1.000000e+00  0.000000e+00]
- [-2.000000e+00 -1.000000e+00  1.000000e+00]]
+Lower Triangular Matrix, L<5 x 5, e>:
+[[ 1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 8.000000e-01  1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 6.000000e-01  8.095238e-01  1.000000e+00  0.000000e+00  0.000000e+00]
+ [ 4.000000e-01  6.190476e-01  8.333333e-01  1.000000e+00  0.000000e+00]
+ [ 2.000000e-01  4.285714e-01  6.666667e-01  8.750000e-01  1.000000e+00]]
 
-Upper Triangular Matrix, L:
-[[ 2.000000e+00 -1.000000e+00 -2.000000e+00]
- [ 0.000000e+00  4.000000e+00 -1.000000e+00]
- [ 0.000000e+00  0.000000e+00  3.000000e+00]]
+Upper Triangular Matrix, U<5 x 5, e>:
+[[ 5.000000e+00  1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00]
+ [ 0.000000e+00  4.200000e+00 -6.000000e-01 -4.000000e-01 -2.000000e-01]
+ [ 0.000000e+00  0.000000e+00  4.285714e+00 -4.761905e-01 -2.380952e-01]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  4.444444e+00 -2.777778e-01]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  4.687500e+00]]
 
-Matrix Residual, R = LU - A, with norm |R| =  0.000000e+00
-[[ 0.000000e+00  0.000000e+00  0.000000e+00]
- [ 0.000000e+00  0.000000e+00  0.000000e+00]
- [ 0.000000e+00  0.000000e+00  0.000000e+00]]
+Permutation Matrix, P<5 x 5, e>:
+[[ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  1.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 0.000000e+00  0.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]]
+
+Matrix Residual, R<5 x 5, e> = L * U - P * A,
+with norm |R| =  0.000000e+00 and max|Rij| =  0.000000e+00:
+[[ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]]
 --------------------------------------------------------------------------------
-Solution vector, x:
-[    1.000000     2.000000     3.000000]
+Solution Vector, x:
+[ 1.666667e-01  6.666667e-02  6.666667e-02  6.666667e-02  6.666667e-02]
+
+Solution Residual, r = b - A * x,
+with norm |r| =  0.000000e+00 and max|ri| =  8.131516e-20:
+[ 0.000000e+00 -2.710505e-20  2.710505e-20  0.000000e+00 -8.131516e-20]
+================================================================================
+```
+
+## Failed LU Factorization (small pivots)
+Notice an issued warning:
+```bash
+[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 examples/test4.inp
+================================================================================
+NE 591 Inlab #05: Solution of Ax=b using LUP Factorization Result
+Author: Kirill Shumilov
+Date: 02/07/2025
 --------------------------------------------------------------------------------
-Max Element of residual vector, r = b - Ax:            0
+This program solves system of equations Ax=b
+using LUP Factorization, PAx=LUx=Pb,
+using forward and backward substitution based on
+lower triangular matrix (L), upper-triangular matrix (U),
+row permutation matrix (P), and RHS vector (b)
+================================================================================
+                                     Inputs
+--------------------------------------------------------------------------------
+Original Matrix, A<5 x 5, e>:
+[[ 1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00  5.000000e+00]
+ [ 2.000000e+00  3.000000e+00  4.000000e+00  5.000000e+00  1.000000e+00]
+ [ 3.000000e+00  4.000000e+00  5.000000e+00  1.000000e+00  2.000000e+00]
+ [ 4.000000e+00  5.000000e+00  1.000000e+00  2.000000e+00  3.000000e+00]
+ [ 5.000000e+00  1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00]]
+
+RHS vector, b:
+[ 1.100000e+00  1.200000e+00  1.300000e+00  1.400000e+00  1.500000e+00]
+
+Pivoting Method: No Pivoting
+================================================================================
+Error: Small Pivot Encountered
+                                    Results
+--------------------------------------------------------------------------------
+Lower Triangular Matrix, L<5 x 5, e>:
+[[ 1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 2.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00]
+ [ 3.000000e+00  2.000000e+00  1.000000e+00  0.000000e+00  0.000000e+00]
+ [ 4.000000e+00  3.000000e+00 -inf          1.000000e+00  0.000000e+00]
+ [ 5.000000e+00  9.000000e+00  inf         -nan          1.000000e+00]]
+
+Upper Triangular Matrix, U<5 x 5, e>:
+[[ 1.000000e+00  2.000000e+00  3.000000e+00  4.000000e+00  5.000000e+00]
+ [ 0.000000e+00 -1.000000e+00 -2.000000e+00 -3.000000e+00 -9.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00 -5.000000e+00  5.000000e+00]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00 -inf          inf        ]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00 -nan        ]]
+
+Matrix Residual, R<5 x 5, e> = L * U - P * A,
+with norm |R| = -nan         and max|Rij| =  0.000000e+00:
+[[ 0.000000e+00  0.000000e+00  0.000000e+00 -nan         -nan        ]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00 -nan         -nan        ]
+ [ 0.000000e+00  0.000000e+00  0.000000e+00 -nan         -nan        ]
+ [-nan         -nan         -nan         -nan         -nan        ]
+ [-nan         -nan         -nan         -nan         -nan        ]]
+--------------------------------------------------------------------------------
+Solution Vector, x:
+[-nan         -nan         -nan         -nan         -nan        ]
+
+Solution Residual, r = b - A * x,
+with norm |r| = -nan         and max|ri| =  nan        :
+[-nan         -nan         -nan         -nan         -nan        ]
 ================================================================================
 ```

@@ -56,20 +56,16 @@ template<class IndexType = std::size_t>
 [[nodiscard]] constexpr
 auto unravel2d(const IndexType flat, const IndexType lda) -> Idx2D<IndexType>
 {
+    assert(lda > 0);
     return std::make_pair<IndexType, IndexType>(flat / lda, flat % lda);
 }
 
 
 template<std::floating_point scalar_t>
 class Matrix {
+public:
     using idx_t = std::size_t;
 
-    idx_t m_rows{};          // Number of rows
-    idx_t m_cols{};          // Number of columns
-    std::vector<scalar_t> m_data{}; // Data storage in row-major order
-
-
-public:
     // Default Constructors
     explicit Matrix() = default;
     Matrix(const Matrix& other) = default;
@@ -378,6 +374,11 @@ public:
     }
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(Matrix, m_rows, m_cols, m_data)
+
+private:
+    idx_t m_rows{};          // Number of rows
+    idx_t m_cols{};          // Number of columns
+    std::vector<scalar_t> m_data{}; // Data storage in row-major order
 };
 
 

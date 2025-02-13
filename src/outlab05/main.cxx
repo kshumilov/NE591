@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 
     fmt::print(
         "================================================================================\n"
-        "NE 591 Inlab #05: Solution of Ax=b using LUP Factorization Result\n"
+        "NE 591 Outlab #05: Solution of Ax=b using LUP Factorization Result\n"
         "Author: {:s}\n"
         "Date: 02/07/2025\n"
         "--------------------------------------------------------------------------------\n"

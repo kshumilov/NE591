@@ -8,7 +8,6 @@
 #include <vector>
 #include <string_view>
 
-#include <fmt/core.h>
 
 using namespace std::literals;
 

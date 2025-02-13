@@ -45,7 +45,7 @@ struct Project01 {
         constexpr auto to_string() const -> std::string
         {
             std::string result{};
-            result.append("================================================================================\n");
+            // result.append("================================================================================\n");
             result.append(problem->to_string());
             result.append("================================================================================\n");
             fmt::format_to(std::back_inserter(result), "{:^80s}\n", "Results");
@@ -115,19 +115,19 @@ struct Project01 {
     auto setup_operator() const -> Matrix<scalar_t>
     {
         const auto M_ = static_cast<std::size_t>(M);
-        const auto delta = step(0.0, a, M + 1);
+        const auto delta = step<scalar_t>(0.0, a, M + 1);
         const auto D_over_delta_sq = D / (delta * delta);
 
         const auto N_ = static_cast<std::size_t>(N);
-        const auto gamma = step(0.0, b, N + 1);
+        const auto gamma = step<scalar_t>(0.0, b, N + 1);
         const auto D_over_gamma_sq = D / (gamma * gamma);
 
         const auto dim = operator_dimension();
         return Matrix<scalar_t>::from_func(
             dim, dim,
             [&](const auto I, const auto J) -> scalar_t {
-                const auto [i, j] = pair_from_flat_idx(I, N_);
-                const auto [k, l] = pair_from_flat_idx(J, N_);
+                const auto [i, j] = unravel2d(I, N_);
+                const auto [k, l] = unravel2d(J, N_);
 
                 if (((0U < i && i - 1U == k) || (i < M_ - 1U && i + 1U == k)) && j == l) return -D_over_delta_sq;
                 if (i == k && ((0U < j && j - 1U == l) || (j < N_ - 1U && j + 1U == l))) return -D_over_gamma_sq;
@@ -150,10 +150,10 @@ struct Project01 {
         std::string result{};
         fmt::format_to(std::back_inserter(result), "{:^80s}\n", "Inputs");
         fmt::format_to(std::back_inserter(result), "--------------------------------------------------------------------------------\n");
-        fmt::format_to(std::back_inserter(result), "Problem Dimensions: {: 12.6e} x {: 12.6e}\n", a, b);
-        fmt::format_to(std::back_inserter(result), "Grid Dimensions: {:d} x {:d}\n", M + 2U, N + 2U);
-        fmt::format_to(std::back_inserter(result), "Diffusion Coefficient, D: {: 12.6e}\n", D);
-        fmt::format_to(std::back_inserter(result), "Macroscopic Removal Cross Section, Sa: {: 12.6e}\n", Sa);
+        fmt::format_to(std::back_inserter(result), "{:.<40s}: {:12.6e} x {:12.6e}\n", "Problem Dimensions", a, b);
+        fmt::format_to(std::back_inserter(result), "{:.<40s}: {:d} x {:d}\n", "Grid Dimensions", M + 2U, N + 2U);
+        fmt::format_to(std::back_inserter(result), "{:.<40s}: {:12.6e}\n", "Diffusion Coefficient, D", D);
+        fmt::format_to(std::back_inserter(result), "{:.<40s}: {:12.6e}\n", "Macroscopic Removal Cross Section, Sa", Sa);
         fmt::format_to(std::back_inserter(result), "Source Matrix, q{}:\n", source.shape_info());
         result.append(source.to_string());
         result.push_back('\n');
@@ -212,7 +212,7 @@ struct Project01 {
 
 int main(const int argc, char* argv[])
 {
-    const std::string title {"NE 591 Project #01\n"};
+    const std::string title {"NE 591 Project #01"};
     const std::string author {"Kirill Shumilov"};
     const std::string date {"02/14/2025"};
     const std::string description {
@@ -234,6 +234,7 @@ int main(const int argc, char* argv[])
     argparse::ArgumentParser program{
         "shumilov_project01",
         "1.0",
+        argparse::default_arguments::help,
     };
 
     program.add_description(description);
@@ -247,7 +248,7 @@ int main(const int argc, char* argv[])
     try {
         program.parse_args(argc, argv);
         const auto input_filename = program.get<std::string>("filename");
-        const auto problem = Project01<double>::from_file(input_filename);
+        const auto problem = Project01<long double>::from_file(input_filename);
         const auto result = problem.solve();
 
         result.echo(std::cout);

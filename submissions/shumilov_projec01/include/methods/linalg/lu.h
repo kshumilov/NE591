@@ -58,7 +58,7 @@ constexpr void lu_factor_inplace_update(Matrix<scalar_t>& A, const std::size_t k
     assert(k < A.rows() and k < A.cols());
 
     for (std::size_t i{k + 1U}; i < A.rows(); ++i) {
-        if (isclose(A[k, k], scalar_t{})) {
+        if (isclose(A[k, k], scalar_t{0})) {
             result = LUResult::SmallPivotEncountered;
         }
 

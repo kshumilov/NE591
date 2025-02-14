@@ -80,31 +80,29 @@ void gemv(
     assert(y.size() == A.rows());
 
     for (std::size_t i{}; i < y.size(); ++i) {
-        scalar_t tmp{};
+        y[i] *= beta;
         if constexpr (symm == MatrixSymmetry::Upper) {
             for (std::size_t j{i}; j < A.cols(); ++j) {
-                tmp += A[i, j] * x[j];
+                y[i] += alpha * A[i, j] * x[j];
             }
         }
         else if constexpr (symm == MatrixSymmetry::Lower) {
             for (std::size_t j{}; j < i; ++j) {
-                tmp += A[i, j] * x[j];
+                y[i] += alpha * A[i, j] * x[j];
             }
 
             if constexpr (diag == Diag::NonUnit) {
-                tmp += A[i, i] * x[i];
+                y[i] += alpha * A[i, i] * x[i];
             }
             else {
-                tmp += x[i];
+                y[i] += alpha * x[i];
             }
         }
         else {
             for (std::size_t j{}; j < A.cols(); ++j) {
-                tmp += A[i, j] * x[j];
+                y[i] += alpha * A[i, j] * x[j];
             }
         }
-
-        y[i] = alpha * tmp + beta * y[i];
     }
 }
 
@@ -118,17 +116,12 @@ void gemm(
     const scalar_t beta = scalar_t{1}
 ) noexcept
 {
-    assert(C.rows() == A.rows());
-    assert(C.cols() == B.cols());
-    assert(A.cols() == B.rows());
-
     for (std::size_t i{}; i < C.rows(); ++i) {
         for (std::size_t j{}; j < C.cols(); ++j) {
-            scalar_t tmp{};
+            C[i, j] *= beta;
             for (std::size_t k{}; k < A.cols(); ++k) {
-                tmp += A[i, k] * B[k, j];
+                C[i, j] += alpha * A[i, k] * B[k, j];
             }
-            C[i, j] *= alpha * tmp + beta * C[i, j];
         }
     }
 }

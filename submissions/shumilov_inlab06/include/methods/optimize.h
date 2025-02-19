@@ -89,11 +89,11 @@ constexpr auto fixed_point_iteration(
     G g, const T& x0, C error,
     const FixedPointIterSettings& settings) -> FixedPointIterResult<T>
 {
-    #ifndef NDEBUG
-    fmt::println(std::cerr, "{:s}", settings.to_string());
-    fmt::println(std::cerr, "Starting point:");
-    fmt::println(std::cerr, "{}", x0);
-    #endif
+//    #ifndef NDEBUG
+//    fmt::println(std::cerr, "{:s}", settings.to_string());
+//    fmt::println(std::cerr, "Starting point:");
+//    fmt::println(std::cerr, "{}", x0);
+//    #endif
 
     auto x = x0;
     long double curr_err = std::numeric_limits<long double>::infinity();
@@ -102,11 +102,11 @@ constexpr auto fixed_point_iteration(
         auto x_next = g(x);
         curr_err = error(x_next, x);
 
-        #ifndef NDEBUG
-        fmt::println(std::cerr, "#{: >3d}/{: >3d}: {:12.6e}", i + 1, settings.max_iter, curr_err);
-        fmt::println(std::cerr, "\tx_next: {::12.6e}", x_next);
-        fmt::println(std::cerr, "\tx_curr: {::12.6e}", x);
-        #endif
+//        #ifndef NDEBUG
+//        fmt::println(std::cerr, "#{: >3d}/{: >3d}: {:12.6e}", i + 1, settings.max_iter, curr_err);
+//        fmt::println(std::cerr, "\tx_next: {::12.6e}", x_next);
+//        fmt::println(std::cerr, "\tx_curr: {::12.6e}", x);
+//        #endif
 
         if (curr_err < settings.tolerance) {
             return FixedPointIterResult<T>{

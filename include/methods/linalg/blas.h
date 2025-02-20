@@ -55,7 +55,7 @@ auto dot(const std::ranges::range auto& lhs, const std::ranges::range auto& rhs)
     assert(lhs.size() == rhs.size());
     return std::transform_reduce(
         std::cbegin(lhs), std::cend(lhs),
-        std::cbegin(rhs), 0
+        std::cbegin(rhs), std::ranges::range_value_t<decltype(lhs)>{}
     );
 }
 

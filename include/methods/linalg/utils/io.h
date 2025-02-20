@@ -1,17 +1,16 @@
 #ifndef LINALG_UTILS_H
 #define LINALG_UTILS_H
 
-#include <istream>
 #include <cstddef>
 #include <concepts>
 #include <functional>
 #include <stdexcept>
-#include <cmath>
 #include <string_view>
 
 #include <fmt/core.h>
 
 #include "methods/utils/io.h"
+
 #include "methods/linalg/matrix.h"
 #include "methods/linalg/lu.h"
 

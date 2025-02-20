@@ -11,31 +11,30 @@
 /**
  * @brief Newton-Raphson method for finding roots of a function.
  *
- * @tparam T The type of the input and output, typically `double`.
+ * @tparam Dtype The type of the input and output, typically `double`.
  *
  * @param f The function whose root is to be found.
  * @param df The derivative of the function `f`.
  * @param x0 The initial guess for the root.
- *
- * @param tol The tolerance for convergence.
- * @param max_iter The maximum number of iterations.
+ * @param settings Fixed Point Iteration Settings
  *
  * @return A pair containing the estimated root and a boolean indicating convergence.
  */
-template<std::floating_point T>
+template<std::floating_point Dtype>
 constexpr auto newton_raphson(
-    std::invocable<T> auto& f, std::invocable<T> auto& df, const T x0,
-    const T tol, const int max_iter
-) -> std::pair<T, bool>
+    std::invocable<Dtype> auto& f, std::invocable<Dtype> auto& df, const Dtype x0,
+    const FixedPointIterSettings<Dtype> settings
+) -> std::pair<Dtype, bool>
 {
     auto g = [&](const auto x) constexpr {
         return x - f(x) / df(x);
     };
 
-    auto converged = [tol](const auto x_next, const auto x) constexpr {
-        return std::abs(x_next - x) < tol;
+    auto error = [&f](const auto x_next, const auto) constexpr {
+        return std::abs(f(x_next));
     };
-    return fixed_point_iteration<T>(g, x0, converged, max_iter);
+
+    return fixed_point_iteration<Dtype>(g, x0, error, settings);
 }
 
 #endif //ROOTS_H

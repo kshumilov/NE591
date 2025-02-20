@@ -34,6 +34,12 @@ auto extract_diagonal_inplace(Matrix<T>& A) -> std::vector<T> {
     return D;
 }
 
+template<class T>
+constexpr auto build_residual_inplace(const Matrix<T>& A, std::span<const T> x, std::span<T> b) -> void {
+    assert(A.cols() == x.size());
+    assert(A.rows() == b.size());
+    gemv<T>(A, x, b, T{ -1 });
+}
 
 /**
  * @brief Calculates residual r = b - A * x, for linear system Ax = b
@@ -48,11 +54,8 @@ auto extract_diagonal_inplace(Matrix<T>& A) -> std::vector<T> {
 template<class T>
 [[nodiscard]] constexpr
 auto get_residual(const Matrix<T>& A, std::span<const T> x, std::span<const T> b) -> std::vector<T> {
-    assert(A.cols() == x.size());
-    assert(A.rows() == b.size());
-
     std::vector<T> residual{ b.cbegin(), b.cend() };
-    gemv<T>(A, x, residual, T{ -1 });
+    build_residual_inplace(A, x, residual);
     return residual;
 }
 

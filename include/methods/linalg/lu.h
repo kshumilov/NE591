@@ -13,6 +13,7 @@
 #include "fmt/format.h"
 
 #include "methods/linalg/matrix.h"
+#include "methods/linalg/utils/math.h"
 #include "methods/utils/math.h"
 
 
@@ -119,26 +120,10 @@ std::pair<Matrix<scalar_t>, LUResult> lup_factor_inplace(Matrix<scalar_t>& A)
 
 template<std::floating_point scalar_t>
 [[nodiscard]] constexpr
-Matrix<scalar_t> separate_lu(Matrix<scalar_t>& LU)
-{
-    auto L = Matrix<scalar_t>::eye(LU.rows(), LU.cols());
-
-    for (const auto i: LU.iter_rows()) {
-        for (const auto j: std::views::iota(0U, i)) {
-            std::swap(L[i, j], LU[i, j]);
-        }
-    }
-
-    return L;
-}
-
-
-template<std::floating_point scalar_t>
-[[nodiscard]] constexpr
 auto lu_factor(Matrix<scalar_t> A) -> std::tuple<Matrix<scalar_t>, Matrix<scalar_t>, LUResult>
 {
     const auto result = lu_factor_inplace<scalar_t>(A);
-    return std::make_tuple(separate_lu<scalar_t>(A), A, result);
+    return std::make_tuple(extract_lowerunit_inplace<scalar_t>(A), A, result);
 }
 
 
@@ -147,7 +132,7 @@ template<std::floating_point scalar_t>
 auto lup_factor(Matrix<scalar_t> A) -> std::tuple<Matrix<scalar_t>, Matrix<scalar_t>, Matrix<scalar_t>, LUResult>
 {
     const auto& [P, result] = lup_factor_inplace<scalar_t>(A);
-    return std::make_tuple(separate_lu<scalar_t>(A), A, P, result);
+    return std::make_tuple(extract_lowerunit_inplace<scalar_t>(A), A, P, result);
 }
 
 

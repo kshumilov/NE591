@@ -12,8 +12,6 @@
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 
-using namespace std::literals;
-
 
 template<class T>
 auto read_value(std::istream& in) -> std::optional<T>
@@ -43,7 +41,7 @@ auto read_and_validate(
 
 
 template<class ReturnType>
-auto read_positive_value(std::istream& in, std::string_view name = "value"sv)
+auto read_positive_value(std::istream& in, std::string_view name = "value")
 {
     auto is_positive = [](const auto x) -> bool {
         return x > 0;
@@ -56,12 +54,14 @@ auto read_positive_value(std::istream& in, std::string_view name = "value"sv)
                 return v;
 
             throw std::runtime_error(fmt::format(
-                "Invalid `{}`, must be a positive {}: {}", name, v, typeid(ReturnType).name()
+                "Invalid `{}`, must be a positive {}: {}",
+                name, v, typeid(ReturnType).name()
             ));
         },
         [&]() {
             return std::runtime_error(fmt::format(
-                "Could not read `{}`", name
+                "Could not read `{}`",
+                name
             ));
         }
     );
@@ -69,7 +69,7 @@ auto read_positive_value(std::istream& in, std::string_view name = "value"sv)
 
 
 template<class ReturnType>
-auto read_nonnegative_value(std::istream& in, std::string_view name = "value"sv)
+auto read_nonnegative_value(std::istream& in, std::string_view name = "value")
 {
     auto is_nonnegative = [](const auto x) -> bool {
         return x >= 0;
@@ -82,12 +82,14 @@ auto read_nonnegative_value(std::istream& in, std::string_view name = "value"sv)
                 return v;
 
             throw std::runtime_error(fmt::format(
-                "Invalid `{}`, must be a positive {}: {}", name, v, typeid(ReturnType).name()
+                "Invalid `{}`, must be a non-negative {}: {}",
+                name, v, typeid(ReturnType).name()
             ));
         },
         [&]() {
             return std::runtime_error(fmt::format(
-                "Could not read `{}`", name
+                "Could not read `{}`",
+                name
             ));
         }
     );

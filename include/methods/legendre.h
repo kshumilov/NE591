@@ -108,7 +108,7 @@ constexpr auto legendre_root(const int l, const int k, const scalar_t tol = 1e-8
         return static_cast<scalar_t>(l) / (x * x - 1.0) * (x * legendre(x, l) - legendre(x, l - 1));
     };
 
-    return newton_raphson<scalar_t>(f, df, x0, tol, max_iter);
+    return newton_raphson<scalar_t>(f, df, x0, {tol, max_iter});
 }
 
 

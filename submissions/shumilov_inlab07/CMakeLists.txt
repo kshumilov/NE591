@@ -20,6 +20,14 @@ target_compile_options(ne591_compiler_flags INTERFACE
         "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt
+        GIT_TAG        8303d140a1a11f19b982a9f664bbe59a1ccda3f4
+)
+
+FetchContent_MakeAvailable(fmt)
+
 # Locate MPI
 find_package(MPI REQUIRED)
 

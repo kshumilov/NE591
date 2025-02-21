@@ -1,0 +1,8 @@
+===========================================================
+This program was developed by Kirill Shumilov on 02/21/2025
+Function: parallel version of the hello_world code.
+===========================================================
+Hello Kirill from MPI Task 0 on host login01
+
+Execution time: 00.002221 seconds.
+===========================================================

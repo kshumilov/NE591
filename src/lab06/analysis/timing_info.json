@@ -1,0 +1,218 @@
+[
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.945182455339818e-09,
+        "iterations": 751,
+        "max_deviation": 4.701377620541791e-09,
+        "n": 32,
+        "time": 407000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.542205248180835e-09,
+        "iterations": 392,
+        "max_deviation": 2.2934771859439707e-09,
+        "n": 32,
+        "time": 252000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 8.463068468245183e-09,
+        "iterations": 86,
+        "max_deviation": 2.9253399702611205e-10,
+        "n": 32,
+        "time": 67000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 2.403632848313464e-14,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 32,
+        "time": 13000
+    },
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.901356179398135e-09,
+        "iterations": 1598,
+        "max_deviation": 3.9217056269080786e-09,
+        "n": 64,
+        "time": 3589000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.873062367660168e-09,
+        "iterations": 830,
+        "max_deviation": 1.9711392518217963e-09,
+        "n": 64,
+        "time": 1711000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 8.712305543667753e-09,
+        "iterations": 85,
+        "max_deviation": 1.0530754046556012e-10,
+        "n": 64,
+        "time": 188000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 1.585953590677036e-13,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 64,
+        "time": 38000
+    },
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.978123216569657e-09,
+        "iterations": 3322,
+        "max_deviation": 3.3706551993972766e-09,
+        "n": 128,
+        "time": 32829000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.908319498208584e-09,
+        "iterations": 1723,
+        "max_deviation": 1.6802345070843216e-09,
+        "n": 128,
+        "time": 15665000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 9.544237400405109e-09,
+        "iterations": 172,
+        "max_deviation": 2.786318953340583e-10,
+        "n": 128,
+        "time": 1575000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 4.0778491694482e-13,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 128,
+        "time": 184000
+    },
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.996256267186254e-09,
+        "iterations": 6813,
+        "max_deviation": 2.9267158696555384e-09,
+        "n": 256,
+        "time": 314448000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.946347745426465e-09,
+        "iterations": 3530,
+        "max_deviation": 1.4590271213421602e-09,
+        "n": 256,
+        "time": 162732000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 9.677705747890286e-09,
+        "iterations": 393,
+        "max_deviation": 2.676781019061991e-10,
+        "n": 256,
+        "time": 18201000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 1.1984996328706643e-12,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 256,
+        "time": 1423000
+    },
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.996256267186254e-09,
+        "iterations": 13857,
+        "max_deviation": 2.5718350782355515e-09,
+        "n": 512,
+        "time": 3167204000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.985569704440422e-09,
+        "iterations": 7174,
+        "max_deviation": 1.2866726573079745e-09,
+        "n": 512,
+        "time": 1634591000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 9.849145499174483e-09,
+        "iterations": 831,
+        "max_deviation": 2.470010862509753e-10,
+        "n": 512,
+        "time": 191234000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 3.974209850099442e-12,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 512,
+        "time": 15656000
+    },
+    {
+        "algo": "PJ",
+        "converged": true,
+        "error": 9.988980309572071e-09,
+        "iterations": 28039,
+        "max_deviation": 2.289812339739683e-09,
+        "n": 1024,
+        "time": 30430410000
+    },
+    {
+        "algo": "GS",
+        "converged": true,
+        "error": 9.984432836063206e-09,
+        "iterations": 14511,
+        "max_deviation": 1.1447532921593506e-09,
+        "n": 1024,
+        "time": 15753247000
+    },
+    {
+        "algo": "SOR",
+        "converged": true,
+        "error": 9.922587196342647e-09,
+        "iterations": 1710,
+        "max_deviation": 2.249398445286488e-10,
+        "n": 1024,
+        "time": 1858001000
+    },
+    {
+        "algo": "LUP",
+        "converged": true,
+        "error": 1.5715817536232635e-11,
+        "iterations": 0,
+        "max_deviation": 0.0,
+        "n": 1024,
+        "time": 115543000
+    }
+]

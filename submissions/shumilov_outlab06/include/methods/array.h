@@ -78,12 +78,12 @@ auto max_abs(const std::ranges::range auto& container)
 
 template<std::ranges::range U, std::ranges::range V = U>
 [[nodiscard]] constexpr
-auto max_rel_error(const U& test, const V& solution) {
+auto max_rel_error(const U& test, const V& reference) {
     return std::ranges::max(std::views::zip_transform(
         [](const auto& u, const auto& v) {
-            return std::abs(u / v - std::ranges::range_value_t<decltype(solution)>{1});
+            return std::abs(u / v - std::ranges::range_value_t<decltype(reference)>{1});
         },
-        test, solution
+        test, reference
     ));
 }
 

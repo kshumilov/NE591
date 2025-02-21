@@ -20,6 +20,8 @@ target_compile_options(ne591_compiler_flags INTERFACE
         "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
+include(FetchContent)
+
 FetchContent_Declare(
         fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt

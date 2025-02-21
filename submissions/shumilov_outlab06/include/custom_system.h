@@ -17,7 +17,7 @@ auto build_system(const std::size_t n) -> std::pair<Matrix<DType>, std::vector<D
 
     auto A = Matrix<DType>::from_func(n, [&](auto i, auto j) {
         if (i != j) {
-            return DType{-1} / (static_cast<DType>(i) + static_cast<DType>(j));
+            return DType{-1} / (static_cast<DType>(i + 1) + static_cast<DType>(j + 1));
         }
         return DType{};
     });

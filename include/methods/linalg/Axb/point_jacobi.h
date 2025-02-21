@@ -8,6 +8,7 @@
 #include "methods/array.h"
 #include "methods/linalg/matrix.h"
 #include "methods/optimize.h"
+#include "methods/linalg/utils/math.h"
 
 #include "methods/linalg/Axb/utils.h"
 
@@ -25,8 +26,7 @@ constexpr auto point_jacobi(
     assert(is_diag_nonzero(A));
 
     std::vector<DType> x(A.rows());
-    std::vector<DType> tmp(A.rows());
-    std::vector<DType> Ax(A.rows());
+    std::vector<DType> x_next(A.rows());
 
     auto g = [&](std::span<const DType> x_curr) constexpr -> std::span<DType> {
         for (std::size_t i{}; i < A.rows(); ++i) {
@@ -44,26 +44,24 @@ constexpr auto point_jacobi(
                 dot_prod += A[i, j] * x_curr[j];
             }
 
-            tmp[i] = (b[i] - dot_prod) / A[i, i];
+            x_next[i] = (b[i] - dot_prod) / A[i, i];
         }
 
-        std::swap(x, tmp);
+        std::swap(x, x_next);
 
         return std::span{x};
     };
 
-    auto error = [&](std::span<const DType> x_curr) constexpr -> DType {
-        gemv<DType>(A, x_curr, Ax);
-        return max_abs_diff(Ax, b);
-    };
-
     const auto iter_result = fixed_point_iteration<std::span<DType>>(
-       g, x, error, settings
+       g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
     );
+
+    const auto residual = get_residual<DType>(A, x, b);
 
     return IterativeAxbResult<DType>{
         .x = std::move(x),
-        .error = iter_result.error,
+        .relative_error = iter_result.error,
+        .residual_error = max_abs(residual),
         .converged = iter_result.converged,
         .iters = iter_result.iters
     };

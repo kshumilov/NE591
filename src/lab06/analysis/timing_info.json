@@ -2,217 +2,217 @@
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.945182455339818e-09,
-        "iterations": 751,
-        "max_deviation": 4.701377620541791e-09,
+        "iterations": 579,
         "n": 32,
-        "time": 407000
+        "relative_error": 9.865677830234176e-09,
+        "residual_error": 8.062836837074983e-07,
+        "time": 470000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.542205248180835e-09,
-        "iterations": 392,
-        "max_deviation": 2.2934771859439707e-09,
+        "iterations": 306,
         "n": 32,
-        "time": 252000
+        "relative_error": 9.534645073472348e-09,
+        "residual_error": 7.597294214845007e-07,
+        "time": 481000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 8.463068468245183e-09,
-        "iterations": 86,
-        "max_deviation": 2.9253399702611205e-10,
+        "iterations": 156,
         "n": 32,
-        "time": 67000
+        "relative_error": 9.377436160917796e-09,
+        "residual_error": 2.110387057330243e-07,
+        "time": 268000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 2.403632848313464e-14,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 32,
-        "time": 13000
+        "relative_error": 0.0,
+        "residual_error": 3.219646771412954e-14,
+        "time": 16000
     },
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.901356179398135e-09,
-        "iterations": 1598,
-        "max_deviation": 3.9217056269080786e-09,
+        "iterations": 1158,
         "n": 64,
-        "time": 3589000
+        "relative_error": 9.894863373105522e-09,
+        "residual_error": 2.0489165619697047e-06,
+        "time": 4475000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.873062367660168e-09,
-        "iterations": 830,
-        "max_deviation": 1.9711392518217963e-09,
+        "iterations": 610,
         "n": 64,
-        "time": 1711000
+        "relative_error": 9.877176188055614e-09,
+        "residual_error": 2.0207190634113914e-06,
+        "time": 3278000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 8.712305543667753e-09,
-        "iterations": 85,
-        "max_deviation": 1.0530754046556012e-10,
+        "iterations": 147,
         "n": 64,
-        "time": 188000
+        "relative_error": 8.702079057343326e-09,
+        "residual_error": 5.084836582902597e-07,
+        "time": 830000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 1.585953590677036e-13,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 64,
-        "time": 38000
+        "relative_error": 0.0,
+        "residual_error": 1.2811973704174306e-13,
+        "time": 48000
     },
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.978123216569657e-09,
-        "iterations": 3322,
-        "max_deviation": 3.3706551993972766e-09,
+        "iterations": 2263,
         "n": 128,
-        "time": 32829000
+        "relative_error": 9.98911420246884e-09,
+        "residual_error": 5.019269186501418e-06,
+        "time": 35757000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.908319498208584e-09,
-        "iterations": 1723,
-        "max_deviation": 1.6802345070843216e-09,
+        "iterations": 1193,
         "n": 128,
-        "time": 15665000
+        "relative_error": 9.972400238922319e-09,
+        "residual_error": 4.981587769736784e-06,
+        "time": 18073000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 9.544237400405109e-09,
-        "iterations": 172,
-        "max_deviation": 2.786318953340583e-10,
+        "iterations": 137,
         "n": 128,
-        "time": 1575000
+        "relative_error": 9.666168532262986e-09,
+        "residual_error": 8.018498001138852e-07,
+        "time": 2030000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 4.0778491694482e-13,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 128,
-        "time": 184000
+        "relative_error": 0.0,
+        "residual_error": 3.8480330033507926e-13,
+        "time": 207000
     },
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.996256267186254e-09,
-        "iterations": 6813,
-        "max_deviation": 2.9267158696555384e-09,
+        "iterations": 4361,
         "n": 256,
-        "time": 314448000
+        "relative_error": 9.973093462178895e-09,
+        "residual_error": 1.1792269149046852e-05,
+        "time": 251243000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.946347745426465e-09,
-        "iterations": 3530,
-        "max_deviation": 1.4590271213421602e-09,
+        "iterations": 2303,
         "n": 256,
-        "time": 162732000
+        "relative_error": 9.97387772372349e-09,
+        "residual_error": 1.1759284209822418e-05,
+        "time": 141314000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 9.677705747890286e-09,
-        "iterations": 393,
-        "max_deviation": 2.676781019061991e-10,
+        "iterations": 131,
         "n": 256,
-        "time": 18201000
+        "relative_error": 9.504397935344855e-09,
+        "residual_error": 1.9775324811011075e-06,
+        "time": 8182000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 1.1984996328706643e-12,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 256,
-        "time": 1423000
+        "relative_error": 0.0,
+        "residual_error": 1.1906031716080179e-12,
+        "time": 1754000
     },
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.996256267186254e-09,
-        "iterations": 13857,
-        "max_deviation": 2.5718350782355515e-09,
+        "iterations": 8317,
         "n": 512,
-        "time": 3167204000
+        "relative_error": 9.990600347009604e-09,
+        "residual_error": 2.7175926274325413e-05,
+        "time": 2311904000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.985569704440422e-09,
-        "iterations": 7174,
-        "max_deviation": 1.2866726573079745e-09,
+        "iterations": 4404,
         "n": 512,
-        "time": 1634591000
+        "relative_error": 9.980651194396728e-09,
+        "residual_error": 2.7110243294603542e-05,
+        "time": 1244538000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 9.849145499174483e-09,
-        "iterations": 831,
-        "max_deviation": 2.470010862509753e-10,
+        "iterations": 236,
         "n": 512,
-        "time": 191234000
+        "relative_error": 9.975606118928226e-09,
+        "residual_error": 1.335657046586114e-05,
+        "time": 67507000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 3.974209850099442e-12,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 512,
-        "time": 15656000
+        "relative_error": 0.0,
+        "residual_error": 3.2998048737908903e-12,
+        "time": 17236000
     },
     {
         "algo": "PJ",
         "converged": true,
-        "error": 9.988980309572071e-09,
-        "iterations": 28039,
-        "max_deviation": 2.289812339739683e-09,
+        "iterations": 15744,
         "n": 1024,
-        "time": 30430410000
+        "relative_error": 9.99623894770707e-09,
+        "residual_error": 6.148627922242245e-05,
+        "time": 19209471000
     },
     {
         "algo": "GS",
         "converged": true,
-        "error": 9.984432836063206e-09,
-        "iterations": 14511,
-        "max_deviation": 1.1447532921593506e-09,
+        "iterations": 8363,
         "n": 1024,
-        "time": 15753247000
+        "relative_error": 9.99298332970966e-09,
+        "residual_error": 6.142312227663815e-05,
+        "time": 10196161000
     },
     {
         "algo": "SOR",
         "converged": true,
-        "error": 9.922587196342647e-09,
-        "iterations": 1710,
-        "max_deviation": 2.249398445286488e-10,
+        "iterations": 509,
         "n": 1024,
-        "time": 1858001000
+        "relative_error": 9.794968836018825e-09,
+        "residual_error": 3.08068522876237e-05,
+        "time": 622263000
     },
     {
         "algo": "LUP",
         "converged": true,
-        "error": 1.5715817536232635e-11,
         "iterations": 0,
-        "max_deviation": 0.0,
         "n": 1024,
-        "time": 115543000
+        "relative_error": 0.0,
+        "residual_error": 1.5071166536984038e-11,
+        "time": 113320000
     }
 ]

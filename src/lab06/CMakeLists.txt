@@ -7,14 +7,13 @@ add_custom_command(TARGET lab06
 )
 install(TARGETS lab06 DESTINATION bin OPTIONAL)
 
-add_executable(generate_matrix generate_matrix.cxx)
-add_custom_command(TARGET generate_matrix
+add_executable(custom_system custom_system.cxx)
+add_custom_command(TARGET custom_system
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:generate_matrix> ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:custom_system> ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-target_link_libraries(generate_matrix PRIVATE methods ne591_compiler_flags fmt::fmt argparse nlohmann_json::nlohmann_json)
-install(TARGETS generate_matrix DESTINATION bin OPTIONAL)
+target_link_libraries(custom_system PRIVATE methods ne591_compiler_flags fmt::fmt argparse nlohmann_json::nlohmann_json)
+install(TARGETS custom_system DESTINATION bin OPTIONAL)
 
 add_executable(compare_methods compare_methods.cxx)
 add_custom_command(TARGET compare_methods

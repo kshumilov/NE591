@@ -61,7 +61,7 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab05]$ cmake -S. -Bbuild
+[kshumil@login02 shumilov_outlab05]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- The CXX compiler identification is GNU 14.2.0
 -- Checking whether CXX compiler has -isysroot
 -- Checking whether CXX compiler has -isysroot - yes

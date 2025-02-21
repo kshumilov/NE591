@@ -70,27 +70,23 @@ module load cmake/3.24.1
 
 ## 1. Initialize the build directory
 ```bash
-cmake -S. -Bbuild
+cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 ```
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab06]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
--- The CXX compiler identification is GNU 14.2.0
--- Checking whether CXX compiler has -isysroot
--- Checking whether CXX compiler has -isysroot - yes
--- Checking whether CXX compiler supports OSX deployment target flag
--- Checking whether CXX compiler supports OSX deployment target flag - yes
+[kshumil@login03 shumilov_outlab06]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+-- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /opt/homebrew/bin/g++-14 - skipped
+-- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
--- Build type: 
--- Using the multi-header code from /Users/kirill/Documents/NC State/Classes/2025 Spring/shumilov_ne591/submissions/shumilov_outlab06/build/_deps/json-src/include/
--- Configuring done (7.7s)
--- Generating done (0.0s)
--- Build files have been written to: /Users/kirill/Documents/NC State/Classes/2025 Spring/shumilov_ne591/submissions/shumilov_outlab06/build
+-- Build type: Release
+-- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_outlab06/build/_deps/json-src/include/
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_outlab06/build
 ```
 
 ## 2. Compile the code
@@ -101,8 +97,8 @@ cmake --build build --config Release -- -j
 
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab06]$  cmake --build build --config Release -- -j
-[ 22%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
+[kshumil@login03 shumilov_outlab06]$ cmake --build build --config Release -- -j
+[ 11%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
 [ 22%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
 [ 33%] Linking CXX static library libfmt.a
 [ 33%] Built target fmt
@@ -111,39 +107,38 @@ cmake --build build --config Release -- -j
 [ 66%] Building CXX object CMakeFiles/outlab06.dir/src/main.cxx.o
 [ 77%] Linking CXX executable custom_system
 [ 77%] Built target custom_system
-[ 88%] Linking CXX executable shumilov_outlab06
-[ 88%] Built target outlab06
-[100%] Linking CXX executable compare_methods
-[100%] Built target compare_methods
-
+[ 88%] Linking CXX executable compare_methods
+[ 88%] Built target compare_methods
+[100%] Linking CXX executable shumilov_outlab06
+[100%] Built target outlab06
 ```
 
 At this point three executables can be found in the root directory.
 
 One as a main executable for the Outlab06:
 ```bash
-[kshumil@login02 shumilov_outlab06]$ ./shumilov_outlab06 -h
+[kshumil@login03 shumilov_outlab06]$ ./shumilov_outlab06 -h
 Usage: shumilov_outlab6 [--help] [--output VAR] input
 
 Positional arguments:
-  input         Path to input file 
+  input         Path to input file
 
 Optional arguments:
-  -h, --help    shows help message and exits 
-  -o, --output  Path to output file 
+  -h, --help    shows help message and exits
+  -o, --output  Path to output file
 ```
 
 Custom matrix builder and solver for Task 4
 ```bash
-[kshumil@login02 shumilov_outlab06]$ ./custom_system -h
+[kshumil@login03 shumilov_outlab06]$ ./custom_system -h
 Usage: generate_matrix [--help] [--output VAR] [--algorithm VAR] [--tolerance VAR] [--max-iterations VAR] [--relaxation-factor VAR] n
 
 Positional arguments:
-  n                         Matrix Rank 
+  n                         Matrix Rank
 
 Optional arguments:
-  -h, --help                shows help message and exits 
-  -o, --output              Path to output file, if not provided the output is written to stdout 
+  -h, --help                shows help message and exits
+  -o, --output              Path to output file, if not provided the output is written to stdout
   -a, --algorithm           Algorithm to use [nargs=0..1] [default: "sor"]
   --tol, --tolerance        Convergence tolerance [nargs=0..1] [default: 1e-08]
   --iter, --max-iterations  Maximum number of iterations [nargs=0..1] [default: 10]
@@ -151,18 +146,18 @@ Optional arguments:
 ```
 And method comparator
 ```bash
-[kshumil@login02 shumilov_outlab06]$ ./compare_methods -h                     
-Usage: compare_methods [--help] [-s VAR] [-l VAR] [--iterations VAR] [--tolerance VAR] [--relaxation-factor VAR]
+Usage: compare_methods [--help] [-s VAR] [-l VAR] [--iterations VAR] [--tolerance VAR] [--relaxation-factor VAR] [--output-json VAR]
 
 Compares performance of LUP, GS, PJ, and SOR methods for solving Ax=b problem
 
 Optional arguments:
--h, --help               shows help message and exits
--s                       Smallest power of two to generate rank: n = 2^s [nargs=0..1] [default: 5]
--l                       Largest power of two to generate rank: n = 2^s [nargs=0..1] [default: 8]
---iter, --iterations     Maximum number of iterations [nargs=0..1] [default: 100]
---tol, --tolerance       Maximum tolerance [nargs=0..1] [default: 0.0001]
--w, --relaxation-factor  Relaxation factor for SOR, ignored otherwise [nargs=0..1] [default: 1.8]
+  -h, --help               shows help message and exits
+  -s                       Smallest power of two to generate rank: n = 2^s [nargs=0..1] [default: 5]
+  -l                       Largest power of two to generate rank: n = 2^l [nargs=0..1] [default: 8]
+  --iter, --iterations     Maximum number of iterations [nargs=0..1] [default: 100]
+  --tol, --tolerance       Maximum tolerance [nargs=0..1] [default: 0.0001]
+  -w, --relaxation-factor  Relaxation factor for SOR, ignored otherwise [nargs=0..1] [default: 1.8]
+  --output-json            Path to json-formatted timings
 ```
 
 Only `shumilov_outlab06` requires an input file, which are provided `examples/` directory

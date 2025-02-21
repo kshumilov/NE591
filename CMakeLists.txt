@@ -16,11 +16,11 @@ target_compile_features(ne591_compiler_flags INTERFACE cxx_std_23)
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 target_compile_options(ne591_compiler_flags INTERFACE
-  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wformat=2;-Wunused;-march=native>>"
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wformat=2;-Wunused;-march=native;-ffast-math>>"
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
-# fetch latest argparse
+# Fetch External Dependencies
 include(FetchContent)
 
 FetchContent_Declare(
@@ -41,6 +41,10 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(argparse fmt json)
+
+# Installed Dependencies
+find_package(MPI REQUIRED)
+message(STATUS "Run: ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS")
 
 # Contains definition for CMAKE_INSTALL_DATADIR
 # Only needs to be included once

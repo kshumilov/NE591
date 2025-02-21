@@ -61,23 +61,19 @@ cmake -S. -Bbuild
 ```
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab05]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
--- The CXX compiler identification is GNU 14.2.0
--- Checking whether CXX compiler has -isysroot
--- Checking whether CXX compiler has -isysroot - yes
--- Checking whether CXX compiler supports OSX deployment target flag
--- Checking whether CXX compiler supports OSX deployment target flag - yes
+[kshumil@login03 shumilov_projec01]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+-- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /opt/homebrew/bin/g++-14 - skipped
+-- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
--- Build type:
--- Using the multi-header code from /Users/kirill/Documents/NC State/Classes/2025 Spring/shumilov_ne591/submissions/shumilov_projec01/build/_deps/json-src/include/
--- Configuring done (7.3s)
--- Generating done (0.0s)
--- Build files have been written to: /Users/kirill/Documents/NC State/Classes/2025 Spring/shumilov_ne591/submissions/shumilov_projec01/build
+-- Build type: Release
+-- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_projec01/build/_deps/json-src/include/
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_projec01/build
 ```
 
 ## 2. Compile the code
@@ -88,6 +84,7 @@ cmake --build build --config Release --target project01 -- -j
 
 ### Example
 ```bash
+[kshumil@login03 shumilov_projec01]$ cmake --build build --config Release -- -j
 [ 40%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
 [ 40%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
 [ 60%] Linking CXX static library libfmt.a
@@ -99,6 +96,7 @@ cmake --build build --config Release --target project01 -- -j
 
 At this point the executable can be found in:
 ```bash
+[kshumil@login03 shumilov_projec01]$ ./shumilov_project01 -h
 Usage: shumilov_project01 [--help] [--input-json] [--output VAR] [--output-json] [--quiet] filename
 
 Solving 2D steady state, one speed diffusion equation in a non-multiplying,
@@ -134,7 +132,7 @@ Optional arguments:
 0 0 .5 .5 .5 0 0
 0 0 0 0 0 0 0
 0 0 0 0 0 0 0
-[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 examples/s5.inp
+[kshumil@login03 shumilov_projec01]$ ./shumilov_project01 examples/s5.inp
 ================================================================================
 NE 591 Project #01
 Author: Kirill Shumilov
@@ -211,10 +209,11 @@ Max Abs Residual: 8.881784e-16
 
 ## Writing into a json file in quiet mode
 ```bash
-[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 examples/s5.inp -o s5.out --quiet
+[kshumil@login03 shumilov_projec01]$ ./shumilov_project01 examples/s5.txt -o s5.out --quiet --output-json
 ```
+
 ```bash
-[kshumil@login02 shumilov_outlab05]$ cat ./s5.out 
+[kshumil@login03 shumilov_projec01]$ cat s5.out
 ```
 ```json
 {

@@ -90,6 +90,13 @@ struct TimingInfo {
     }
 };
 
+template<std::floating_point T>
+T validate_relaxation_factor(T w) {
+    if (w <= T{1}) {
+        throw std::runtime_error(fmt::format("Relaxation factor must be greater than one: {}", w));
+    }
+    return w;
+}
 
 int main(int argc, char* argv[]) {
     argparse::ArgumentParser program{
@@ -106,7 +113,7 @@ int main(int argc, char* argv[]) {
                .default_value(5);
 
     program.add_argument("-l")
-               .help("Largest power of two to generate rank: n = 2^s")
+               .help("Largest power of two to generate rank: n = 2^l")
                .scan<'i', int>()
                .default_value(8);
 
@@ -143,7 +150,9 @@ int main(int argc, char* argv[]) {
             program.get<real>("--tolerance"),
             program.get<int>("--iterations")
         };
-        const real relaxation_factor = program.get<real>("--relaxation-factor");
+        const auto relaxation_factor = validate_relaxation_factor<real>(
+            program.get<real>("-w")
+        );
 
         std::vector<TimingInfo> timing_infos{};
         for (auto& system : systems) {

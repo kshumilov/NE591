@@ -106,7 +106,7 @@ auto read_vector(std::istream& is, const std::size_t size) -> std::vector<T>
         }
         else {
             throw std::runtime_error(
-                std::format("Could not read vector element {:d}.", values.size())
+                fmt::format("Could not read vector element {:d}.", values.size())
             );
         }
     }

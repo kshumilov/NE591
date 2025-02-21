@@ -25,7 +25,8 @@ constexpr auto gauss_seidel(
     assert(is_diag_nonzero(A));
 
     std::vector<DType> x(A.cols());
-    std::vector<DType> Ax(b.size());
+    std::vector<DType> x_next(A.cols());
+    // std::vector<DType> Ax(b.size());
 
     auto g = [&](std::span<DType> x_curr) constexpr -> std::span<DType> {
         for (std::size_t i{}; i < A.rows(); ++i) {
@@ -33,7 +34,7 @@ constexpr auto gauss_seidel(
 
             // j in [0, i)
             for (std::size_t j{}; j < i; ++j) {
-                dot_prod += A[i, j] * x_curr[j];
+                dot_prod += A[i, j] * x_next[j];
             }
 
             // skip j == i
@@ -43,22 +44,29 @@ constexpr auto gauss_seidel(
                 dot_prod += A[i, j] * x_curr[j];
             }
 
-            x_curr[i] = (b[i] - dot_prod) / A[i, i];
+            x_next[i] = (b[i] - dot_prod) / A[i, i];
         }
 
-        return x_curr;
+        std::swap(x, x_next);
+
+        return std::span{x};
     };
 
-    auto error = [&](std::span<const DType> x_curr) constexpr -> DType {
-        gemv<DType>(A, x_curr, Ax);
-        return max_abs_diff(Ax, b);
-    };
+    // auto error = [&](std::span<const DType> x_curr) constexpr -> DType {
+    //     gemv<DType>(A, x_curr, Ax);
+    //     return max_abs_diff(Ax, b);
+    // };
 
-    const auto iter_result = fixed_point_iteration<std::span<DType>>(g, x, error, settings);
+    const auto iter_result = fixed_point_iteration<std::span<DType>>(
+        g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
+    );
+
+    const auto residual = get_residual<DType>(A, x, b);
 
     return IterativeAxbResult<DType>{
         .x = std::move(x),
-        .error = iter_result.error,
+        .relative_error = iter_result.error,
+        .residual_error = max_abs(residual),
         .converged = iter_result.converged,
         .iters = iter_result.iters
     };

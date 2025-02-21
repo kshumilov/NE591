@@ -29,7 +29,8 @@ constexpr auto successive_over_relaxation(
     assert(relaxation_factor > 1.0);
 
     std::vector<DType> x(A.rows());
-    std::vector<DType> Ax(A.rows());
+    std::vector<DType> x_next(A.rows());
+    // std::vector<DType> Ax(A.rows());
 
     auto g = [&](std::span<DType> x_curr) constexpr -> std::span<DType> {
         for (std::size_t i{}; i < A.rows(); ++i) {
@@ -37,7 +38,7 @@ constexpr auto successive_over_relaxation(
 
             // j in [0, i)
             for (std::size_t j{}; j < i; ++j) {
-                dot_prod += A[i, j] * x_curr[j];
+                dot_prod += A[i, j] * x_next[j];
             }
 
             // skip j == i
@@ -47,20 +48,22 @@ constexpr auto successive_over_relaxation(
                 dot_prod += A[i, j] * x_curr[j];
             }
 
-            x_curr[i] = (1 - relaxation_factor) * x_curr[i]
+            x_next[i] = (1 - relaxation_factor) * x_curr[i]
                       + relaxation_factor * (b[i] - dot_prod) / A[i, i];
         }
 
-        return x_curr;
+        std::swap(x, x_next);
+
+        return std::span{x};
     };
 
-    auto error = [&](std::span<const DType> x_curr) constexpr -> DType {
-        gemv<DType>(A, x_curr, Ax);
-        return max_abs_diff(Ax, b);
-    };
+    // auto error = [&](std::span<const DType> x_curr) constexpr -> DType {
+    //     gemv<DType>(A, x_curr, Ax);
+    //     return max_abs_diff(Ax, b);
+    // };
 
     const auto iter_result = fixed_point_iteration<std::span<DType>>(
-       g, x, error, settings
+       g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
     );
 
     return IterativeAxbResult<DType>{

@@ -101,9 +101,9 @@ auto read_vector(std::istream& is, const std::size_t size) -> std::vector<T>
             values.emplace_back(result.value());
         }
         else {
-            throw std::runtime_error(
-                std::format("Could not read vector element {:d}.", values.size())
-            );
+            throw std::runtime_error(fmt::format(
+                "Could not read vector element {:d}.", values.size()
+            ));
         }
     }
 

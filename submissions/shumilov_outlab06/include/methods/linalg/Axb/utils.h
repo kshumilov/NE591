@@ -31,9 +31,9 @@ struct IterativeAxbResult {
     [[nodiscard]]
     constexpr auto to_string() const -> std::string {
         if (converged) {
-            return fmt::format("Converged at iteration #{: <5d} with residual {:12.6e}", iters, error);
+            return fmt::format("Converged at iteration #{: <5d} with relative {:12.6e}", iters, error);
         }
-        return fmt::format("Failed to converge in  #{: <5d} with resitual {:12.6e}", iters, error);
+        return fmt::format("Failed to converge in  #{: <5d} with relative {:12.6e}", iters, error);
     }
 };
 

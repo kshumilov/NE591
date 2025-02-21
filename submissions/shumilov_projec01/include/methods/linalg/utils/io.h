@@ -58,7 +58,7 @@ auto read_matrix_elements(std::istream& in, const std::size_t rows, const std::s
             }
 
             throw std::runtime_error(
-                std::format("Could not read matrix element ({:d}, {:d})\n"
+                fmt::format("Could not read matrix element ({:d}, {:d})\n"
                             "Must be a real value.", row + 1U, col + 1U)
             );
         }

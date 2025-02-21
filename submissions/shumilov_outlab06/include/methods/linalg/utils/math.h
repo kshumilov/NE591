@@ -55,7 +55,7 @@ template<class T>
 [[nodiscard]] constexpr
 auto get_residual(const Matrix<T>& A, std::span<const T> x, std::span<const T> b) -> std::vector<T> {
     std::vector<T> residual{ b.cbegin(), b.cend() };
-    build_residual_inplace(A, x, residual);
+    build_residual_inplace<T>(A, x, residual);
     return residual;
 }
 

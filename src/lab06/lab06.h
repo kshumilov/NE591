@@ -9,18 +9,17 @@
 #include "methods/linalg/Axb/solve.h"
 
 
-template <std::floating_point DType>
-struct Outlab6 {
+template<std::floating_point DType> struct Outlab6 {
     FixedPointIterSettings<DType> settings{};
     std::pair<Matrix<DType>, std::vector<DType>> linear_system;
     AxbAlgorithm algorithm;
     DType relaxation_factor{1.1};
 
     struct Result {
-        const Outlab6& problem;
+        const Outlab6 &problem;
         IterativeAxbResult<DType> result{};
 
-        auto echo(std::ostream& out) const -> void {
+        auto echo(std::ostream &out) const -> void {
             problem.echo(out);
             fmt::println(out, "================================================================================");
             fmt::println(out, "{:^80s}", "Results");
@@ -32,7 +31,7 @@ struct Outlab6 {
         }
     };
 
-    auto echo(std::ostream& out) const -> void {
+    auto echo(std::ostream &out) const -> void {
         fmt::println(out, "{:^80s}", "Inputs");
         fmt::println(out, "--------------------------------------------------------------------------------");
         fmt::println(out, "Matrix Rank: {:d}", A().rows());
@@ -51,8 +50,7 @@ struct Outlab6 {
         }
     }
 
-    [[nodiscard]] constexpr
-    auto run() const -> Result {
+    [[nodiscard]] constexpr auto run() const -> Result {
         if (not is_diag_nonzero(A())) {
             throw std::invalid_argument("Diagonal of A contains values close to zero");
         }
@@ -77,13 +75,13 @@ struct Outlab6 {
         }
 
         return {
-            .problem = *this,
-            .result = iter_result,
+                .problem = *this,
+                .result = iter_result,
         };
     }
 
     [[nodiscard]]
-    static auto from_file(std::istream& input) -> Outlab6 {
+    static auto from_file(std::istream &input) -> Outlab6 {
         const auto algorithm = read_axb_algorithm(input);
 
         DType relaxation_factor{1.1};
@@ -91,10 +89,8 @@ struct Outlab6 {
             case AxbAlgorithm::SuccessiveOverRelaxation: {
                 relaxation_factor = read_positive_value<DType>(input);
                 if (relaxation_factor <= 1.0) {
-                    throw std::runtime_error(fmt::format(
-                        "SOR relaxation factor must be larger than 1: {}",
-                        relaxation_factor
-                    ));
+                    throw std::runtime_error(
+                            fmt::format("SOR relaxation factor must be larger than 1: {}", relaxation_factor));
                 }
                 break;
             }
@@ -104,51 +100,40 @@ struct Outlab6 {
         }
 
         return {
-            .settings = FixedPointIterSettings<>::from_file(input),
-            .linear_system = read_linear_system<DType>(input),
-            .algorithm = algorithm,
-            .relaxation_factor = relaxation_factor,
+                .settings = FixedPointIterSettings<DType>::from_file(input),
+                .linear_system = read_linear_system<DType>(input),
+                .algorithm = algorithm,
+                .relaxation_factor = relaxation_factor,
         };
     }
 
-    [[nodiscard]] constexpr
-    auto A() const -> Matrix<DType> {
-        return linear_system.first;
-    }
+    [[nodiscard]] constexpr auto A() const -> Matrix<DType> { return linear_system.first; }
 
-    [[nodiscard]] constexpr
-    auto b() const -> std::span<const DType> {
-        return std::span{linear_system.second};
-    }
+    [[nodiscard]] constexpr auto b() const -> std::span<const DType> { return std::span{linear_system.second}; }
 };
 
 
 struct Header {
-    std::string title {"NE 591 Inlab #06"};
-    std::string author {"Kirill Shumilov"};
-    std::string date {"02/14/2025"};
-    std::string description {
-        "Solving Ax=b using iterative methods: PJ, GS, and SOR"
-    };
+    std::string title{"NE 591 Inlab #06"};
+    std::string author{"Kirill Shumilov"};
+    std::string date{"02/14/2025"};
+    std::string description{"Solving Ax=b using iterative methods: PJ, GS, and SOR"};
 
     [[nodiscard]] constexpr auto to_string() const -> std::string {
         return fmt::format(
-            "================================================================================\n"
-            "{:s}\n"
-            "Author: {:s}\n"
-            "Date: {:s}\n"
-            "--------------------------------------------------------------------------------\n"
-            "{:s}\n"
-            "================================================================================\n"
-          , title
-          , author
-          , date
-          , description
-        );
+                "================================================================================\n"
+                "{:s}\n"
+                "Author: {:s}\n"
+                "Date: {:s}\n"
+                "--------------------------------------------------------------------------------\n"
+                "{:s}\n"
+                "================================================================================\n",
+                title,
+                author,
+                date,
+                description);
     }
 
-    void echo(std::ostream& out) const {
-        out << this->to_string();
-    }
+    void echo(std::ostream &out) const { out << this->to_string(); }
 };
 #endif // LAB06_H

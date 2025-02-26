@@ -7,6 +7,8 @@ project(
   LANGUAGES CXX
 )
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # specify the C++ standard
 add_library(ne591_compiler_flags INTERFACE)
 target_compile_features(ne591_compiler_flags INTERFACE cxx_std_23)
@@ -16,9 +18,15 @@ target_compile_features(ne591_compiler_flags INTERFACE cxx_std_23)
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 target_compile_options(ne591_compiler_flags INTERFACE
-  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wformat=2;-Wunused;-march=native;-ffast-math>>"
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wformat=2;-Wunused;-ffast-math>>"
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH)
+if(COMPILER_SUPPORTS_MARCH)
+  target_compile_options(ne591_compiler_flags INTERFACE -march=native)
+endif()
 
 # Fetch External Dependencies
 include(FetchContent)

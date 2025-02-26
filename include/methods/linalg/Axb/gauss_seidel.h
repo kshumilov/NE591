@@ -2,8 +2,8 @@
 #define LINALG_AXB_GS_H
 
 #include <concepts>
-#include <vector>
 #include <span>
+#include <vector>
 
 #include "methods/array.h"
 #include "methods/linalg/matrix.h"
@@ -14,11 +14,9 @@
 
 template<std::floating_point DType>
 constexpr auto gauss_seidel(
-        const Matrix<DType>& A,
+        const Matrix<DType> &A,
         std::span<const DType> b,
-        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}
-) -> IterativeAxbResult<DType>
-{
+        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}) -> IterativeAxbResult<DType> {
     assert(not A.empty());
     assert(A.is_square());
     assert(A.rows() == b.size());
@@ -58,26 +56,23 @@ constexpr auto gauss_seidel(
     // };
 
     const auto iter_result = fixed_point_iteration<std::span<DType>>(
-        g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
-    );
+            g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings);
 
     const auto residual = get_residual<DType>(A, x, b);
 
     return IterativeAxbResult<DType>{
-        .x = std::move(x),
-        .relative_error = iter_result.error,
-        .residual_error = max_abs(residual),
-        .converged = iter_result.converged,
-        .iters = iter_result.iters
-    };
+            .x = std::move(x),
+            .relative_error = iter_result.error,
+            .residual_error = max_abs(residual),
+            .converged = iter_result.converged,
+            .iters = iter_result.iters};
 }
 
 
 template<std::floating_point DType>
 constexpr auto gauss_seidel(
-        const std::pair<Matrix<DType>, std::vector<DType>>& linear_system,
-        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}
-) -> IterativeAxbResult<DType> {
+        const std::pair<Matrix<DType>, std::vector<DType>> &linear_system,
+        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}) -> IterativeAxbResult<DType> {
     return gauss_seidel<DType>(linear_system.first, linear_system.second, settings);
 }
 

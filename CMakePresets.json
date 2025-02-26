@@ -1,0 +1,31 @@
+{
+    "version": 8,
+    // "schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+    "configurePresets": [
+        {
+            "name": "common",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++-14"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "inherits": "common",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}

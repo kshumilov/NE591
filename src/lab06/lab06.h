@@ -4,10 +4,10 @@
 #include <concepts>
 #include <utility>
 
-#include <fmt/ostream.h>
-
 #include "methods/linalg/Axb/solve.h"
 
+#include <fmt/core.h>
+#include <fmt/ostream.h>
 
 template<std::floating_point DType> struct Outlab6 {
     FixedPointIterSettings<DType> settings{};

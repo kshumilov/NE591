@@ -2,30 +2,32 @@
 #define LINALG_AXB_IO_H
 
 #include <concepts>
-#include <utility>
+#include <cstdlib>
 #include <stdexcept>
+#include <utility>
 
 #include <fmt/format.h>
 
 #include "methods/linalg/matrix.h"
-#include "methods/utils/io.h"
 #include "methods/linalg/utils/io.h"
+#include "methods/utils/io.h"
 
 #include "methods/linalg/Axb/algorithm.h"
 
 
 template<std::floating_point Dtype = long double, MatrixSymmetry symmetry = MatrixSymmetry::General>
-auto read_linear_system(std::istream& in) -> std::pair<Matrix<Dtype>, std::vector<Dtype>> {
+[[nodiscard]]
+auto read_linear_system(std::istream &in) -> std::pair<Matrix<Dtype>, std::vector<Dtype>> {
     const auto rank = read_positive_value<int>(in);
     return {
-        read_matrix<Dtype, symmetry>(in, rank, rank),
-        read_vector<Dtype>(in, rank),
+            read_matrix<Dtype, symmetry>(in, rank, rank),
+            read_vector<Dtype>(in, rank),
     };
 }
 
 
 [[nodiscard]]
-inline auto read_axb_algorithm(std::istream& in) -> AxbAlgorithm {
+inline auto read_axb_algorithm(std::istream &in) -> AxbAlgorithm {
     const auto algo = read_nonnegative_value<int>(in, "Algorithm");
     if (algo > 2) {
         throw std::runtime_error(fmt::format("Invalid algorithm code, must be 0/1/2: {}", algo));

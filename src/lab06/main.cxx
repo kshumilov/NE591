@@ -1,8 +1,8 @@
 #include <filesystem>
 #include <fstream>
-#include <ostream>
 
 #include <fmt/color.h>
+#include <fmt/core.h>
 #include <fmt/ostream.h>
 
 #include <argparse/argparse.hpp>

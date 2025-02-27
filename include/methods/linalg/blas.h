@@ -1,21 +1,21 @@
 #ifndef LINALG_BLAS_H
 #define LINALG_BLAS_H
 
-#include <concepts>
-#include <cstdlib>
-#include <span>
 #include <cassert>
 #include <cmath>
+#include <concepts>
+#include <cstdlib>
 #include <numeric>
+#include <ranges>
+#include <span>
 
 
-template<std::floating_point T>
-class Matrix;
+template<std::floating_point T> class Matrix;
 
 
 enum class MatrixSymmetry : char {
-    Upper   = 'U',
-    Lower   = 'L',
+    Upper = 'U',
+    Lower = 'L',
     Symmetric = 'S',
     Diagonal = 'D',
     // Hermitian = 'H',
@@ -23,17 +23,11 @@ enum class MatrixSymmetry : char {
 };
 
 
-enum class Diag : char {
-    NonUnit = 'N',
-    Unit = 'U',
-    Skip = 'S'
-};
+enum class Diag : char { NonUnit = 'N', Unit = 'U', Skip = 'S' };
 
 
 // x <- alpha * x
-template<std::floating_point T>
-void scal(std::span<T> x, const T alpha = T{1}) noexcept
-{
+template<std::floating_point T> void scal(std::span<T> x, const T alpha = T{1}) noexcept {
     for (std::size_t i{}; i < x.size(); ++i) {
         x[i] *= alpha;
     }
@@ -41,9 +35,7 @@ void scal(std::span<T> x, const T alpha = T{1}) noexcept
 
 
 // y <- alpha * x + y
-template<std::floating_point T>
-void axpy(std::span<const T> x, std::span<T> y, const T alpha = T{1}) noexcept
-{
+template<std::floating_point T> void axpy(std::span<const T> x, std::span<T> y, const T alpha = T{1}) noexcept {
     assert(y.size() == x.size());
     for (std::size_t i{}; i < x.size(); ++i) {
         y[i] += alpha * x[i];
@@ -51,31 +43,24 @@ void axpy(std::span<const T> x, std::span<T> y, const T alpha = T{1}) noexcept
 }
 
 
-auto dot(const std::ranges::range auto& lhs, const std::ranges::range auto& rhs)
-{
+auto dot(const std::ranges::range auto &lhs, const std::ranges::range auto &rhs) {
     assert(lhs.size() == rhs.size());
     return std::transform_reduce(
-        std::cbegin(lhs), std::cend(lhs),
-        std::cbegin(rhs), std::ranges::range_value_t<decltype(lhs)>{}
-    );
+            std::cbegin(lhs), std::cend(lhs), std::cbegin(rhs), std::ranges::range_value_t<decltype(lhs)>{});
 }
 
 
-auto norm_l2(const std::ranges::range auto& v)
-{
-    return std::sqrt(dot(v, v));
-}
+auto norm_l2(const std::ranges::range auto &v) { return std::sqrt(dot(v, v)); }
 
 
 // y <- alpha * A * x + beta * y
 template<std::floating_point DType, MatrixSymmetry symm = MatrixSymmetry::General, Diag diag = Diag::NonUnit>
 void gemv(
-    const Matrix<DType>& A,
-    std::span<const DType> x,
-    std::span<DType> y,
-    const DType alpha = DType{1},
-    const DType beta = DType{}
-) noexcept {
+        const Matrix<DType> &A,
+        std::span<const DType> x,
+        std::span<DType> y,
+        const DType alpha = DType{1},
+        const DType beta = DType{}) noexcept {
     assert(A.cols() == x.size());
     assert(y.size() == A.rows());
 
@@ -90,7 +75,8 @@ void gemv(
     if (beta != one) {
         if (beta == zero) {
             std::fill(y.begin(), y.end(), zero);
-        } else {
+        }
+        else {
             for (std::size_t i{}; i < y.size(); ++i) {
                 y[i] *= beta;
             }
@@ -150,13 +136,11 @@ void gemv(
 // C <- alpha * A * B + beta * C
 template<std::floating_point scalar_t>
 void gemm(
-    const Matrix<scalar_t>& A,
-    const Matrix<scalar_t>& B,
-    Matrix<scalar_t>& C,
-    const scalar_t alpha = scalar_t{1},
-    const scalar_t beta = scalar_t{1}
-) noexcept
-{
+        const Matrix<scalar_t> &A,
+        const Matrix<scalar_t> &B,
+        Matrix<scalar_t> &C,
+        const scalar_t alpha = scalar_t{1},
+        const scalar_t beta = scalar_t{1}) noexcept {
     assert(C.rows() == A.rows());
     assert(C.cols() == B.cols());
     assert(A.cols() == B.rows());

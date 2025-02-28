@@ -57,11 +57,11 @@ module load cmake/3.24.1
 
 ## 1. Initialize the build directory
 ```bash
-cmake -S. -Bbuild
+cmake -S. -Bbuild-DCMAKE_BUILD_TYPE=Release 
 ```
 ### Example
 ```bash
-[kshumil@login03 shumilov_projec02]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+[kshumil@login03 shumilov_project02]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -84,19 +84,19 @@ cmake --build build --config Release --target project02 -- -j
 
 ### Example
 ```bash
-[kshumil@login03 shumilov_projec02]$ cmake --build build --config Release -- -j
+[kshumil@login03 shumilov_project02]$ cmake --build build -- -j
 [ 40%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/format.cc.o
 [ 40%] Building CXX object _deps/fmt-build/CMakeFiles/fmt.dir/src/os.cc.o
 [ 60%] Linking CXX static library libfmt.a
 [ 60%] Built target fmt
-[ 80%] Building CXX object CMakeFiles/project01.dir/src/main.cxx.o
+[ 80%] Building CXX object CMakeFiles/project02.dir/src/main.cxx.o
 [100%] Linking CXX executable shumilov_project02
 [100%] Built target project02
 ```
 
 At this point the executable can be found in:
 ```bash
-[kshumil@login03 shumilov_projec02]$ ./shumilov_project02 -h
+[kshumil@login03 shumilov_project02]$ ./shumilov_project02 -h
 Usage: shumilov_projec02 [--help] [--output VAR] [--output-json] [--input-json] input
 
 Positional arguments:
@@ -112,7 +112,7 @@ Optional arguments:
 # Examples
 ## Successful LUP Factorization and Solution
 ```bash
-[kshumil@login02 shumilov_outlab05]$ cat examples/s5_sor.inp
+[kshumil@login02 shumilov_project02]$ cat examples/s5_sor.inp
 3
 
 100 1e-7 1.5
@@ -130,9 +130,9 @@ Optional arguments:
 0 0 .5 .5 .5 0 0
 0 0 0 0 0 0 0
 0 0 0 0 0 0 0
-[kshumil@login03 shumilov_projec02]$ ./shumilov_project02 examples/s5_sor.inp
+[kshumil@login03 shumilov_project02]$ ./shumilov_project02 examples/s5_sor.inp
 ================================================================================
-NE 591 Project #01
+NE 591 Project #02
 Author: Kirill Shumilov
 Date: 02/28/2025
 --------------------------------------------------------------------------------
@@ -180,9 +180,9 @@ Execution time: 00.000109000 seconds.
 
 ## Writing into a txt file
 ```bash
-[kshumil@login02 shumilov_outlab05]$ ./shumilov_outlab05 examples/s5.inp -o examples/s5_sor.out
+[kshumil@login02 shumilov_project02]$ ./shumilov_project02 examples/s5_sor.inp -o examples/s5_sor.out
 ================================================================================
-NE 591 Project #01
+NE 591 Project #02
 Author: Kirill Shumilov
 Date: 02/28/2025
 --------------------------------------------------------------------------------
@@ -230,5 +230,5 @@ Execution time: 00.000109000 seconds.
 
 ## Writing into a json file in quiet mode
 ```bash
-[kshumil@login03 shumilov_projec01]$ ./shumilov_project01 examples/s5_sor.inp -o s5.json --output-json
+[kshumil@login03 shumilov_project02]$ ./shumilov_project02 examples/s5_sor.inp -o s5.json --output-json
 ```

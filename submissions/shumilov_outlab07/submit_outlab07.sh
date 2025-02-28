@@ -11,4 +11,4 @@ module load cmake/3.24
 module load gcc/13.2.0
 module load mpi/mpich-x86_64
 
-mpirun ./shumilov_outlab07
+mpirun -n 4 ./shumilov_outlab07

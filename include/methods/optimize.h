@@ -13,6 +13,11 @@
 
 #include "methods/utils/io.h"
 
+enum class ParamOrder
+{
+    ToleranceFirst,
+    MaxIterFirst,
+};
 
 template<std::floating_point DType = long double> struct FixedPointIterSettings {
     DType tolerance{1.0e-8};
@@ -48,12 +53,25 @@ template<std::floating_point DType = long double> struct FixedPointIterSettings 
                 tolerance);
     }
 
+    template<ParamOrder Order = ParamOrder::ToleranceFirst>
     [[nodiscard]]
     static auto from_file(std::istream &input) -> FixedPointIterSettings {
-        return FixedPointIterSettings{
+        if constexpr (Order == ParamOrder::ToleranceFirst)
+        {
+            return FixedPointIterSettings{
                 read_positive_value<DType>(input, "tolerance"),
                 read_positive_value<int>(input, "max_iter"),
-        };
+            };
+        }
+        else
+        {
+            const auto max_iter = read_positive_value<int>(input, "max_iter");
+            const auto tolerance = read_positive_value<DType>(input, "tolerance");
+            return FixedPointIterSettings{
+                tolerance,
+                max_iter,
+            };
+        }
     }
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(FixedPointIterSettings<DType>, tolerance, max_iter)

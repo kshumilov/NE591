@@ -73,7 +73,11 @@ template<std::ranges::range U, std::ranges::range V = U>
             reference.cbegin(),
             zero,
             [](const auto xi, const auto xj) constexpr -> value_type { return std::max(xi, xj); },
-            [&one](const auto ti, const auto ri) -> value_type { return std::abs(ti / ri - one); });
+            [&](const auto ti, const auto ri) -> value_type
+            {
+                if (ri == zero and isclose(ti, zero)) return zero;
+                return std::abs(ti / ri - one);
+            });
 }
 
 template<std::ranges::range U, std::ranges::range V = U>

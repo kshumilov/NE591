@@ -11,9 +11,12 @@
 
 template<std::floating_point DType>
 [[nodiscard]]
-constexpr auto is_diag_nonzero(const Matrix<DType>& A) -> bool {
-    for (std::size_t i{}; i < A.rows(); ++i) {
-        if (isclose(A[i, i], DType{})) {
+constexpr auto is_diag_nonzero(const Matrix<DType>& A) -> bool
+{
+    for (std::size_t i{}; i < A.rows(); ++i)
+    {
+        if (isclose(A[i, i], DType{}))
+        {
             return false;
         }
     }
@@ -22,12 +25,14 @@ constexpr auto is_diag_nonzero(const Matrix<DType>& A) -> bool {
 
 
 template<std::floating_point DType>
-struct IterativeAxbResult {
+struct IterativeAxbResult
+{
     std::vector<DType> x{};
     DType relative_error{};
     DType residual_error{};
     bool converged{};
     int iters{};
+
 
     [[nodiscard]]
     constexpr auto to_string() const -> std::string {

@@ -29,16 +29,18 @@ auto read_linear_system(std::istream &in) -> std::pair<Matrix<Dtype>, std::vecto
 [[nodiscard]]
 inline auto read_axb_algorithm(std::istream &in) -> AxbAlgorithm {
     const auto algo = read_nonnegative_value<int>(in, "Algorithm");
-    if (algo > 2) {
-        throw std::runtime_error(fmt::format("Invalid algorithm code, must be 0/1/2: {}", algo));
+    if (algo > 3) {
+        throw std::runtime_error(fmt::format("Invalid algorithm code, must be 0/1/2/3: {}", algo));
     }
 
     switch (algo) {
         case 0:
-            return AxbAlgorithm::PointJacobi;
+            return AxbAlgorithm::LUP;
         case 1:
-            return AxbAlgorithm::GaussSeidel;
+            return AxbAlgorithm::PointJacobi;
         case 2:
+            return AxbAlgorithm::GaussSeidel;
+        case 3:
             return AxbAlgorithm::SuccessiveOverRelaxation;
         default:
             throw std::runtime_error("Invalid algorithm code");

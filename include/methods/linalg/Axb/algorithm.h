@@ -5,24 +5,31 @@
 
 #include <fmt/format.h>
 
-enum class AxbAlgorithm {
+enum class AxbAlgorithm
+{
+    LUP,
     PointJacobi,
     GaussSeidel,
     SuccessiveOverRelaxation,
 };
 
 template<>
-struct fmt::formatter<AxbAlgorithm, char> {
+struct fmt::formatter<AxbAlgorithm, char>
+{
     template<class ParseContext>
     constexpr ParseContext::iterator parse(ParseContext& ctx)
     {
         return ctx.begin();
     }
 
+
     template<class FmtContext>
     constexpr auto format(const AxbAlgorithm val, FmtContext& ctx) const
     {
-        switch (val) {
+        switch (val)
+        {
+            case AxbAlgorithm::LUP:
+                return fmt::format_to(ctx.out(), "LU with Partial Row Pivoting");
             case AxbAlgorithm::PointJacobi:
                 return fmt::format_to(ctx.out(), "Point Jacobi");
             case AxbAlgorithm::GaussSeidel:

@@ -225,8 +225,7 @@ struct IsotropicSteadyStateDiffusion2D
         return DType{};
     }
 
-    template<Diag diag = Diag::NonUnit>
-    constexpr auto matvec(std::span<const DType> x, std::span<DType> y) -> void
+    auto matvec(std::span<const DType> x, std::span<DType> y, const DType alpha, const DType beta) const -> void
     {
         const auto dim = static_cast<std::size_t>(grid.points.size());
         assert(dim == x.size());
@@ -234,51 +233,55 @@ struct IsotropicSteadyStateDiffusion2D
 
         for (std::size_t i = 0; i < dim; ++i)
         {
-            y[i] = rowvec<diag>(i, x);
+            y[i] = alpha * rowvec(i, x) + beta * y[i];
         }
     }
 
-    template<Diag diag = Diag::NonUnit>
-    constexpr auto rowvec(const std::size_t i, std::span<const DType> x) const noexcept -> DType
+    auto rowvec(const std::size_t i, std::span<const DType> x) const noexcept -> DType
     {
         DType dot_prod{};
 
-        if constexpr (diag == Diag::NonUnit)
+        const auto nonzero = nonzero_row_elems(i);
+        for (const auto& [j, value] : nonzero)
         {
-            dot_prod += diagonal_element(i) * x[i];
+            dot_prod += value * x[j];
         }
-        else if constexpr (diag == Diag::Unit)
-        {
-            dot_prod += x[i];
-        }
+
+        return dot_prod;
+    }
+
+    auto nonzero_row_elems(const std::size_t i) const -> std::vector<std::pair<std::size_t, DType>>
+    {
+        std::vector<std::pair<std::size_t, DType>> nonzero{};
+        nonzero.emplace_back(std::make_pair(i, diagonal_element(i)));
 
         const auto [i_q, j_q] = unravel2d(i, N());
 
         if (0U < i_q)
         {
             const auto j = ravel2d(i_q - 1U, j_q, N());
-            dot_prod += horizontal_element() * x[j];
+            nonzero.emplace_back(std::make_pair(j, horizontal_element()));
         }
 
         if (i_q + 1U < M())
         {
             const auto j = ravel2d(i_q + 1U, j_q, N());
-            dot_prod += horizontal_element() * x[j];
+            nonzero.emplace_back(std::make_pair(j, horizontal_element()));
         }
 
         if (0U < j_q)
         {
             const auto j = ravel2d(i_q, j_q - 1U, N());
-            dot_prod += vertical_element() * x[j];
+            nonzero.emplace_back(std::make_pair(j, vertical_element()));
         }
 
         if (j_q + 1U < N())
         {
             const auto j = ravel2d(i_q, j_q + 1U, N());
-            dot_prod += vertical_element() * x[j];
+            nonzero.emplace_back(std::make_pair(j, vertical_element()));
         }
 
-        return dot_prod;
+        return nonzero;
     }
 
     [[nodiscard]] constexpr

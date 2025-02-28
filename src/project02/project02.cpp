@@ -21,15 +21,20 @@ auto main(int argc, char* argv[]) -> int
             argparse::default_arguments::help,
     };
 
-    program.add_argument("input").help("Path to input file");
+    program.add_argument("input").help("Path to input file. If `--params` present treat it as json problem");
 
     program.add_argument("-o", "--output").help("Path to output file");
     program.add_argument("--output-json").help("Write the output file in json-format").flag();
+    program.add_argument("--input-json").help("Path to parameter files").flag();
 
     try
     {
         program.parse_args(argc, argv);
-        const auto project = read_input_file<real>(program.get<std::string>("input"));
+
+        auto project = read_input_file<real>(
+            program.get<std::string>("input"),
+            program.get<bool>("--input-json")
+        );
         const auto solution = project.run();
 
         const auto to_json = program.get<bool>("--output-json");

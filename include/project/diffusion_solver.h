@@ -10,6 +10,8 @@
 
 #include "methods/linalg/lu.h"
 #include "methods/linalg/matrix.h"
+#include "methods/linalg/Axb/utils.h"
+#include "methods/optimize.h"
 
 #include "project/diffusion_problem.h"
 
@@ -148,4 +150,124 @@ struct LUPSolver
   }
 };
 
+
+template<std::floating_point DType>
+constexpr auto successive_over_relaxation_sparse(
+        const IsotropicSteadyStateDiffusion2D<DType>& problem,
+        std::span<const DType> b,
+        const DType relaxation_factor,
+        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}
+) -> IterativeAxbResult<DType>
+{
+    assert(relaxation_factor >= 1.0);
+
+    std::vector<DType> x(b.size());
+    std::vector<DType> x_next(b.size());
+
+    auto g = [&](std::span<DType> x_curr) constexpr -> std::span<DType>
+    {
+        for (std::size_t i{}; i < x_curr.size(); ++i)
+        {
+            DType diag{};
+            DType dot_prod{};
+
+            for (const std::vector<std::pair<std::size_t, DType>> nonzero = problem.nonzero_row_elems(i);
+                 const auto& [j, value] : nonzero)
+            {
+                if (j < i)
+                    dot_prod += value * x_next[j];
+                else if (j == i)
+                    diag = value;
+                else
+                    dot_prod += value * x_curr[j];
+            }
+
+            x_next[i] = (1 - relaxation_factor) * x_curr[i]
+                        + relaxation_factor * (b[i] - dot_prod) / diag;
+        }
+
+        std::swap(x, x_next);
+
+        return std::span{x};
+    };
+
+    const auto iter_result = fixed_point_iteration<std::span<DType>>(
+       g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
+    );
+
+    std::vector<DType> residual{b.cbegin(), b.cend()};
+    problem.matvec(x, residual, DType{1}, DType{-1});
+
+    return IterativeAxbResult<DType>{
+        .x = std::move(x),
+        .relative_error = iter_result.error,
+        .residual_error = max_abs(residual),
+        .converged = iter_result.converged,
+        .iters = iter_result.iters
+    };
+}
+
+
+template<std::floating_point DType>
+constexpr auto gauss_seidel_sparse(
+        const IsotropicSteadyStateDiffusion2D<DType>& problem,
+        std::span<const DType> b,
+        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}
+) -> IterativeAxbResult<DType>
+{
+  return successive_over_relaxation_sparse<DType>(problem, b, 1.0, settings);
+}
+
+
+template<std::floating_point DType>
+constexpr auto point_jacobi_sparse(
+        const IsotropicSteadyStateDiffusion2D<DType>& problem,
+        std::span<const DType> b,
+        const FixedPointIterSettings<DType> settings = FixedPointIterSettings{}
+) -> IterativeAxbResult<DType>
+{
+    std::vector<DType> x(b.size());
+    std::vector<DType> x_next(b.size());
+
+    auto g = [&](std::span<DType> x_curr) constexpr -> std::span<DType>
+    {
+        for (std::size_t i{}; i < x_curr.size(); ++i)
+        {
+            DType diag{};
+            DType dot_prod{};
+
+            for (const std::vector<std::pair<std::size_t, DType>> nonzero = problem.nonzero_row_elems(i);
+                 const auto[j, value] : nonzero)
+            {
+                if (j < i)
+                    dot_prod += value * x_curr[j];
+                else if (j == i)
+                    diag = value;
+                else
+                    dot_prod += value * x_curr[j];
+            }
+
+            x_next[i] = (b[i] - dot_prod) / diag;
+        }
+
+        std::swap(x, x_next);
+
+        return std::span{x};
+    };
+
+    const auto iter_result = fixed_point_iteration<std::span<DType>>(
+       g, x, max_rel_diff<std::span<const DType>, std::span<const DType>>, settings
+    );
+
+    std::vector<DType> residual{b.cbegin(), b.cend()};
+    problem.matvec(x, residual, DType{1}, DType{-1});
+
+    return IterativeAxbResult<DType>{
+        .x = std::move(x),
+        .relative_error = iter_result.error,
+        .residual_error = max_abs(residual),
+        .converged = iter_result.converged,
+        .iters = iter_result.iters
+    };
+}
 #endif // DIFFUSION_SOLVER_H

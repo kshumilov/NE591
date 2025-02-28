@@ -8,6 +8,7 @@
 
 #include "methods/linalg/Axb/solve.h"
 #include "project/diffusion_problem.h"
+#include "project/diffusion_solver.h"
 
 
 struct Header
@@ -75,21 +76,22 @@ struct Parameters
                 j["algorithm"] = "sor";
                 break;
             }
+            default:
+                throw std::invalid_argument("Invalid algorithm");
         }
 
-        j["iter_settings"] = iter_settings;
-        j["relaxation_factor"] = relaxation_factor;
+        if (params.algorithm != AxbAlgorithm::LUP)
+        {
+            j["iter_settings"] = params.iter_settings;
+            j["relaxation_factor"] = params.relaxation_factor;
+        }
     }
-
 
     template<class BasicJsonType>
     friend void from_json(BasicJsonType& j, Parameters& params)
     {
-        from_json(j["iter_settings"], params.iter_settings);
-        j.at("relaxation_factor").get_to(params.relaxation_factor);
-
         std::string algorithm{};
-        j.at("algorithm").get_to(algorithm);
+        j.at("algorithm").template get_to<std::string>(algorithm);
 
         if (algorithm == "lup")
         {
@@ -111,6 +113,12 @@ struct Parameters
         {
             throw std::invalid_argument("Invalid algorithm");
         }
+
+        if (params.algorithm != AxbAlgorithm::LUP)
+        {
+            params.iter_settings = j["iter_settings"].template get<FixedPointIterSettings<T>>();
+            params.relaxation_factor = j["relaxation_factor"].template get<T>();
+        }
     }
 };
 
@@ -118,9 +126,7 @@ struct Parameters
 template<std::floating_point T>
 struct Project02
 {
-    AxbAlgorithm algorithm{};
-    FixedPointIterSettings<T> settings{};
-    T relaxation_factor{};
+    Parameters<T> params{};
     IsotropicSteadyStateDiffusion2D<T> problem{};
 
     struct Solution
@@ -149,7 +155,7 @@ struct Project02
                 "Results", scalar_flux.shape_info(), scalar_flux.to_string(), residual_error
             );
 
-            if (project.algorithm != AxbAlgorithm::LUP)
+            if (project.params.algorithm != AxbAlgorithm::LUP)
             {
                 fmt::print(
                     out,
@@ -174,32 +180,7 @@ struct Project02
         template<class BasicJsonType>
         friend void to_json(BasicJsonType& j, const Solution& solution)
         {
-            j["problem"] = solution.project.problem;
-
-            switch (solution.project.algorithm)
-            {
-                case AxbAlgorithm::LUP:
-                {
-                    j["algo"] = "lup";
-                    break;
-                }
-                case AxbAlgorithm::PointJacobi:
-                {
-                    j["algo"] = "pj";
-                    break;
-                }
-                case AxbAlgorithm::GaussSeidel:
-                {
-                    j["algo"] = "gs";
-                    break;
-                }
-                case AxbAlgorithm::SuccessiveOverRelaxation:
-                {
-                    j["algo"] = "sor";
-                    break;
-                }
-            }
-
+            j["project"] = solution.project;
             j["flux"] = solution.scalar_flux;
             j["time"] = solution.time.count();
             j["residual_error"] = solution.residual_error;
@@ -222,26 +203,22 @@ struct Project02
             out,
             "................................................................................\n"
             "Selected Method: {}\n",
-            algorithm
+            params.algorithm
         );
 
-        if (algorithm != AxbAlgorithm::LUP)
+        if (params.algorithm != AxbAlgorithm::LUP)
         {
             fmt::print(
                 out,
                 "{:}\n",
-                settings.to_string()
+                params.iter_settings.to_string()
             );
 
-            if (algorithm == AxbAlgorithm::SuccessiveOverRelaxation)
+            if (params.algorithm == AxbAlgorithm::SuccessiveOverRelaxation)
             {
-                fmt::println(out, "\tRelaxation Factor: {:12.6e}", relaxation_factor);
+                fmt::println(out, "\tRelaxation Factor: {:12.6e}", params.relaxation_factor);
             }
         }
-        // fmt::println(
-        //     out,
-        //     "--------------------------------------------------------------------------------"
-        // );
     }
 
     [[nodiscard]]
@@ -254,7 +231,7 @@ struct Project02
             return problem.operator_element(i, j);
         };
 
-        switch (algorithm)
+        switch (params.algorithm)
         {
             case AxbAlgorithm::LUP:
             {
@@ -303,7 +280,7 @@ struct Project02
             case AxbAlgorithm::PointJacobi:
             {
                 const auto start = std::chrono::high_resolution_clock::now();
-                auto result = point_jacobi<T>(matelem, b, settings);
+                auto result = point_jacobi_sparse<T>(problem, b, params.iter_settings);
                 const auto end = std::chrono::high_resolution_clock::now();
 
                 return {
@@ -323,7 +300,7 @@ struct Project02
             case AxbAlgorithm::GaussSeidel:
             {
                 const auto start = std::chrono::high_resolution_clock::now();
-                auto result = gauss_seidel<T>(matelem, b, settings);
+                auto result = gauss_seidel_sparse<T>(problem, b, params.iter_settings);
                 const auto end = std::chrono::high_resolution_clock::now();
 
                 return {
@@ -343,7 +320,7 @@ struct Project02
             case AxbAlgorithm::SuccessiveOverRelaxation:
             {
                 const auto start = std::chrono::high_resolution_clock::now();
-                auto result = successive_over_relaxation<T>(matelem, b, relaxation_factor, settings);
+                auto result = successive_over_relaxation_sparse<T>(problem, b, params.relaxation_factor, params.iter_settings);
                 const auto end = std::chrono::high_resolution_clock::now();
 
                 return {
@@ -373,9 +350,7 @@ struct Project02
             case AxbAlgorithm::LUP:
             {
                 return {
-                    .algorithm = algorithm,
-                    .settings = {},
-                    .relaxation_factor = {},
+                    .params = {algorithm},
                     .problem = IsotropicSteadyStateDiffusion2D<T>::from_file(input),
                 };
             }
@@ -383,9 +358,10 @@ struct Project02
             case AxbAlgorithm::GaussSeidel:
             {
                 return {
-                    .algorithm = algorithm,
-                    .settings = FixedPointIterSettings<T>::template from_file<ParamOrder::MaxIterFirst>(input),
-                    .relaxation_factor = T{1.1},
+                    .params = {
+                        algorithm,
+                        FixedPointIterSettings<T>::template from_file<ParamOrder::MaxIterFirst>(input),
+                    },
                     .problem = IsotropicSteadyStateDiffusion2D<T>::from_file(input),
                 };
             }
@@ -401,9 +377,11 @@ struct Project02
                 }
 
                 return {
-                    .algorithm = algorithm,
-                    .settings = settings,
-                    .relaxation_factor = relaxation_factor,
+                    .params = {
+                        algorithm,
+                        settings,
+                        relaxation_factor,
+                    },
                     .problem = IsotropicSteadyStateDiffusion2D<T>::from_file(input),
                 };
             }
@@ -413,13 +391,20 @@ struct Project02
             }
         }
     }
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+        Project02<T>,
+        params,
+        problem
+    )
 };
 
 
 template<std::floating_point T>
 [[nodiscard]]
-auto read_input_file(const std::string &filename) -> Project02<T> {
+auto read_input_file(const std::string &filename, const bool from_json = false) -> Project02<T> {
     const auto input_filepath = std::filesystem::path{filename};
+
 
     if (input_filepath.empty()) {
         throw std::runtime_error(
@@ -427,6 +412,11 @@ auto read_input_file(const std::string &filename) -> Project02<T> {
     }
 
     std::ifstream input{input_filepath};
+
+    if (from_json) {
+        json data = json::parse(input);
+        return data.template get<Project02<T>>();
+    }
 
     if (!input.is_open()) {
         throw std::runtime_error(

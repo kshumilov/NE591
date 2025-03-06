@@ -8,7 +8,6 @@
 #include <ranges>
 #include <vector>
 
-#include "methods/utils/math.h"
 
 template<std::floating_point scalar_t>
 [[nodiscard]] constexpr scalar_t step(const scalar_t a, const scalar_t b, const int intervals) noexcept {

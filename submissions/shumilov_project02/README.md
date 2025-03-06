@@ -57,7 +57,7 @@ module load cmake/3.24.1
 
 ## 1. Initialize the build directory
 ```bash
-cmake -S. -Bbuild-DCMAKE_BUILD_TYPE=Release 
+cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release 
 ```
 ### Example
 ```bash

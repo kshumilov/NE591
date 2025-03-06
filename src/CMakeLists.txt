@@ -15,6 +15,7 @@ add_subdirectory(outlab05)
 
 add_subdirectory(lab06)
 add_subdirectory(lab07)
+add_subdirectory(lab08)
 
 add_subdirectory(project01)
 add_subdirectory(project02)

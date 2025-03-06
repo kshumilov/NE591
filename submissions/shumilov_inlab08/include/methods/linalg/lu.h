@@ -9,7 +9,6 @@
 #include <utility>  // pair, unreachable
 #include <tuple>
 #include <vector>
-#include <string_view>
 
 #include "fmt/format.h"
 
@@ -33,39 +32,26 @@ enum class PivotingMethod
 template<>
 struct fmt::formatter<PivotingMethod, char>
 {
-    fmt::formatter<std::string_view> underlying_;
-
-    constexpr auto parse(auto& ctx)
+    template<class ParseContext>
+    constexpr typename ParseContext::iterator parse(ParseContext& ctx)
     {
-        return underlying_.parse(ctx);
+        return ctx.begin();
     }
 
-    constexpr auto format(const PivotingMethod q, auto& ctx) const
-    {
-        const auto name = [&q] constexpr -> std::string_view
-        {
-            switch (q)
-            {
-                case PivotingMethod::NoPivoting:
-                    return "No Pivoting";
-                case PivotingMethod::PartialPivoting:
-                    return "Partial Pivoting";
-                default:
-                    std::unreachable();
-            }
-        }();
 
-        return underlying_.format(name, ctx);
-        // switch (q)
-        // {
-        //     case PivotingMethod::NoPivoting:
-        //         return fmt::format_to(ctx.out(), "No Pivoting");
-        //     case PivotingMethod::PartialPivoting:
-        //         return fmt::format_to(ctx.out(), "Partial Pivoting");
-        //     default:
-        //         std::unreachable();
-        // }
-        // return ctx.out();
+    template<class FmtContext>
+    constexpr auto format(const PivotingMethod q, FmtContext& ctx) const
+    {
+        switch (q)
+        {
+            case PivotingMethod::NoPivoting:
+                return fmt::format_to(ctx.out(), "No Pivoting");
+            case PivotingMethod::PartialPivoting:
+                return fmt::format_to(ctx.out(), "Partial Pivoting");
+            default:
+                std::unreachable();
+        }
+        return ctx.out();
     }
 };
 

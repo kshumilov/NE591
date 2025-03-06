@@ -111,17 +111,11 @@ struct FixedPointIterResult
     [[nodiscard]]
     constexpr auto to_string() const -> std::string
     {
-        return fmt::format(
-            "{:} at #{:d} with error {:14.6e}",
-            converged ? "SUCCESS" : "FAILURE",
-            iters, error
-        );
-
-        // if (converged)
-        // {
-        //     return fmt::format("Converged at iteration #{:d}: {:12.6e}", iters, error);
-        // }
-        // return fmt::format("Failed to converge in {:d} iterations: {:12.6e}", iters, error);
+        if (converged)
+        {
+            return fmt::format("Converged at iteration #{:d}: {:12.6e}", iters, error);
+        }
+        return fmt::format("Failed to converge in {:d} iterations: {:12.6e}", iters, error);
     }
 };
 
@@ -217,6 +211,7 @@ constexpr auto fixed_point_iteration
 
     auto x = x0;
     auto current_error = std::numeric_limits<DType>::infinity();
+
     for (int i = 0; i < settings.max_iter; ++i)
     {
         x = g(x);
@@ -225,7 +220,7 @@ constexpr auto fixed_point_iteration
         #ifndef NDEBUG
         fmt::println(
             std::cerr,
-            "#{: >5d}/{: >5d}: {:14.6e}",
+            "#{: >3d}/{: >3d}: {:12.6e}",
             i + 1,
             settings.max_iter,
             current_error
@@ -246,6 +241,7 @@ constexpr auto fixed_point_iteration
             return result;
         }
     }
+
 
     const FixedPointIterResult<T, DType> result{
         .x = x,
@@ -268,17 +264,6 @@ constexpr auto fixed_point_iteration
     const FixedPointIterSettings<DType>& settings
 ) -> FixedPointIterResult<T, DType>
 {
-    #ifndef NDEBUG
-    fmt::println(
-        std::cerr,
-        "{:s}",
-        // "\t{:.<40s}: {}",
-        settings.to_string()
-        // "Starting Point",
-        // x0
-    );
-    #endif
-
     auto x = x0;
     auto current_error = std::numeric_limits<DType>::infinity();
 
@@ -289,7 +274,7 @@ constexpr auto fixed_point_iteration
         #ifndef NDEBUG
         fmt::println(
             std::cerr,
-            "#{: >5d}/{: >5d}: {:14.6e}",
+            "#{: >3d}/{: >3d}: {:12.6e}",
             i + 1,
             settings.max_iter,
             current_error
@@ -298,28 +283,15 @@ constexpr auto fixed_point_iteration
 
         if (current_error < settings.tolerance)
         {
-            const auto result = FixedPointIterResult<T, DType>{
-                .x = x,
-                .converged = true,
-                .iters = i + 1,
-                .error = current_error
-            };
-            #ifndef NDEBUG
-            fmt::println(std::cerr, "{}\n", result.to_string());
-            #endif
-            return result;
+            return FixedPointIterResult<T, DType>{ .x = x, .converged = true, .iters = i + 1, .error = current_error };
         }
     }
 
-    const FixedPointIterResult<T, DType> result{
+    return FixedPointIterResult<T, DType>{
         .x = x,
         .converged = false,
         .iters = settings.max_iter,
         .error = current_error
     };
-    #ifndef NDEBUG
-    fmt::println(std::cerr, "{}\n", result.to_string());
-    #endif
-    return result;
 }
 #endif // OPTIMIZE_H

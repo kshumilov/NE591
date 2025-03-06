@@ -23,12 +23,6 @@ using json = nlohmann::json;
 #include "methods/linalg/blas.h"
 #include "methods/linalg/vec.h"
 
-#include <stdexcept>
-#include <format>
-#include <utility>
-#include <concepts>
-#include <span>
-
 
 template<class IndexType = std::size_t>
 using Idx2D = std::pair<IndexType, IndexType>;

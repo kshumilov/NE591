@@ -24,11 +24,6 @@ enum class MatrixSymmetry : char
     General = 'G',
 };
 
-enum class MatrixOperation : char {
-    Identity = 'I',
-    Transpose = 'T'
-};
-
 
 enum class Diag : char
 {
@@ -78,7 +73,6 @@ template<
     std::floating_point DType,
     MatrixSymmetry symm = MatrixSymmetry::General,
     Diag diag = Diag::NonUnit,
-    MatrixOperation op = MatrixOperation::Identity,
     std::invocable<std::size_t, std::size_t> MatElem
 >
 void gemv
@@ -173,12 +167,7 @@ void gemv
 
 
 // y <- alpha * A * x + beta * y
-template<
-    std::floating_point DType,
-    MatrixSymmetry symm = MatrixSymmetry::General,
-    Diag diag = Diag::NonUnit,
-    MatrixOperation op = MatrixOperation::Identity
->
+template<std::floating_point DType, MatrixSymmetry symm = MatrixSymmetry::General, Diag diag = Diag::NonUnit>
 void gemv
 (
     const Matrix<DType>& A,
@@ -188,12 +177,15 @@ void gemv
     const DType beta = DType{}
 ) noexcept
 {
+    assert(A.cols() == x.size());
+    assert(y.size() == A.rows());
+
     auto matelem = [&](const std::size_t i, const std::size_t j) constexpr -> DType
     {
         return A[i, j];
     };
 
-    gemv<DType, symm, diag, op>(matelem, A.rows(), A.cols(), x, y, alpha, beta);
+    gemv<DType, symm, diag>(matelem, A.rows(), A.cols(), x, y, alpha, beta);
 }
 
 

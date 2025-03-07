@@ -18,12 +18,11 @@ add_custom_command(TARGET outlab08
 )
 install(TARGETS outlab08 DESTINATION bin OPTIONAL)
 
-add_executable(quad ./src/gauss_quad.cpp)
-target_link_libraries(quad PRIVATE methods ne591_compiler_flags fmt::fmt argparse)
-target_include_directories(quad PRIVATE ./include)
-set_property(TARGET quad PROPERTY OUTPUT_NAME quad)
-add_custom_command(TARGET quad
+add_executable(gauss_quad ./src/gauss_quad.cpp)
+target_link_libraries(gauss_quad PRIVATE methods ne591_compiler_flags fmt::fmt argparse)
+target_include_directories(gauss_quad PRIVATE ./include)
+add_custom_command(TARGET gauss_quad
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:quad> ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:gauss_quad> ${CMAKE_CURRENT_SOURCE_DIR}
 )
-install(TARGETS quad DESTINATION bin OPTIONAL)
+install(TARGETS gauss_quad DESTINATION bin OPTIONAL)

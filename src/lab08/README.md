@@ -28,7 +28,7 @@ module load mpi/mpich-x86_64
 cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 ```
 ### Example
-```bash
+```
 [kshumil@login03 shumilov_outlab08]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
@@ -36,12 +36,17 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- Check for working CXX compiler: /usr/local/apps/gcc/13.2.0/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
+-- Performing Test COMPILER_SUPPORTS_MARCH
+-- Performing Test COMPILER_SUPPORTS_MARCH - Success
 -- {fmt} version: 11.1.2
 -- Build type: Release
--- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_outlab08/build/_deps/json-src/include/
+-- Using the multi-header code from /home/kshumil/ne591/NE591/build/_deps/json-src/include/
+-- Found MPI_CXX: /usr/lib64/mpich/lib/libmpicxx.so (found version "3.1")
+-- Found MPI: TRUE (found version "3.1")
+-- Run: /usr/lib64/mpich/bin/mpiexec -n 32  EXECUTABLE  ARGS
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_outlab08/build
+-- Build files have been written to: /home/kshumil/ne591/NE591/build
 ```
 
 ## 2. Compile

@@ -253,12 +253,14 @@ constexpr auto gauss_legendre_quadrature(
 ) -> std::pair<std::vector<scalar_t>, std::vector<scalar_t>>
 {
     const auto nodes = legendre_roots<scalar_t>(l, k_min, k_max, settings);
-    const auto weights = std::ranges::to<std::vector>(
-        nodes | std::views::transform(
-            [&](const scalar_t x) constexpr -> scalar_t {
-                return legendre_weight<scalar_t>(l, x);
-            }
-        )
+    std::vector<scalar_t> weights(nodes.size());
+
+    std::transform(
+        nodes.cbegin(), nodes.cend(),
+        weights.begin(),
+        [&l](const scalar_t x) constexpr -> scalar_t {
+            return legendre_weight<scalar_t>(l, x);
+        }
     );
 
     return std::make_pair(std::move(nodes), std::move(weights));

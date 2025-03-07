@@ -1,11 +1,12 @@
-# Inlab #08
+# Outlab #08
 - Author: Kirill Shumilov
-- Date: 02/28/2025
+- Date: 03/07/2025
 
 # Requirements
 ```requirements
 C++ Compiler: GCC/Clang supporing C++23 standard
 CMake >=3.24
+MPI Library
 ```
 
 
@@ -14,10 +15,12 @@ The code has been run and tested on Hazel. Before continuing login in on the log
 ```bash
 ssh -X $USER:login.hpc.ncsu.edu
 ```
-Load the latest gcc compile and CMake:
+Load the latest GCC compiler, CMake, and MPI Implementation:
 ```bash
+module purge
+module load cmake/3.24
 module load gcc/13.2.0
-module load cmake/3.24.1
+module load mpi/mpich-x86_64
 ```
 
 ## 1. Initialize the build directory
@@ -26,7 +29,7 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 ```
 ### Example
 ```bash
-[kshumil@login03 shumilov_inlab08]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+[kshumil@login03 shumilov_outlab08]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -35,16 +38,17 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type: Release
--- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_inlab08/build/_deps/json-src/include/
+-- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_outlab08/build/_deps/json-src/include/
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_inlab08/build
+-- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_outlab08/build
 ```
 
-## 2. Compile the code
+## 2. Compile
+### Compile MPI Parallel Code
 Now, compile the code:
 ```bash
-cmake --build build --config Release -- -j
+cmake --build build --config Release --target outlab08 -- -j
 ```
 
 ### Example
@@ -70,7 +74,6 @@ Positional arguments:
 Optional arguments:
   -h, --help    shows help message and exits 
   -o, --output  Path to output file 
-
 ```
 
 # Examples

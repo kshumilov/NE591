@@ -16,7 +16,7 @@ auto main(int argc, char* argv[]) -> int
     const Header header{};
 
     argparse::ArgumentParser program{
-            "shumilov_projec02",
+            "shumilov_project02",
             "1.0",
             argparse::default_arguments::help,
     };

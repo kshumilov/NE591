@@ -7,6 +7,11 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <iostream>
+#include <ranges>
+
+#include <fmt/core.h>
+#include <fmt/ostream.h>
 
 #include "linalg/blas.h"
 #include "methods/roots.h"
@@ -127,7 +132,24 @@ constexpr auto legendre_root(const int l, const int k, const FixedPointIterSetti
     return newton_raphson<scalar_t>(f, df, x0, settings);
 }
 
-
+template<std::floating_point scalar_t>
+auto legendre_roots(const int l, const int k_min, const int k_max, const FixedPointIterSettings<scalar_t>& settings) -> std::vector<scalar_t>
+{
+    assert(1 <= k_min && k_min < k_max && k_max <= l);
+    return std::ranges::to<std::vector>(
+        std::views::iota(k_min, k_max + 1) | std::views::transform(
+            [&](const int k) -> scalar_t
+            {
+                const auto result = legendre_root<scalar_t>(l, k, settings);
+                if (not result.converged)
+                {
+                    throw std::runtime_error(fmt::format("Could not converge Legendre root l = {}, k = {}", l, k));
+                }
+                return result.x;
+            }
+        )
+    );
+}
 
 /**
  * @brief Find all roots of Legendre polynomial for a given degree
@@ -222,6 +244,66 @@ constexpr auto gauss_legendre_quadrature(
     #endif
 
     return std::make_pair(std::move(nodes), std::move(weights));
+}
+
+template<std::floating_point scalar_t>
+constexpr auto gauss_legendre_quadrature(
+    const int l, const int k_min, const int k_max,
+    const FixedPointIterSettings<scalar_t> settings
+) -> std::pair<std::vector<scalar_t>, std::vector<scalar_t>>
+{
+    const auto nodes = legendre_roots<scalar_t>(l, k_min, k_max, settings);
+    const auto weights = std::ranges::to<std::vector>(
+        nodes | std::views::transform(
+            [&](const scalar_t x) constexpr -> scalar_t {
+                return legendre_weight<scalar_t>(l, x);
+            }
+        )
+    );
+
+    return std::make_pair(std::move(nodes), std::move(weights));
+}
+
+
+template<std::floating_point scalar_t>
+auto print_gauss_legendre_quadrature(
+    const std::pair<std::vector<scalar_t>, std::vector<scalar_t>>& quad,
+    std::ostream& out = std::cout
+) -> void
+{
+    const auto&[nodes, weights] = quad;
+    const auto sum = std::accumulate(weights.cbegin(), weights.cend(), scalar_t{0.0});
+
+    std::string result{};
+    fmt::format_to(
+        std::back_inserter(result),
+        "{:^{}}\n",
+        fmt::format("{:^5} {:^24} {:^24}", "i", "nodes", "weights"),
+        80
+    );
+
+    for (const auto [i, x, w] : std::views::zip(std::views::iota(1U), nodes, weights))
+        fmt::format_to(
+            std::back_inserter(result),
+            "{:^{}}\n",
+            fmt::format("{:<5d} {:> 24.16e} {:> 24.16e}", i, x, w),
+            80
+        );
+
+    fmt::print(
+        out,
+        "{2:^{1}}\n"
+        "{0:-^{1}}\n"
+        "{3}"
+        "{0:-^{1}}\n"
+        "{4: ^{1}s}",
+        "",
+        80,
+        fmt::format("Gauss Quadrature, I = {:d}", nodes.size()),
+        result,
+        fmt::format("sum(weights) = {:^24.16e}", sum)
+    );
+
 }
 
 #endif //LEGENDRE_H

@@ -177,7 +177,7 @@ The input file and output files can be found under `examples/a64s20k.inp` and `e
 
 ## 4. Examples
 ### Running Serial with output to stdout
-```bash
+```
 [kshumil@login02 shumilov_outlab08]$ ./shumilov_inlab08 examples/a32s10.inp
 ================================================================================
 NE 591 Inlab #08
@@ -221,7 +221,7 @@ Execution time: 00.000267000 seconds.
 
 ### Running MPI Parallel with output to file
 #### On Login node (Not Recommended)
-```bash
+```
 [kshumil@login02 shumilov_outlab08]$ mpirun -n 4./shumilov_outlab08 examples/a32s10.inp --output examples/a32s10.n4.out
 [kshumil@login02 shumilov_outlab08]$ cat examples/a32s10.n4.out
 ================================================================================
@@ -262,4 +262,29 @@ SUCCESS at #11 with error   5.691750e-06
 --------------------------------------------------------------------------------
 Execution time: 00.000350000 seconds.
 ================================================================================
+```
+
+#### On Compute node (Recommended)
+```bash
+[kshumil@login02 shumilov_outlab08]$ bsub < submit_outlab8.sh
+```
+
+### Running Gauss-Legendre Quadrature Set
+```
+[kshumil@login02 shumilov_outlab08]$ ./gauss_quad 10
+                            Gauss Quadrature, I = 10
+--------------------------------------------------------------------------------
+              i            nodes                   weights
+            1      -9.7390652851717172e-01   6.6671344308688138e-02
+            2      -8.6506336668898451e-01   1.4945134915058060e-01
+            3      -6.7940956829902441e-01   2.1908636251598204e-01
+            4      -4.3339539412927318e-01   2.6926671931007104e-01
+            5      -1.4887433898164077e-01   2.9552422471476148e-01
+            6       1.4887433898164077e-01   2.9552422471476148e-01
+            7       4.3339539412927318e-01   2.6926671931007104e-01
+            8       6.7940956829902441e-01   2.1908636251598204e-01
+            9       8.6506336668898451e-01   1.4945134915058060e-01
+            10      9.7390652851717172e-01   6.6671344308688138e-02
+--------------------------------------------------------------------------------
+                    sum(weights) =  2.0000000000001666e+00
 ```

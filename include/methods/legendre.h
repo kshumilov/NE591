@@ -301,7 +301,7 @@ auto print_gauss_legendre_quadrature(
         "{0:-^{1}}\n"
         "{3}"
         "{0:-^{1}}\n"
-        "{4: ^{1}s}",
+        "{4: ^{1}s}\n",
         "",
         80,
         fmt::format("Gauss Quadrature, I = {:d}", nodes.size()),

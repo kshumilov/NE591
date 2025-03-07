@@ -136,19 +136,22 @@ template<std::floating_point scalar_t>
 auto legendre_roots(const int l, const int k_min, const int k_max, const FixedPointIterSettings<scalar_t>& settings) -> std::vector<scalar_t>
 {
     assert(1 <= k_min && k_min < k_max && k_max <= l);
-    return std::ranges::to<std::vector>(
-        std::views::iota(k_min, k_max + 1) | std::views::transform(
-            [&](const int k) -> scalar_t
-            {
-                const auto result = legendre_root<scalar_t>(l, k, settings);
-                if (not result.converged)
+    auto rg = std::views::iota(k_min, k_max + 1)
+            | std::views::transform(
+                [&](const int k) -> scalar_t
                 {
-                    throw std::runtime_error(fmt::format("Could not converge Legendre root l = {}, k = {}", l, k));
+                    const auto result = legendre_root<scalar_t>(l, k, settings);
+                    if (not result.converged)
+                    {
+                        throw std::runtime_error(
+                            fmt::format("Could not converge Legendre root l = {}, k = {}", l, k)
+                        );
+                    }
+                    return result.x;
                 }
-                return result.x;
-            }
-        )
-    );
+            );
+
+    return std::vector<scalar_t>{rg.cbegin(), rg.cend()};
 }
 
 /**

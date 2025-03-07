@@ -9,6 +9,50 @@ CMake >=3.24
 MPI Library
 ```
 
+# File Tree
+```
+shumilov_outlab08
+├── CMakeLists.txt
+├── README.md
+├── compile_oulab08.sh
+├── examples
+│   ├── a128s1024.inp
+│   ├── a128s1024.n8.out
+│   ├── a128s1024.serial.out
+│         ...
+├── include
+│   └── methods
+│       ├── array.h
+│       ├── legendre.h
+│       ├── linalg
+│       │   ├── blas.h
+│       │   ├── matrix.h
+│       │   ├── utils
+│       │   │   ├── io.h
+│       │   │   └── math.h
+│       │   └── vec.h
+│       ├── optimize.h
+│       ├── roots.h
+│       └── utils
+│           ├── io.h
+│           └── math.h
+├── lab_include               
+│   ├── flux.h            <--- Single Iteration
+│   ├── grid.h
+│   ├── inlab08.h         <--- Serial
+│   ├── io.h
+│   ├── mpi_utils.h
+│   ├── outlab08.h        <--- Parallel
+│   ├── slab.h
+│   └── utils.h
+├── src
+│   ├── gauss_quad.cpp
+│   ├── inlab08.cpp
+│   ├── mpi_utils.cpp
+│   └── outlab08.cpp
+└── submit_outlab08.sh
+```
+
 
 # Hazel HPC System (NCSU)
 The code has been run and tested on Hazel. Before continuing login in on the login node of the cluster:

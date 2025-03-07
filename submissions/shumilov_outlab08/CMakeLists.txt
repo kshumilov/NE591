@@ -45,6 +45,8 @@ FetchContent_MakeAvailable(argparse fmt json)
 find_package(MPI REQUIRED)
 message(STATUS "Run: ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS")
 
+add_subdirectory(include)
+
 add_executable(inlab08 ./src/inlab08.cpp)
 target_link_libraries(inlab08 PRIVATE methods ne591_compiler_flags fmt::fmt argparse nlohmann_json::nlohmann_json)
 target_include_directories(inlab08 PRIVATE ./lab_include)

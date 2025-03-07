@@ -5,15 +5,16 @@
 #include <concepts>
 #include <type_traits>
 
+
 auto get_local_rank(MPI_Comm comm) -> int;
 auto get_world_size(MPI_Comm comm) -> int;
-auto get_processor_name(MPI_Comm comm) -> int;
+auto get_processor_name() -> std::string;
 
 
 // Template function to map C++ floating-point types to MPI floating-point types
 template <std::floating_point T>
-MPI_Datatype get_mpi_type() {
-    static_assert(std::is_floating_point_v<T>, "T must be a floating-point type");
+[[nodiscard]]
+constexpr MPI_Datatype get_mpi_type() {
     if constexpr (std::is_same_v<T, float>) {
         return MPI_FLOAT;
     } else if constexpr (std::is_same_v<T, double>) {

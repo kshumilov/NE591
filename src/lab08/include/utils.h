@@ -2,9 +2,9 @@
 #define CONFIG_H
 
 
-constexpr int columnwidth = 80;
-const static std::string eq_divider(columnwidth, '=');
-const static std::string dash_divider(columnwidth, '-');
+constexpr int COLUMN_WIDTH = 80;
+const static std::string eq_divider(COLUMN_WIDTH, '=');
+const static std::string dash_divider(COLUMN_WIDTH, '-');
 
 struct Header
 {
@@ -24,7 +24,7 @@ struct Header
             "{0:-^{1}}\n"
             "{5:s}\n"
             "{0:=^{1}}\n",
-            "", columnwidth,
+            "", COLUMN_WIDTH,
             title,
             author,
             date,

@@ -218,3 +218,48 @@ SUCCESS at #11 with error   5.691750e-06
 Execution time: 00.000267000 seconds.
 ================================================================================
 ```
+
+### Running MPI Parallel with output to file
+#### On Login node (Not Recommended)
+```bash
+[kshumil@login02 shumilov_outlab08]$ mpirun -n 4./shumilov_outlab08 examples/a32s10.inp --output examples/a32s10.n4.out
+[kshumil@login02 shumilov_outlab08]$ cat examples/a32s10.n4.out
+================================================================================
+NE 591 Outlab #08
+Author: Kirill Shumilov
+Date: 03/07/2025
+--------------------------------------------------------------------------------
+Solving Source Iteration Equations
+================================================================================
+Slab:
+Slab Grid:
+	Number of angular grid points, N        : 64
+	Number of spatial cells, I              : 10
+Medium:
+	Total Macroscopic Cross Section, St     :   1.000000e+00
+	Scattering Macroscopic Cross Section, Ss:   5.000000e-01
+	Uniform Fixed Source Strength, q        :   1.000000e+00
+	Slab Width, L                           :   1.000000e+00
+--------------------------------------------------------------------------------
+Fixed-Point Iteration:
+	Maximum Number of Iterations............: 100
+	Tolerance...............................: 1.000000e-05
+--------------------------------------------------------------------------------
+SUCCESS at #11 with error   5.691750e-06
+--------------------------------------------------------------------------------
+  i        flux
+    1   7.040376e-01
+    2   8.432337e-01
+    3   9.141558e-01
+    4   9.608904e-01
+    5   9.817911e-01
+    6   9.817911e-01
+    7   9.608904e-01
+    8   9.141558e-01
+    9   8.432337e-01
+   10   7.040376e-01
+
+--------------------------------------------------------------------------------
+Execution time: 00.000350000 seconds.
+================================================================================
+```

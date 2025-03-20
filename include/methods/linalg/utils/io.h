@@ -91,6 +91,26 @@ auto read_matrix(std::istream& in, const std::size_t rows, const std::size_t col
     return read_matrix_elements<scalar_t>(in, rows, cols, func);
 }
 
+template<std::floating_point scalar_t>
+auto read_embedded_matrix(
+    std::istream& in,
+    const std::size_t total_rows, const std::size_t total_cols,
+    const std::size_t r0, const std::size_t c0,
+    const std::size_t rows, const std::size_t cols
+) -> Matrix<scalar_t>
+{
+    assert(r0 < total_rows);
+    assert(r0 + rows < total_rows);
+    assert(c0 < total_cols);
+    assert(c0 + cols < total_cols);
+    auto select = [&](const size_t i, const size_t j) -> bool
+    {
+        return r0 <= i && i < r0 + rows && c0 <= j && j < c0 + cols;
+    };
+
+    return read_matrix_elements<scalar_t>(in, total_rows, total_cols, select);
+}
+
 
 template<class T>
 auto print(const Matrix<T>& matrix, std::string_view header = "Matrix"sv, std::ostream& out = std::cerr) -> void {

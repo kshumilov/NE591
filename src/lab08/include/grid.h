@@ -1,5 +1,5 @@
-#ifndef GRID_H
-#define GRID_H
+#ifndef LAB08_GRID_H
+#define LAB08_GRID_H
 
 #include <concepts>
 
@@ -113,4 +113,4 @@ struct Grid
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Grid, num_spatial_cells, num_angular_points)
 };
-#endif //GRID_H
+#endif // LAB08_GRID_H

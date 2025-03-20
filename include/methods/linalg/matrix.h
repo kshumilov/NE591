@@ -222,7 +222,13 @@ class Matrix
         [[nodiscard]]
         constexpr auto at(const idx_t row, const idx_t col) const -> const scalar_t&
         {
-            return this->at(row, col);
+            if (row >= rows() || col >= cols())
+            {
+                throw std::out_of_range(
+                    fmt::format("Index pair ({}, {}) is out of range for {}", row, col, shape_info())
+                );
+            }
+            return m_data.at(ravel(row, col));
         }
 
 
@@ -327,6 +333,21 @@ class Matrix
             return result;
         }
 
+        [[nodiscard]]
+        constexpr auto submatrix(const idx_t row0, const idx_t col0, const idx_t subrows, const idx_t subcols) const
+        {
+            assert(row0 < rows() && row0 + subrows <= rows());
+            assert(col0 < cols() && col0 + subcols <= cols());
+
+            return Matrix<scalar_t>::from_func(
+                subrows, subcols,
+                [&](const auto i, const auto j)
+                {
+                    return this->at(row0 + i, col0 + j);
+                }
+            );
+        }
+
 
         [[nodiscard]]
         constexpr auto norm() const noexcept -> scalar_t
@@ -406,6 +427,12 @@ class Matrix
             return fmt::format("[{}]", fmt::join(lines, " \n "));
         }
 
+        void swap(Matrix& rhs) noexcept
+        {
+            std::swap(this->m_data, rhs.m_data);
+            std::swap(this->m_rows, rhs.m_rows);
+            std::swap(this->m_cols, rhs.m_cols);
+        }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Matrix<scalar_t>, m_rows, m_cols, m_data)
 
@@ -423,6 +450,11 @@ auto operator<<(std::ostream& out, const Matrix<T>& matrix) -> std::ostream&
     return out;
 }
 
+template<std::floating_point T>
+void swap(Matrix<T>& a, Matrix<T>& b) noexcept
+{
+    a.swap(b);
+}
 
 template<std::floating_point scalar_t>
 constexpr auto operator+(Matrix<scalar_t> lhs, const Matrix<scalar_t>& rhs) -> Matrix<scalar_t>

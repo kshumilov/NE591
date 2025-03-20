@@ -192,7 +192,7 @@ auto main(int argc, char* argv[]) -> int
             err.what()
         );
 
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
         std::exit(EXIT_FAILURE);
     }
 

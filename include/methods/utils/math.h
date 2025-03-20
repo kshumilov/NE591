@@ -27,4 +27,14 @@ constexpr auto rel_diff(const U test, const V ref)
     return std::abs(test / ref - one);
 }
 
+template<std::floating_point U, std::floating_point V>
+constexpr auto rel_err(const U err, const V val)
+{
+    using value_type = std::common_type_t<U, V>;
+    const auto zero = value_type{0};
+    if (val == zero)
+        return std::numeric_limits<value_type>::infinity();
+    return std::abs(err / val);
+}
+
 #endif //UTILS_MATH_H

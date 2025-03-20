@@ -19,3 +19,4 @@ add_subdirectory(lab08)
 
 add_subdirectory(project01)
 add_subdirectory(project02)
+add_subdirectory(project04)

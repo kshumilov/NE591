@@ -204,7 +204,11 @@ struct IsotropicSteadyStateDiffusion2D
             throw std::invalid_argument("`source` must be the same size as the grid");
         }
 
-        if (not std::ranges::all_of(source.cbegin(), source.cend(), [](const auto v) { return v >= DType{}; }))
+        if (not std::ranges::all_of(
+            source.data().cbegin(),
+            source.data().cend(),
+            [](const auto v) { return v >= DType{}; }
+        ))
         {
             throw std::invalid_argument("`source` must be non-negative");
         }

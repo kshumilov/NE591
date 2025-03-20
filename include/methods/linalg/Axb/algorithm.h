@@ -2,15 +2,16 @@
 #define LINALG_AXB_ALGORITHM_H
 
 #include <utility>
+#include <cstdint>
 
 #include <fmt/format.h>
 
-enum class AxbAlgorithm
+enum class AxbAlgorithm: int
 {
-    LUP,
-    PointJacobi,
-    GaussSeidel,
-    SuccessiveOverRelaxation,
+    LUP = 0,
+    PointJacobi = 1,
+    GaussSeidel = 2,
+    SuccessiveOverRelaxation = 3,
 };
 
 template<>

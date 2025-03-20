@@ -382,11 +382,11 @@ auto main(int argc, char* argv[]) -> int
                 global_result.echo(std::cout);
             else
             {
-                std::ofstream output{ "FLUX" };
+                std::ofstream output{ "Flux" };
                 if (!output.is_open())
                 {
                     throw std::runtime_error(
-                        fmt::format("Could not open: '{}'", "FLUX")
+                        fmt::format("Could not open: '{}'", "Flux")
                     ); // Indicate an error occurred
                 }
 

@@ -378,6 +378,19 @@ auto main(int argc, char* argv[]) -> int
                 MPI_COMM_WORLD
             );
 
+            const auto end = std::chrono::high_resolution_clock::now();
+
+            fmt::print(
+                std::cout,
+                "................................................................................\n"
+                "Rank {}: {}\n"
+                "Execution time: {:%S} seconds.\n"
+                "================================================================================\n",
+                MANAGER_IDX,
+                global_result.to_string(),
+                std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
+            );
+
             if (global_result.u.rows() <= 8)
                 global_result.echo(std::cout);
             else
@@ -392,19 +405,6 @@ auto main(int argc, char* argv[]) -> int
 
                 global_result.echo(output);
             }
-
-            const auto end = std::chrono::high_resolution_clock::now();
-
-            fmt::print(
-                std::cout,
-                "................................................................................\n"
-                "Rank {}: {}\n"
-                "Execution time: {:%S} seconds.\n"
-                "================================================================================\n",
-                MANAGER_IDX,
-                global_result.to_string(),
-                std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
-            );
         }
         else
         {

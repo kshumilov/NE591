@@ -298,7 +298,7 @@ auto main(int argc, char* argv[]) -> int
 
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Scatterv(
-                nullptr, nullptr, nullptr, nullptr,
+                nullptr, nullptr, nullptr, MPI_DATATYPE_NULL,
                 data.data(), data.size(), get_mpi_type<real>(),
                 MANAGER_IDX, MPI_COMM_WORLD
             );
@@ -411,7 +411,7 @@ auto main(int argc, char* argv[]) -> int
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Gatherv(
                 result.u.data().data(), result.u.size(), get_mpi_type<real>(),
-                nullptr, nullptr, nullptr, nullptr,
+                nullptr, nullptr, nullptr, MPI_DATATYPE_NULL,
                 MANAGER_IDX, MPI_COMM_WORLD
             );
 

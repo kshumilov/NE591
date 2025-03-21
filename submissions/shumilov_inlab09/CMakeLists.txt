@@ -46,6 +46,8 @@ FetchContent_Declare(
 ## Make the dependencies available
 FetchContent_MakeAvailable(argparse fmt json)
 
+add_subdirectory(include)
+
 # Executables
 
 ## Main Executable

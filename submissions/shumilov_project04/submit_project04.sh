@@ -5,6 +5,7 @@
 #BSUB -e stderr.%J
 #BSUB -W 00:10
 #BSUB -n 9
+#BSUB -R span[hosts=1]
 
 module purge
 module load cmake/3.24

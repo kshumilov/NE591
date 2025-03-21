@@ -12,7 +12,6 @@
 #include "methods/utils/io.h"
 
 #include "methods/linalg/matrix.h"
-#include "methods/linalg/lu.h"
 
 using namespace std::literals;
 
@@ -20,31 +19,6 @@ inline auto read_rank(std::istream& in, const std::string_view dim_name = ""sv) 
 {
     return read_positive_value<std::ptrdiff_t>(in, dim_name);
 }
-
-
-inline auto read_pivoting_method(std::istream& input) -> PivotingMethod {
-    return read_and_validate<PivotingMethod, int>(
-        input,
-        [](const auto v) {
-            switch (v) {
-                case 0:
-                    return PivotingMethod::NoPivoting;
-                case 1:
-                    return PivotingMethod::PartialPivoting;
-                default:
-                    throw std::runtime_error(fmt::format(
-                        "Invalid pivoting flag `{}`", v
-                    ));
-            }
-        },
-        []() {
-            return std::runtime_error(fmt::format(
-                "Invalid pivoting flag"
-            ));
-        }
-    );
-}
-
 
 
 template<std::floating_point scalar_t>

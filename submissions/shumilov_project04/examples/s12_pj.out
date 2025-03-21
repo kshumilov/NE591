@@ -1,0 +1,32 @@
+================================================================================
+NE 591 Project #04
+Author: Kirill Shumilov
+Date: 03/21/2025
+--------------------------------------------------------------------------------
+Solving Source Iteration Equations with Parallel Point-Jacobi
+================================================================================
+                                     Inputs                                     
+#Processes..............................: 9
+Space Dimensions, a x b.................: 1.000000e+00 x 1.000000e+00
+Non-Zero Grid Points, M x N.............: 12 x 12
+Diffusion Coefficient, D................: 1
+Macroscopic Removal Cross Section, Sa...: 2
+Source, q...............................: <12 x 12, e>
+Selected Method: Point Jacobi
+Fixed-Point Iteration:
+	Maximum Number of Iterations............: 10000
+	Tolerance...............................: 1.000000e-07
+================================================================================
+Rank 0, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.47983004e-04
+Rank 1, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.78501727e-04
+Rank 2, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.47983004e-04
+Rank 3, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.78501728e-04
+Rank 4, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 2.15314366e-04
+Rank 5, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.78501728e-04
+Rank 6, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.47983006e-04
+Rank 7, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.78501729e-04
+Rank 8, SUCCESS at #406 with error: 9.89610209e-08, max|res|: 1.47983006e-04
+................................................................................
+Rank 0: SUCCESS at #406 with error: 9.89610209e-08, max|res|: 2.15314366e-04
+Execution time: 00.016463740 seconds.
+================================================================================

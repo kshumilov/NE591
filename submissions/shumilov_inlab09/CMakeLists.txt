@@ -53,6 +53,7 @@ add_executable(inlab09 ./src/inlab09.cpp)
 target_link_libraries(
         inlab09
         PRIVATE
+        methods
         ne591_compiler_flags  # Compilation Flags
         argparse              # CLI argument parsing
         fmt::fmt              # Formatting

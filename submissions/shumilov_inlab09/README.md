@@ -26,7 +26,7 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
 ```
 ### Example
 ```bash
-[kshumil@login03 shumilov_inlab08]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+[kshumil@login02 shumilov_inlab09]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -35,10 +35,10 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
 -- Detecting CXX compile features - done
 -- {fmt} version: 11.1.2
 -- Build type: Release
--- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_inlab08/build/_deps/json-src/include/
+-- Using the multi-header code from /home/kshumil/ne591/NE591/submissions/shumilov_inlab09/build/_deps/json-src/include/
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_inlab08/build
+-- Build files have been written to: /home/kshumil/ne591/NE591/submissions/shumilov_inlab09/build
 ```
 
 ## 2. Compile the code

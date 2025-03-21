@@ -51,7 +51,7 @@ FetchContent_MakeAvailable(argparse fmt json)
 ## Main Executable
 add_executable(inlab09 ./src/inlab09.cpp)
 target_link_libraries(
-        inlab08
+        inlab09
         PRIVATE
         ne591_compiler_flags  # Compilation Flags
         argparse              # CLI argument parsing

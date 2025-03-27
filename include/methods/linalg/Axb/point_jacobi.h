@@ -12,6 +12,48 @@
 
 #include "methods/linalg/Axb/utils.h"
 
+#include "methods/fixed_point/algorithm.h"
+
+template<std::floating_point T, std::floating_point ErrorType = T>
+struct PJState final : public FixedPoint<ErrorType>
+{
+    const Matrix<T>& A{};
+    const std::vector<T>& b{};
+
+    std::vector<T> x{};
+    std::vector<T> error{};
+
+
+    [[nodiscard]]
+    constexpr PJState(
+        const FPSettings<ErrorType>& fps,
+        const Matrix<T>& A_,
+        const std::vector<T>& b_
+    ) : FixedPoint<ErrorType>{fps}
+      , A{ A_ }
+      , b{ b_ }
+      , x(b_.size(), 0)
+      , error(b_.cbegin(), b_.cend())
+    {
+        assert(matches_shape(A, b));
+    }
+
+
+    void update() override
+    {
+        std::copy(b.cbegin(), b.cend(), error.begin());
+        gemv<T>(A, x, error, -1, 1);
+
+        for (const auto i : A.iter_rows())
+            error[i] /= A[i, i];
+
+        this->m_error = max_rel_err(error, x);
+        x += error;
+
+        FixedPoint<ErrorType>::update();
+    }
+};
+
 
 template<std::floating_point DType, std::invocable<std::size_t, std::size_t> MatElem>
 constexpr auto point_jacobi

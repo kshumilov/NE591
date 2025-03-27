@@ -52,10 +52,19 @@ template<std::floating_point T>
 void axpy(std::span<const T> x, std::span<T> y, const T alpha = T{ 1 }) noexcept
 {
     assert(y.size() == x.size());
-    for (std::size_t i{}; i < x.size(); ++i)
-    {
-        y[i] += alpha * x[i];
-    }
+    // for (std::size_t i{}; i < x.size(); ++i)
+    // {
+    //     y[i] += alpha * x[i];
+    // }
+
+    std::transform(
+        x.cbegin(), x.cend(),
+        y.cbegin(), y.begin(),
+        [&](const auto x_i, const auto y_i)
+        {
+            return alpha * x_i + y_i;
+        }
+    );
 }
 
 

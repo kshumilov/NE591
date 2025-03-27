@@ -12,6 +12,44 @@
 
 #include "methods/linalg/Axb/utils.h"
 
+template<std::floating_point T, std::floating_point ErrorType = T>
+struct SORState final : public FixedPoint<ErrorType>
+{
+    const Matrix<T>& A{};
+    const std::vector<T>& b{};
+
+    T relaxation_factor{};
+
+    std::vector<T> x{};
+
+    [[nodiscard]]
+    constexpr SORState(
+        const FPSettings<ErrorType>& fps,
+        const Matrix<T>& A_,
+        const std::vector<T>& b_,
+        const T w = T{ 1 }
+    ) : FixedPoint<ErrorType>{fps}
+      , A{ A_ }
+      , b{ b_ }
+      , relaxation_factor{ w }
+      , x(b_.size(), 0)
+    {
+        assert(matches_shape(A, b));
+    }
+
+
+    void update() override
+    {
+        this->m_error = T{};
+        for (const auto i : A.iter_rows())
+        {
+            const T update = relaxation_factor * (b[i] - dot(A.row(i), x)) / A[i, i];
+            this->m_error = std::max(rel_err(update, x[i]), this->m_error);
+            x[i] += update;
+        }
+        FixedPoint<ErrorType>::update();
+    }
+};
 
 template<std::floating_point DType, std::invocable<std::size_t, std::size_t> MatElem>
 constexpr auto successive_over_relaxation(

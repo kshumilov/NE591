@@ -1,6 +1,6 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef LAB_CONFIG_H
+#define LAB_CONFIG_H
 
 constexpr int COLUMN_WIDTH = 80;
 
-#endif //CONFIG_H
+#endif // LAB_CONFIG_H

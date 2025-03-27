@@ -189,7 +189,6 @@ class Matrix
             return rows() == other.rows() && cols() == other.cols();
         }
 
-
         // Accessor for matrix elements
         [[nodiscard]]
         constexpr auto operator[](const idx_t row, const idx_t col) -> scalar_t&

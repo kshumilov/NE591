@@ -9,8 +9,10 @@
 #include "methods/optimize.h"
 #include "methods/utils/io.h"
 #include "methods/linalg/utils/io.h"
+#include "methods/linalg/utils/math.h"
 
-#include "util.h"
+#include "methods/linalg/Axb/conjugate_gradient.h"
+
 
 template<std::floating_point T>
 struct Inputs
@@ -25,6 +27,8 @@ struct Inputs
         , A{ std::move(A_) }
         , b{ std::move(b_) }
     {
+        CGState<T>::validate_A(A);
+
         if (A.rows() != b.size())
         {
             throw std::invalid_argument(
@@ -33,15 +37,6 @@ struct Inputs
                     A.rows(),
                     b.size()
                 )
-            );
-        }
-
-        if (const auto idx = find_matrix_assymetry<T>(A, T{}, 1e-12);
-            idx.has_value())
-        {
-            const auto&[i, j] = idx.value();
-            throw std::invalid_argument(
-                fmt::format("`A` is asymmetric in ({}, {}): {} != {}", i, j, A[i, j], A[j, i])
             );
         }
     }

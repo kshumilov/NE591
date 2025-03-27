@@ -23,7 +23,6 @@ struct fmt::formatter<AxbAlgorithm, char>
         return ctx.begin();
     }
 
-
     template<class FmtContext>
     constexpr auto format(const AxbAlgorithm val, FmtContext& ctx) const
     {

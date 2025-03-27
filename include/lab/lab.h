@@ -1,9 +1,9 @@
-#ifndef LAB_H
-#define LAB_H
+#ifndef LAB_INFO_H
+#define LAB_INFO_H
 
 #include <string>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "lab/config.h"
 
@@ -37,4 +37,37 @@ struct Info
     void echo(std::ostream& out) const { out << this->to_string(); }
 };
 
-#endif //LAB_H
+template<class Char = char>
+struct fmt::formatter<Info>
+{
+    [[nodiscard]]
+    constexpr auto parse(fmt::parse_context<Char>& ctx)
+    {
+        return ctx.begin();
+    }
+
+
+    [[nodiscard]]
+    constexpr auto format(const Info& info, fmt::format_context& ctx)
+    {
+        using namespace fmt::literals;
+
+        return fmt::format_to(
+            ctx.out(),
+            "{0:=^{1}}\n"
+            "{title:s}\n"
+            "Author: {author:s}\n"
+            "Date: {date:s}\n"
+            "{0:-^{1}}\n"
+            "{description:s}\n"
+            "{0:=^{1}}\n",
+            "", COLUMN_WIDTH,
+            "title"_a=info.title,
+            "author"_a=info.author,
+            "date"_a=info.date,
+            "description"_a=info.description
+        );
+    }
+};
+
+#endif // LAB_INFO_H

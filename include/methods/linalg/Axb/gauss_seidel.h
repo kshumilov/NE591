@@ -5,6 +5,7 @@
 #include "methods/linalg/Axb/sor.h"
 
 
+
 template<std::floating_point DType, std::invocable<std::size_t, std::size_t> MatElem>
 constexpr auto gauss_seidel
 (

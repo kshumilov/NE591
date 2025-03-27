@@ -5,6 +5,8 @@
 #include <ranges>
 #include <vector>
 
+#include "methods/utils/math.h"
+
 #include "methods/linalg/matrix.h"
 
 
@@ -96,5 +98,45 @@ auto get_residual(
     build_residual_inplace<T>(A, b.size(), b.size(), x, residual);
     return residual;
 }
+
+
+using Index2D = std::pair<std::size_t, std::size_t>;
+
+
+template<std::floating_point T>
+[[nodiscard]]
+constexpr auto find_matrix_assymetry
+(
+    const Matrix<T>& M,
+    const T rtol = T{ 1.0e-05 },
+    const T atol = T{ 1.0e-08 }
+) -> std::optional<Index2D>
+{
+    assert(M.is_square());
+    for (const auto i : M.iter_rows())
+        for (const auto j : std::views::iota(i + 1U, M.cols()))
+            if (not isclose(M[i, j], M[j, i], rtol, atol))
+                return std::make_optional(Index2D{ i, j });
+    return std::nullopt;
+}
+
+template<std::floating_point T, std::floating_point U>
+constexpr auto matches_shape(const Matrix<T>& M, const std::vector<U>& v) -> bool
+{
+    return M.cols() == v.size();
+}
+
+template<std::floating_point T, std::floating_point U>
+constexpr auto matches_shape(const Matrix<T>& A, const Matrix<U>& B) -> bool
+{
+    return A.cols() == B.rows();
+}
+
+template<std::floating_point T, std::floating_point U>
+constexpr auto matches_shape(const std::vector<T>& v, const Matrix<U>& M) -> bool
+{
+    return v.size() == M.rows();
+}
+
 
 #endif //LINALG_MATH_H

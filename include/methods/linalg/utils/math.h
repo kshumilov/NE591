@@ -120,6 +120,18 @@ constexpr auto find_matrix_assymetry
     return std::nullopt;
 }
 
+
+template<std::floating_point T>
+[[nodiscard]]
+constexpr auto find_nonzero_diag(const Matrix<T>& M) -> std::optional<int>
+{
+    for (const auto i : M.iter_rows())
+        if (isclose(M[i, i], T{}))
+            return std::make_optional(i);
+    return {};
+}
+
+
 template<std::floating_point T, std::floating_point U>
 constexpr auto matches_shape(const Matrix<T>& M, const std::vector<U>& v) -> bool
 {

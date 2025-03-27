@@ -12,6 +12,7 @@
 #include <ranges>
 #include <utility>
 #include <vector>
+#include <random>
 
 // 3rd-party Dependencies
 #include <fmt/format.h>
@@ -68,16 +69,17 @@ class Matrix
         [[nodiscard]]
         constexpr Matrix(const idx_t rows, const idx_t cols, const scalar_t init_value)
             : m_rows{ rows }
-          , m_cols{ cols }
-          , m_data(rows * cols, init_value) {}
+            , m_cols{ cols }
+            , m_data(rows * cols, init_value)
+        {}
 
 
         // Move constructor by moving in vector of data
         [[nodiscard]]
         constexpr Matrix(const idx_t rows, const idx_t cols, std::vector<scalar_t>&& data)
             : m_rows{ rows }
-          , m_cols{ cols }
-          , m_data{ std::move(data) }
+            , m_cols{ cols }
+            , m_data{ std::move(data) }
         {
             if (m_data.size() != rows * cols)
             {
@@ -87,27 +89,94 @@ class Matrix
             }
         }
 
-
-        [[nodiscard]] static constexpr auto from_func
-        (const idx_t rows, const idx_t cols, std::invocable<idx_t, idx_t> auto func) -> Matrix
+        template<MatrixSymmetry symm = MatrixSymmetry::General, Diag diag = Diag::NonUnit>
+        [[nodiscard]]
+        static constexpr auto from_func
+        (
+            const idx_t rows,
+            const idx_t cols,
+            std::invocable<idx_t, idx_t> auto func
+        ) -> Matrix
         {
-            std::vector<scalar_t> data(rows * cols);
+            std::vector<scalar_t> data(rows * cols, scalar_t{});
             for (const auto r : std::views::iota(idx_t{}, rows))
-            {
-                for (const auto c : std::views::iota(idx_t{}, cols))
+                if constexpr (symm == MatrixSymmetry::Upper)
                 {
-                    data[ravel2d(r, c, cols)] = func(r, c);
+                    if constexpr (diag == Diag::NonUnit)
+                        data[ravel2d(r, r, cols)] = func(r, r);
+                    else if constexpr (diag == Diag::Unit)
+                        data[ravel2d(r, r, cols)] = scalar_t{ 1 };
+
+                    for (const auto c : std::views::iota(r + idx_t{ 1 }, cols))
+                    {
+                        data[ravel2d(r, c, cols)] = func(r, c);
+                    }
                 }
-            }
+                else if constexpr (symm == MatrixSymmetry::Lower)
+                {
+                    for (const auto c : std::views::iota(idx_t{}, r))
+                        data[ravel2d(r, c, cols)] = func(r, c);
+                    
+                    if constexpr (diag == Diag::NonUnit)
+                        data[ravel2d(r, r, cols)] = func(r, r);
+                    else if constexpr (diag == Diag::Unit)
+                        data[ravel2d(r, r, cols)] = scalar_t{ 1 };
+                }
+                else if constexpr (symm == MatrixSymmetry::Symmetric)
+                {
+                    if constexpr (diag == Diag::NonUnit)
+                        data[ravel2d(r, r,cols)] = func(r, r);
+                    else if constexpr (diag == Diag::Unit)
+                        data[ravel2d(r, r, cols)] = scalar_t{1};
+
+                    for (const auto c : std::views::iota(r + idx_t{ 1 }, cols))
+                    {
+                        const auto left = ravel2d(r, c, cols);
+                        const auto right = ravel2d(c, r, cols);
+                        data[left] = data[right] = (func(r, c) + func(c, r)) / scalar_t{2};
+                    }
+                }
+                else if constexpr (symm == MatrixSymmetry::Diagonal)
+                {
+                    if constexpr (diag == Diag::NonUnit)
+                        data[ravel2d(r, r,cols)] = func(r, r);
+                    else if constexpr (diag == Diag::Unit)
+                        data[ravel2d(r, r, cols)] = scalar_t{ 1 };
+                }
+                else
+                {
+                    if constexpr (diag == Diag::NonUnit)
+                    {
+                        for (const auto c : std::views::iota(idx_t{}, cols))
+                            data[ravel2d(r, c, cols)] = func(r, c);
+                    }
+                    else
+                    {
+                        for (const auto c : std::views::iota(idx_t{}, r))
+                            data[ravel2d(r, c, cols)] = func(r, c);
+
+                        if constexpr (diag == Diag::Unit)
+                            data[ravel2d(r, r, cols)] = scalar_t{1};
+
+                        for (const auto c : std::views::iota(r + idx_t{ 1 }, cols))
+                            data[ravel2d(r, c, cols)] = func(r, c);
+                    }
+                }
 
             return Matrix{ rows, cols, std::move(data) };
         }
 
 
-        [[nodiscard]] static constexpr auto from_func
-        (const idx_t rows, std::invocable<idx_t, idx_t> auto func) -> Matrix
+        template<MatrixSymmetry symm = MatrixSymmetry::General, Diag diag = Diag::NonUnit>
+        [[nodiscard]]
+        static
+        constexpr auto from_func
+        (
+            const idx_t rows,
+            std::invocable<idx_t, idx_t> auto func
+        ) -> Matrix
         {
-            return Matrix::from_func(rows, rows, func);
+            return Matrix::from_func<symm, diag>(rows, rows, func);
         }
 
 
@@ -140,6 +209,27 @@ class Matrix
         [[nodiscard]] static constexpr auto ones(const idx_t rows, const idx_t cols) -> Matrix
         {
             return Matrix{ rows, cols, scalar_t{ 1 } };
+        }
+
+        template<MatrixSymmetry symm = MatrixSymmetry::General, Diag diag = Diag::NonUnit>
+        [[nodiscard]] static constexpr
+        auto random
+        (
+            const idx_t rows,
+            const idx_t cols,
+            const scalar_t lb = scalar_t{},
+            const scalar_t ub = scalar_t{ 1 }
+        ) -> Matrix
+        {
+            std::default_random_engine rng{};
+            std::uniform_real_distribution<scalar_t> unif{ lb, ub };
+            return Matrix::from_func<symm, diag>(
+                rows, cols,
+                [&](auto, auto)
+                {
+                    return unif(rng);
+                }
+            );
         }
 
 
@@ -439,6 +529,99 @@ class Matrix
         idx_t m_rows{};                 // Number of rows
         idx_t m_cols{};                 // Number of columns
         std::vector<scalar_t> m_data{}; // Data storage in row-major order
+};
+
+
+template<std::floating_point T>
+struct fmt::formatter<Matrix<T>>
+{
+    enum class Style
+    {
+        Repr,
+        Full,
+    };
+
+    Style style = Style::Repr;
+
+    fmt::formatter<T> underlying{};
+
+    [[nodiscard]]
+    constexpr auto parse(fmt::format_parse_context& ctx)
+    {
+        auto reached_end = [&](const auto& pos) -> bool
+        {
+            return pos == ctx.end() or *pos == '}';
+        };
+
+        auto it = ctx.begin();
+
+        if (reached_end(it))
+            return it;
+
+        this->style = [&] {
+            switch (*it++)
+            {
+                case 'r':
+                    return Style::Repr;
+                case 'F':
+                    return Style::Full;
+                default:
+                    throw std::format_error("Invalid Matrix style");
+            }
+        }();
+
+        if (reached_end(it))
+            return it;
+
+        if (*it == ':')
+        {
+            ++it;
+            ctx.advance_to(it);
+            it = underlying.parse(ctx);
+        }
+
+        return it;
+    }
+
+    [[nodiscard]]
+    auto format(const Matrix<T>& m, fmt::format_context& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "{}", m.shape_info());
+
+        if (style == Style::Full)
+        {
+            out = fmt::format_to(out, ":\n");
+
+            for (const auto i : m.iter_rows())
+            {
+                if (i == 0)
+                    out = fmt::format_to(out, "[");
+                else
+                    out = fmt::format_to(out, " ");
+
+                for (const auto j : m.iter_cols())
+                {
+                   if (j == 0)
+                       out = fmt::format_to(out, "[");
+
+                   ctx.advance_to(out);
+                   out = underlying.format(m[i, j], ctx);
+
+                   if (j != m.cols() - 1U)
+                       out = fmt::format_to(out, " ");
+                   else
+                       out = fmt::format_to(out, "]");
+                }
+
+                if (i != m.rows() - 1U)
+                    out = fmt::format_to(out, "\n");
+                else
+                    out = fmt::format_to(out, "]");
+            }
+        }
+
+        return out;
+    }
 };
 
 

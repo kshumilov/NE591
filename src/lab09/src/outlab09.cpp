@@ -18,6 +18,9 @@
 using real = long double;
 
 
+
+
+
 int main(int argc, char *argv[])
 {
     const Info info{
@@ -26,6 +29,8 @@ int main(int argc, char *argv[])
         .date = "03/21/2025",
         .description = "Preparation for implementation of CG solver for Ax=b systems"
     };
+
+    fmt::print("{}", info);
 
     // argparse::ArgumentParser program{
     //     "shumilov_outlab09",
@@ -44,34 +49,20 @@ int main(int argc, char *argv[])
         // const auto inputs = Inputs<real>::from_file(input_filename);
         //
 
-        auto [A, b] = build_random_system<real, MatrixSymmetry::Symmetric>(64);
-        make_diag_dom(A);
-
-        fmt::println("A, {}:\n{}", A.shape_info(), A.to_string());
-
+        constexpr int n{64};
         constexpr FPSettings<real> fps{1e-8, 10'000};
+        // const auto linear_system = build_random_system<real, MatrixSymmetry::Symmetric>(n, -1, 1);
+        const auto linear_system = build_custom_system<real>(n);
 
-        const auto cg = std::make_unique<CGState<real>>(fps, A, b);
-        const auto cg_converged = cg->solve();
-        fmt::println("CG ({}, {}):\n{}\n", cg_converged, static_cast<FixedPoint<real>>(*cg), cg->x);
+        fmt::println("A{:F: 5.3f}", linear_system->A);
 
-        const auto pj = std::make_unique<PJState<real>>(fps, A, b);
-        const auto pj_converged = pj->solve();
-        fmt::println("PJ ({}, {}):\n{}\n", pj_converged, static_cast<FixedPoint<real>>(*pj), pj->x);
+        constexpr CG<real> cg{ fps };
+        auto cgr = cg.solve(linear_system);
+        fmt::println("{:F:: .3e}", *cgr.second);
 
-        const auto sor = std::make_unique<SORState<real>>(fps, A, b, 1.5);
-        const auto sor_converged = sor->solve();
-        fmt::println("SOR({}, {}):\n{}\n", sor_converged, static_cast<FixedPoint<real>>(*sor), sor->x);
-
-        const auto [P, success] = lup_factor_inplace<real>(A);
-        const auto x = lup_solve<real>(A, P, b);
-        std::vector<real> tmp(x.size());
-        std::vector<real> residual{ b.cbegin(), b.cend() };
-        gemv<real, MatrixSymmetry::Upper>(A, x, tmp, real{ 1 });
-        gemv<real, MatrixSymmetry::Lower, Diag::Unit>(A, tmp, residual, real{ -1 }, real{ 1 });
-        const auto error = max_abs(residual);
-        fmt::println("LUP({}):\n{}\n", error, sor->x);
-
+        constexpr SOR<real> sor{fps};
+        auto sorr = sor.solve(linear_system);
+        fmt::println("{:s:: .3e}", *sorr.second);
 
 
        //  if (const auto output_filename = program.present<std::string>("--output");

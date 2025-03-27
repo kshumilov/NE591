@@ -9,7 +9,6 @@
 #include "methods/optimize.h"
 #include "methods/utils/io.h"
 #include "methods/linalg/utils/io.h"
-#include "methods/linalg/utils/math.h"
 
 #include "methods/linalg/Axb/conjugate_gradient.h"
 

@@ -3,52 +3,57 @@
 
 #include <concepts>
 #include <vector>
+#include <memory>
 
 #include <fmt/core.h>
 
 #include "methods/fixed_point.h"
 #include "methods/linalg/matrix.h"
 #include "methods/linalg/utils/math.h"
+#include "methods/linalg/Axb/utils.h"
 
 
-template<std::floating_point T, std::floating_point ErrorType = T>
-struct CGState final : public FixedPoint<ErrorType>
+struct CGParams
 {
-    const Matrix<T>& A{};
-    const std::vector<T>& b{};
-
-    std::vector<T> d{}; // Current direction
-    std::vector<T> x{}; //
-    std::vector<T> r{};
-
+    int residual_update_frequency{10};
 
     [[nodiscard]]
-    CGState(
-        const FPSettings<ErrorType>& fps,
-        const Matrix<T>& A_,
-        const std::vector<T>& b_
-    ) : FixedPoint<ErrorType>{ fps }
-      , A{ A_ }
-      , b{ b_ }
-      , d(b_.cbegin(), b_.cend())
-      , x(b_.size(), 0)
-      , r(b_.cbegin(), b_.cend())
+    constexpr auto update_residual(const int iter) const
     {
-        CGState::validate_A(A);
+        return iter % residual_update_frequency == 0;
+    }
+};
 
-        if (not matches_shape(A, b))
-        {
-            throw std::invalid_argument(
-                fmt::format("Shape mismatch: ({}, {}) & ({})", A.rows(), A.cols(), b.size())
-            );
-        }
 
+template<std::floating_point T>
+struct CGState final : public FPState<T>
+{
+    std::shared_ptr<const LinearSystem<T>> system{};
+    const CGParams params{};
+
+    std::vector<T> x{};
+    std::vector<T> r{};
+    std::vector<T> d{};
+
+    [[nodiscard]]
+    constexpr CGState(
+        std::shared_ptr<const LinearSystem<T>> Ab,
+        const CGParams params_
+    ) : FPState<T>{}
+      , system{ Ab }
+      , params{ params_ }
+      , x(Ab->b.size(), 0)
+      , r(Ab->b.cbegin(), Ab->b.cend())
+      , d(Ab->b.cbegin(), Ab->b.cend())
+    {
+        CGState::validate_system(*system);
         this->m_error = norm_l2(r);
     }
 
-
-    static auto validate_A(const Matrix<T>& A)
+    static auto validate_system(const LinearSystem<T>& system)
     {
+        const auto& A = system.A;
+
         if (not A.is_square())
         {
             throw std::invalid_argument("`A` must be a square matrix: ()");
@@ -63,27 +68,29 @@ struct CGState final : public FixedPoint<ErrorType>
         }
     }
 
-
     void update() override
     {
-        fmt::println(std::cerr, "r  : {}", r);
-        fmt::println(std::cerr, "d  : {}", d);
-        fmt::println(std::cerr, "x  : {}", x);
+        const auto& A = system->A;
+        const auto& b = system->b;
+
+        // fmt::println(std::cerr, "r  : {}", r);
+        // fmt::println(std::cerr, "d  : {}", d);
+        // fmt::println(std::cerr, "x  : {}", x);
 
         const auto Ad = A * d;
 
-        fmt::println(std::cerr, "Ad : {}", r);
+        // fmt::println(std::cerr, "Ad : {}", r);
 
-        const auto r_dot_r = dot(r, r);
-        this->m_error = std::sqrt(r_dot_r);
+        const auto rprev_dot_rprev = this->m_error * this->m_error;
+        const auto alpha = rprev_dot_rprev / dot(d, Ad);
+        // fmt::println(std::cerr, "a  : {}", alpha);
 
-        const auto alpha = r_dot_r / dot(d, Ad);
-        fmt::println(std::cerr, "a  : {}", alpha);
-
+        // Update the solution
         axpy<T>(d, x, alpha);
-        fmt::println(std::cerr, "x_n: {}", x);
+        // fmt::println(std::cerr, "x_n: {}", x);
 
-        if (false)
+        // Get new residual
+        if (params.update_residual(this->iteration()))
         {
             std::copy(b.cbegin(), b.cend(), r.begin());
             gemv<T>(A, x, r, -T{ 1 }, T{ 1 });
@@ -92,14 +99,138 @@ struct CGState final : public FixedPoint<ErrorType>
         {
             axpy<T>(Ad, r, -alpha);
         }
-        fmt::println(std::cerr, "r_n: {}", r);
 
-        const auto beta = dot(r, r) / r_dot_r;
+        // fmt::println(std::cerr, "r_n: {}", r);
+
+        // Get new Conjugate direction
+        const auto r_dot_r = dot(r, r);
+        const auto beta = r_dot_r / rprev_dot_rprev;
         scal<T>(d, beta);
         axpy<T>(r, d);
 
-        FixedPoint<ErrorType>::update();
+        this->m_error = std::sqrt(r_dot_r);
+
+        FPState<T>::update();
     }
+};
+
+
+template<std::floating_point T>
+struct fmt::formatter<CGState<T>>
+{
+    enum Style
+    {
+        Repr,
+        Solution,
+        Full,
+    };
+
+    Style style = Style::Repr;
+
+    fmt::formatter<FPState<T>> underlying{};
+
+    [[nodiscard]]
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        auto reached_end = [&](const auto& pos) -> bool
+        {
+            return pos == ctx.end() or *pos == '}';
+        };
+
+        auto it = ctx.begin();
+
+        if (reached_end(it))
+            return it;
+
+        this->style = [&] {
+            switch (*it++)
+            {
+                case 'r':
+                    return Style::Repr;
+                case 's':
+                    return Style::Solution;
+                case 'F':
+                    return Style::Full;
+                default:
+                    throw std::format_error("Invalid style");
+            }
+        }();
+
+        if (reached_end(it))
+            return it;
+
+        if (*it == ':')
+        {
+            ++it;
+            ctx.advance_to(it);
+            it = underlying.parse(ctx);
+        }
+
+        return it;
+    }
+
+    auto format(const CGState<T>& state, fmt::format_context& ctx) const
+    {
+        auto out = fmt::format_to(ctx.out(), "CG : ");
+        ctx.advance_to(out);
+        out = underlying.format(state, ctx);
+
+        auto fmt_vec = [&](const std::vector<T>& data, const std::string_view label)
+        {
+            out = fmt::format_to(out, "{}: [", label);
+            bool first = true;
+            for (const auto& v : data)
+            {
+                if (not first)
+                {
+                    out = fmt::format_to(out, " ");
+                }
+                ctx.advance_to(out);
+                underlying.real_fmt.format(v, ctx);
+                first = false;
+            }
+            return fmt::format_to(out, "]");
+        };
+
+        if (style == Style::Solution or style == Style::Full)
+        {
+            out = fmt::format_to(out, ":\n");
+            out = fmt_vec(state.x, "x");
+        }
+
+        if (style == Style::Full)
+        {
+            out = fmt::format_to(out, "\n");
+            out = fmt_vec(state.x, "r");
+
+            out = fmt::format_to(out, "\n");
+            out = fmt_vec(state.d, "d");
+        }
+        return out;
+    }
+};
+
+
+template<std::floating_point T, std::floating_point ErrorType = T>
+class CG : public FixedPoint<ErrorType>
+{
+    CGParams params{};
+
+    public:
+        [[nodiscard]]
+        explicit constexpr CG(
+            const FPSettings<ErrorType>& fps,
+            const CGParams params_ = {}
+        ) : FixedPoint<ErrorType>{ fps }
+          , params{ params_ }
+        {}
+
+
+        [[nodiscard]]
+        auto solve(std::shared_ptr<LinearSystem<T>> system) const
+        {
+            return FixedPoint<ErrorType>::template solve<CGState<T>>(system, params);
+        }
 };
 
 #endif //CONJUGATE_GRADIENT_H

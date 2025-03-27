@@ -5,6 +5,7 @@
 #include <span>
 #include <vector>
 
+#include "sor.h"
 #include "methods/array.h"
 #include "methods/optimize.h"
 #include "methods/linalg/matrix.h"
@@ -15,43 +16,79 @@
 #include "methods/fixed_point/algorithm.h"
 
 template<std::floating_point T, std::floating_point ErrorType = T>
-struct PJState final : public FixedPoint<ErrorType>
+struct PJState final : public FPState<ErrorType>
 {
-    const Matrix<T>& A{};
-    const std::vector<T>& b{};
+    std::shared_ptr<const LinearSystem<T>> system{};
 
     std::vector<T> x{};
-    std::vector<T> error{};
-
+    std::vector<T> dx{};
 
     [[nodiscard]]
-    constexpr PJState(
-        const FPSettings<ErrorType>& fps,
-        const Matrix<T>& A_,
-        const std::vector<T>& b_
-    ) : FixedPoint<ErrorType>{fps}
-      , A{ A_ }
-      , b{ b_ }
-      , x(b_.size(), 0)
-      , error(b_.cbegin(), b_.cend())
+    constexpr explicit PJState(
+        std::shared_ptr<const LinearSystem<T>> Ab
+    ) : FPState<ErrorType>{}
+      , system{ Ab }
+      , x(Ab->b.size(), 0)
+      , dx(Ab->b.size(), 0)
     {
-        assert(matches_shape(A, b));
+        PJState::validate_system(*system);
     }
-
 
     void update() override
     {
-        std::copy(b.cbegin(), b.cend(), error.begin());
-        gemv<T>(A, x, error, -1, 1);
+        const auto& A = system->A;
+        const auto& b = system->b;
+
+        std::copy(b.cbegin(), b.cend(), dx.begin());
+        gemv<T>(A, x, dx, -1, 1);
 
         for (const auto i : A.iter_rows())
-            error[i] /= A[i, i];
+            dx[i] /= A[i, i];
 
-        this->m_error = max_rel_err(error, x);
-        x += error;
+        this->m_error = max_rel_err(dx, x);
+        x += dx;
 
-        FixedPoint<ErrorType>::update();
+        FPState<ErrorType>::update();
     }
+
+    static auto validate_system(const LinearSystem<T>& system)
+    {
+        const auto& A = system.A;
+
+        if (not A.is_square())
+        {
+            throw std::invalid_argument(
+                fmt::format("`A` must be a square matrix: {:s}", A)
+            );
+        }
+
+        if (const auto idx = find_nonzero_diag(A); idx.has_value())
+        {
+            const int& i = idx.value();
+            throw std::invalid_argument(
+                fmt::format("`A` must have non-zero diagonal: A[{0}, {0}] = {1}", i, A[i, i])
+            );
+        }
+    }
+};
+
+
+template<std::floating_point T, std::floating_point ErrorType = T>
+class PJ : public FixedPoint<ErrorType>
+{
+    public:
+        [[nodiscard]]
+        explicit constexpr PJ(
+            const FPSettings<ErrorType>& fps
+        ) : FixedPoint<ErrorType>{ fps }
+        {}
+
+
+        [[nodiscard]]
+        auto solve(std::shared_ptr<LinearSystem<T>> system) const
+        {
+            return FixedPoint<ErrorType>::template solve<PJState<T>>(system);
+        }
 };
 
 

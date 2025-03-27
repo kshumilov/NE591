@@ -37,18 +37,18 @@ struct Info
     void echo(std::ostream& out) const { out << this->to_string(); }
 };
 
-template<class Char = char>
+template<>
 struct fmt::formatter<Info>
 {
     [[nodiscard]]
-    constexpr auto parse(fmt::parse_context<Char>& ctx)
+    constexpr auto parse(fmt::parse_context<>& ctx)
     {
         return ctx.begin();
     }
 
 
     [[nodiscard]]
-    constexpr auto format(const Info& info, fmt::format_context& ctx)
+    constexpr auto format(const Info& info, fmt::format_context& ctx) const
     {
         using namespace fmt::literals;
 

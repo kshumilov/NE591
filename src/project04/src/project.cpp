@@ -7,7 +7,7 @@
 #include <fmt/ostream.h>
 #include <fmt/color.h>
 
-#include "inputs.h"
+#include "Lab10.h"
 #include "topology.h"
 #include "parallel_fd.h"
 
@@ -141,7 +141,7 @@ auto read_input(int argc, char* argv[])
         program.parse_args(argc, argv);
 
         const auto filename = program.get<std::string>("input");
-        return Inputs<T>::read_input_file(filename);
+        return Lab10<T>::read_input_file(filename);
     }
     catch (const std::exception& err)
     {

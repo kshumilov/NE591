@@ -89,7 +89,7 @@ struct fmt::formatter<FPState<ErrorType>>
     {
         auto out = fmt::format_to(ctx.out(), "Iter #");
         ctx.advance_to(out);
-        out = int_fmt.format(state.iteration(), ctx);
+        out = int_fmt.format(state.iteration() + 1, ctx);
         ctx.advance_to(out);
 
         out = fmt::format_to(ctx.out(), ", Error = ");
@@ -118,7 +118,12 @@ class FixedPoint {
                 state->iteration() < iter_settings.max_iter and
                 not state->converged(iter_settings.tolerance)
             )
+            {
+                #ifndef NDEBUG
+                fmt::println(std::cerr, "{:r::14.6e}", *state);
+                #endif
                 state->update();
+            }
 
             return std::make_pair(state->converged(iter_settings.tolerance), std::move(state));
         }

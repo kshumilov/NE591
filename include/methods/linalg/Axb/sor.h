@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "conjugate_gradient.h"
 #include "methods/array.h"
 #include "methods/optimize.h"
 #include "methods/linalg/matrix.h"
@@ -15,12 +16,13 @@
 #include "methods/linalg/Axb/utils.h"
 
 
+template<std::floating_point T>
 struct SORParams
 {
-    int relaxation_factor{1};
+    T relaxation_factor{1};
 
     [[nodiscard]]
-    explicit constexpr SORParams(const int relaxation_factor_ = 1) : relaxation_factor(relaxation_factor_)
+    explicit constexpr SORParams(const T relaxation_factor_ = 1) : relaxation_factor{ relaxation_factor_ }
     {
         if (relaxation_factor_ < 0)
         {
@@ -32,31 +34,49 @@ struct SORParams
 };
 
 
-template<std::floating_point T, std::floating_point ErrorType = T>
-struct SORState final : public FPState<ErrorType>
+template<std::floating_point T>
+struct fmt::formatter<SORParams<T>>
 {
-    std::shared_ptr<const LinearSystem<T>> system{};
-    const SORParams params{};
+    [[nodiscard]]
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
 
-    std::vector<T> x{};
+    [[nodiscard]]
+    constexpr auto format(const SORParams<T>& params, format_context& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(),
+            "Relaxation Factor: {:g}",
+            params.relaxation_factor
+        );
+    }
+};
+
+
+template<std::floating_point T>
+struct SORState final : IterAxbState<T>
+{
+    const SORParams<T> params{};
 
     [[nodiscard]]
     constexpr SORState(
         std::shared_ptr<const LinearSystem<T>> Ab,
-        const SORParams params_
-    ) : FPState<ErrorType>{}
-      , system{ Ab }
+        const SORParams<T> params_
+    ) : IterAxbState<T>{Ab}
       , params{ params_ }
-      , x(Ab->b.size(), 0)
     {
-        SORState::validate_system(*system);
+        SORState::validate_system(*this->system);
     }
 
     void update() override
     {
-        const auto& A = system->A;
-        const auto& b = system->b;
+        const auto& A = this->system->A;
+        const auto& b = this->system->b;
         const auto& w = this->params.relaxation_factor;
+
+        auto& x = this->x;
 
         this->m_error = T{};
         for (const auto i : A.iter_rows())
@@ -66,7 +86,7 @@ struct SORState final : public FPState<ErrorType>
             x[i] += update;
         }
 
-        FPState<ErrorType>::update();
+        IterAxbState<T>::update();
     }
 
     static auto validate_system(const LinearSystem<T>& system)
@@ -94,110 +114,65 @@ struct SORState final : public FPState<ErrorType>
 template<std::floating_point T>
 struct fmt::formatter<SORState<T>>
 {
-    enum Style
-    {
-        Repr,
-        Solution,
-        Full,
-    };
-
-    Style style = Style::Repr;
-
-    fmt::formatter<FPState<T>> underlying{};
+    fmt::formatter<IterAxbState<T>> underlying{};
 
     [[nodiscard]]
     constexpr auto parse(format_parse_context& ctx)
     {
-        auto reached_end = [&](const auto& pos) -> bool
-        {
-            return pos == ctx.end() or *pos == '}';
-        };
-
-        auto it = ctx.begin();
-
-        if (reached_end(it))
-            return it;
-
-        this->style = [&] {
-            switch (*it++)
-            {
-                case 'r':
-                    return Style::Repr;
-                case 's':
-                    return Style::Solution;
-                case 'F':
-                    return Style::Full;
-                default:
-                    throw std::format_error("Invalid style");
-            }
-        }();
-
-        if (reached_end(it))
-            return it;
-
-        if (*it == ':')
-        {
-            ++it;
-            ctx.advance_to(it);
-            it = underlying.parse(ctx);
-        }
-
-        return it;
+        return underlying.parse(ctx);
     }
 
     auto format(const SORState<T>& state, fmt::format_context& ctx) const
     {
-        auto out = fmt::format_to(ctx.out(), "SOR: ");
+        const auto out = fmt::format_to(ctx.out(), "SOR:");
         ctx.advance_to(out);
-        out = underlying.format(state, ctx);
-
-        auto fmt_vec = [&](const std::vector<T>& data, const std::string_view label)
-        {
-            out = fmt::format_to(out, "{}: [", label);
-            bool first = true;
-            for (const auto& v : data)
-            {
-                if (not first)
-                {
-                    out = fmt::format_to(out, " ");
-                }
-                ctx.advance_to(out);
-                underlying.real_fmt.format(v, ctx);
-                first = false;
-            }
-            return fmt::format_to(out, "]");
-        };
-
-        if (style == Style::Solution or style == Style::Full)
-        {
-            out = fmt::format_to(out, ":\n");
-            out = fmt_vec(state.x, "x");
-        }
-        return out;
+        return underlying.format(state, ctx);
     }
 };
 
 
 template<std::floating_point T, std::floating_point ErrorType = T>
-class SOR : public FixedPoint<ErrorType>
+struct SOR : FixedPoint<ErrorType>
 {
-    SORParams params{};
+    SORParams<T> params{};
 
-    public:
-        [[nodiscard]]
-        explicit constexpr SOR(
-            const FPSettings<ErrorType>& fps,
-            const SORParams params_ = SORParams{}
-        ) : FixedPoint<ErrorType>{ fps }
-          , params{ params_ }
-        {}
+    [[nodiscard]]
+    explicit constexpr SOR(
+        const FPSettings<ErrorType>& fps,
+        const SORParams<T> params_ = SORParams<T>{}
+    ) : FixedPoint<ErrorType>{ fps }
+      , params{ params_ }
+    {}
 
 
-        [[nodiscard]]
-        auto solve(std::shared_ptr<LinearSystem<T>> system) const
-        {
-            return FixedPoint<ErrorType>::template solve<SORState<T>>(system, params);
-        }
+    [[nodiscard]]
+    auto solve(std::shared_ptr<const LinearSystem<T>> system) const
+    {
+        return FixedPoint<ErrorType>::template solve<SORState<T>>(system, params);
+    }
+};
+
+
+template<std::floating_point T>
+struct fmt::formatter<SOR<T>>
+{
+    [[nodiscard]]
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    [[nodiscard]]
+    constexpr auto format(const SOR<T>& sor, format_context& ctx) const
+    {
+        return fmt::format_to(
+            ctx.out(),
+            "Method: {}\n"
+            "{}",
+            AxbAlgorithm::SuccessiveOverRelaxation,
+            sor.params
+        );
+    }
 };
 
 template<std::floating_point DType, std::invocable<std::size_t, std::size_t> MatElem>

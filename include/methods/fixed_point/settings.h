@@ -5,14 +5,16 @@
 
 #include "fmt/format.h"
 
+#include "methods/utils/io.h"
+
 template<std::floating_point ErrorType = long double>
 struct FPSettings
 {
     static constexpr ErrorType DEFAULT_TOLERANCE{1.0e-8};
     static constexpr int DEFAULT_MAX_ITER{100};
 
-    ErrorType tolerance{};
-    int max_iter{};
+    ErrorType tolerance{DEFAULT_TOLERANCE};
+    int max_iter{DEFAULT_MAX_ITER};
 
     [[nodiscard]]
     constexpr explicit FPSettings(const ErrorType tolerance_ = DEFAULT_TOLERANCE, const int max_iter_ = DEFAULT_MAX_ITER)
@@ -36,71 +38,54 @@ struct FPSettings
         return max_iter == other.tolerance and isclose(tolerance, other.tolerance);
     }
 
+
+    enum class FPSettingParamOrder
+    {
+        ToleranceFirst, MaxIterFirst,
+    };
+
+
+    template<FPSettingParamOrder Order = FPSettingParamOrder::ToleranceFirst>
+    [[nodiscard]]
+    static auto from_file(std::istream& input)
+    {
+        if constexpr (Order == FPSettingParamOrder::ToleranceFirst)
+        {
+            return FPSettings{
+                read_positive_value<ErrorType>(input, "tolerance"),
+                read_positive_value<int>(input, "max_iter"),
+            };
+        }
+        else
+        {
+            const auto max_iter_ = read_positive_value<int>(input, "max_iter");
+            const auto tolerance_ = read_positive_value<ErrorType>(input, "tolerance");
+            return FPSettings{
+                tolerance_,
+                max_iter_,
+            };
+        }
+    }
 };
 
 
-template<std::floating_point T>
-struct fmt::formatter<FPSettings<T>>
+template<std::floating_point ErrorType>
+struct fmt::formatter<FPSettings<ErrorType>>
 {
-    enum class Style
+    [[nodiscard]]
+    constexpr auto parse(format_parse_context& ctx)
     {
-        Repr, Pretty,
-        PrettyWithHeader
-    };
-
-    Style style = Style::Repr;
-
-    template<class ParseContext>
-    constexpr auto parse(ParseContext& ctx)
-    {
-        auto it = ctx.begin();
-        if (it == ctx.end() or *it == '}')
-            return it;
-
-        this->style = [&] {
-            switch (*it++)
-            {
-                case 'r':
-                    return Style::Repr;
-                case 'p':
-                    return Style::Pretty;
-                case 'P':
-                    return Style::PrettyWithHeader;
-                default:
-                    throw std::format_error("Invalid fixed point style");
-            }
-        }();
-
-        return it;
+        return ctx.begin();
     }
 
-    template<class FormatContext>
-    auto format(const FPSettings<T>& settings, FormatContext& ctx) const
+    auto format(const FPSettings<ErrorType>& fps, fmt::format_context& ctx) const
     {
-        if (style == Style::Repr)
-        {
-            return fmt::format_to(
-                ctx.out(),
-                "FPSettings(max_iter={:L}, tolerance={:g})",
-                settings.max_iter,
-                settings.tolerance
-            );
-        }
-
-        return fmt::format_to(
-            ctx.out(),
-            "{2}"
-            "{1}{3:.<{0}s}: {4:d}\n"
-            "{1}{5:.<{0}s}: {6:.6g}",
-            40,
-            style == Style::PrettyWithHeader ? "\t" : "",
-            style == Style::PrettyWithHeader ? "Fixed-Point Iteration:\n" : "",
-            "Maximum Number of Iterations",
-            settings.max_iter,
-            "Tolerance",
-            settings.tolerance
+        return fmt::format_to(ctx.out(),
+            "Tolerance: {:g}\n"
+            "Maximum #Iterations: {:L}",
+            fps.tolerance,
+            fps.max_iter
         );
-
     }
 };
 

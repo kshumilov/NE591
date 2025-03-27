@@ -16,7 +16,7 @@
 #include "mpi_utils.h"
 
 template<std::floating_point T>
-struct Inputs
+struct Lab10
 {
     AxbAlgorithm algorithm{};
     FixedPointIterSettings<T> iter_settings{};
@@ -67,7 +67,7 @@ struct Inputs
         {
             case AxbAlgorithm::LUP:
             {
-                return Inputs{
+                return Lab10{
                     algorithm,
                     FixedPointIterSettings<T>{},
                     T{ 1 },
@@ -77,7 +77,7 @@ struct Inputs
             case AxbAlgorithm::PointJacobi:
             case AxbAlgorithm::GaussSeidel:
             {
-                return Inputs{
+                return Lab10{
                     algorithm,
                     FixedPointIterSettings<T>::template from_file<ParamOrder::MaxIterFirst>(input),
                     T{ 1 },
@@ -95,7 +95,7 @@ struct Inputs
                     );
                 }
 
-                return Inputs{
+                return Lab10{
                     algorithm,
                     settings,
                     relaxation_factor,
@@ -131,7 +131,7 @@ struct Inputs
             ); // Indicate an error occurred
         }
 
-        return Inputs::from_file(input);
+        return Lab10::from_file(input);
     }
 };
 

@@ -9,7 +9,7 @@
 
 #include "lab/lab.h"
 
-#include "inputs.h"
+#include "Lab10.h"
 
 
 using real = long double;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         program.parse_args(argc, argv);
 
         const auto input_filename = program.get<std::string>("input");
-        const auto inputs = Inputs<real>::from_file(input_filename);
+        const auto inputs = Lab10<real>::from_file(input_filename);
 
         if (const auto output_filename = program.present<std::string>("--output");
             output_filename.has_value())

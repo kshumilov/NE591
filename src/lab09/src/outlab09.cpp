@@ -10,87 +10,77 @@
 #include <methods/linalg/Axb/sor.h>
 
 #include "lab/lab.h"
+#include "lab/utils/io.h"
 
-#include "inputs.h"
+#include "Lab10.h"
 #include "custom_system.h"
 
 
 using real = long double;
 
 
-
-
-
 int main(int argc, char *argv[])
 {
-    const Info info{
-        .title = "NE 501 Outlab #09",
-        .author = "Kirill Shumilov",
-        .date = "03/21/2025",
-        .description = "Preparation for implementation of CG solver for Ax=b systems"
+    argparse::ArgumentParser program{
+        "shumilov_outlab09",
+        "1.0",
+        argparse::default_arguments::help,
     };
 
-    fmt::print("{}", info);
-
-    // argparse::ArgumentParser program{
-    //     "shumilov_outlab09",
-    //     "1.0",
-    //     argparse::default_arguments::help,
-    // };
-    //
-    // program.add_argument("input").help("Path to input file.");
-    // program.add_argument("-o", "--output").help("Path to output file");
+    program.add_argument("input").help("Path to input file.");
+    program.add_argument("-o", "--output").help("Path to output file");
 
     try
     {
-        // program.parse_args(argc, argv);
+        program.parse_args(argc, argv);
 
-        // const auto input_filename = program.get<std::string>("input");
-        // const auto inputs = Inputs<real>::from_file(input_filename);
+        const auto input_filename = program.get<std::string>("input");
+        const auto lab = read_input_file<Lab10<real>>(input_filename);
+        const auto result = lab.run();
+
+        // constexpr int n{256};
+        // constexpr FPSettings<real> fps{1e-8, 10'000};
+        // const auto linear_system = build_random_system<real, MatrixSymmetry::Symmetric>(n, 0, 1);
+        // const auto linear_system = build_custom_system<real>(n);
+
+        // const CG<real> cg{ fps };
+        // auto cgr = cg.solve(linear_system);
+        // fmt::println("{}", cg);
+        // fmt::println("{:r:: .3e}", *cgr.second);
         //
+        // const SOR<real> sor{fps};
+        // auto sorr = sor.solve(linear_system);
+        // fmt::println("{:r:: .3e}", *sorr.second);
 
-        constexpr int n{64};
-        constexpr FPSettings<real> fps{1e-8, 10'000};
-        // const auto linear_system = build_random_system<real, MatrixSymmetry::Symmetric>(n, -1, 1);
-        const auto linear_system = build_custom_system<real>(n);
+        if (const auto output_filename = program.present<std::string>("--output");
+            output_filename.has_value())
+        {
+            std::ofstream output{ output_filename.value() };
+            if (!output.is_open())
+            {
+                throw std::runtime_error(
+                    fmt::format("Could not open: '{}'", output_filename.value())
+                ); // Indicate an error occurred
+            }
 
-        fmt::println("A{:F: 5.3f}", linear_system->A);
+            fmt::println(
+                output,
+                "{}\n",
+                lab
+            );
 
-        constexpr CG<real> cg{ fps };
-        auto cgr = cg.solve(linear_system);
-        fmt::println("{:F:: .3e}", *cgr.second);
+            Lab10<real>::print_result(output, result);
+        }
+        else
+        {
+            fmt::println(
+                std::cout,
+                "{}",
+                lab
+            );
 
-        constexpr SOR<real> sor{fps};
-        auto sorr = sor.solve(linear_system);
-        fmt::println("{:s:: .3e}", *sorr.second);
-
-
-       //  if (const auto output_filename = program.present<std::string>("--output");
-       //      output_filename.has_value())
-       //  {
-       //      std::ofstream output{ output_filename.value() };
-       //      if (!output.is_open())
-       //      {
-       //          throw std::runtime_error(
-       //              fmt::format("Could not open: '{}'", output_filename.value())
-       //          ); // Indicate an error occurred
-       //      }
-       //
-       //      fmt::print(
-       //          output,
-       //          "{}{}\n",
-       //          info.to_string(),
-       //          inputs.to_string()
-       //      );
-       //  } else
-       //  {
-       //      fmt::print(
-       //          std::cout,
-       //          "{}{}\n",
-       //          info.to_string(),
-       //          inputs.to_string()
-       //      );
-       // }
+            Lab10<real>::print_result(std::cout, result);
+        }
     }
     catch (const std::exception& err)
     {

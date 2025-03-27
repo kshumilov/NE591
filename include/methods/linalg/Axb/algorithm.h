@@ -12,19 +12,18 @@ enum class AxbAlgorithm: int
     PointJacobi = 1,
     GaussSeidel = 2,
     SuccessiveOverRelaxation = 3,
+    ConjugateGradient = 4,
 };
 
 template<>
 struct fmt::formatter<AxbAlgorithm, char>
 {
-    template<class ParseContext>
-    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    constexpr auto parse(format_parse_context& ctx)
     {
         return ctx.begin();
     }
 
-    template<class FmtContext>
-    constexpr auto format(const AxbAlgorithm val, FmtContext& ctx) const
+    constexpr auto format(const AxbAlgorithm val, format_context& ctx) const
     {
         switch (val)
         {
@@ -36,6 +35,8 @@ struct fmt::formatter<AxbAlgorithm, char>
                 return fmt::format_to(ctx.out(), "Gauss-Seidel");
             case AxbAlgorithm::SuccessiveOverRelaxation:
                 return fmt::format_to(ctx.out(), "Successive Over Relaxation");
+            case AxbAlgorithm::ConjugateGradient:
+                return fmt::format_to(ctx.out(), "Conjugate Gradients");
             default:
                 std::unreachable();
         }

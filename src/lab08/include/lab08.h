@@ -42,7 +42,7 @@ struct Info
 
 
 template<std::floating_point T>
-struct Inputs
+struct Lab10
 {
     Slab<T> slab{};
     FixedPointIterSettings<T> iter_settings{};
@@ -63,7 +63,7 @@ struct Inputs
     [[nodiscard]]
     static auto from_file(std::istream& input)
     {
-        return Inputs{
+        return Lab10{
             Slab<T>::from_file(input),
             FixedPointIterSettings<T>::from_file(input)
         };
@@ -74,7 +74,7 @@ struct Inputs
 template<std::floating_point T>
 struct Outputs
 {
-    std::shared_ptr<Inputs<T>> inputs{};
+    std::shared_ptr<Lab10<T>> inputs{};
     Flux<T> flux{};
     FixedPointIterResult<std::span<T>> result{};
     std::chrono::duration<long long, std::nano> time{}; // nanoseconds
@@ -112,7 +112,7 @@ template<ExecutionPolicy Policy, std::floating_point T>
 struct Lab08
 {
     Info info{};
-    Inputs<T> inputs{};
+    Lab10<T> inputs{};
 
     [[nodiscard]]
     auto run()
@@ -124,7 +124,7 @@ struct Lab08
         const auto end = std::chrono::high_resolution_clock::now();
         const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         return Outputs<T>{
-            std::make_shared<Inputs<T>>(this->inputs),
+            std::make_shared<Lab10<T>>(this->inputs),
             std::move(flux),
             std::move(result),
             duration

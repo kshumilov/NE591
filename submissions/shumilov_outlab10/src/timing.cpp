@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 
 #include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 #include "methods/linalg/Axb/cg.h"
 #include "methods/linalg/Axb/sor.h"

@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <chrono>
+#include <fstream>
 
 #include <fmt/core.h>
 

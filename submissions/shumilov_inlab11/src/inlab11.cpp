@@ -1,9 +1,12 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <chrono>
 
 #include <argparse/argparse.hpp>
 
+#include <fmt/core.h>
+#include <fmt/chrono.h>
 #include <fmt/color.h>
 #include <fmt/ostream.h>
 
@@ -34,7 +37,9 @@ int main(int argc, char *argv[])
             program.get<std::string>("input")
         );
 
+        const auto start = std::chrono::high_resolution_clock::now();
         const auto result = lab.run();
+        const auto end = std::chrono::high_resolution_clock::now();
 
         auto output = get_output_stream(
             program.present<std::string>("--output")
@@ -50,6 +55,13 @@ int main(int argc, char *argv[])
                 );
 
                 Lab11<real>::print_result(stream, result);
+
+                fmt::println(
+                    stream,
+                    "Execution time: {:%S} seconds.\n"
+                    "================================================================================",
+                    std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+                );
             },
             output
         );

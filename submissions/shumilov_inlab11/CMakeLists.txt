@@ -69,23 +69,6 @@ add_custom_command(TARGET inlab11
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:inlab11> ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(timing ./src/timing.cpp)
-target_link_libraries(
-        timing
-        PRIVATE
-        methods
-        ne591_compiler_flags  # Compilation Flags
-        argparse              # CLI argument parsing
-        fmt::fmt              # Formatting
-        nlohmann_json::nlohmann_json  # Json IO
-)
-target_include_directories(timing PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lab_include)
-
-add_custom_command(TARGET timing
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:timing> ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 # Contains definition for CMAKE_INSTALL_DATADIR
 # Only needs to be included once
 include(GNUInstallDirs)

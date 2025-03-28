@@ -11,8 +11,13 @@ CMake >=3.24
 # File Tree
 ```
 shumilov_outlab10
+├── analysis
+│   ├── analysis.ipynb
+│   ├── iters_cust.pdf
+│   ├── iters_rand.pdf
+│   ├── timing_custom.json
+│   └── timing_random.json
 ├── CMakeLists.txt
-├── README.md
 ├── examples
 │   ├── asymm.inp
 │   └── symm.inp
@@ -20,24 +25,38 @@ shumilov_outlab10
 │   ├── CMakeLists.txt
 │   ├── lab
 │   │   ├── config.h
+│   │   ├── io.h
 │   │   └── lab.h
-│   └── methods
-│       ├── linalg
-│       │   ├── blas.h
-│       │   ├── matrix.h
-│       │   ├── utils
-│       │   │   ├── io.h
-│       │   │   └── math.h
-│       │   └── vec.h
-│       ├── optimize.h
-│       └── utils
-│           ├── io.h
-│           └── math.h
+│   ├── methods
+│   │   ├── array.h
+│   │   ├── fixed_point
+│   │   │   ├── algorithm.h
+│   │   │   ├── settings.h
+│   │   │   └── state.h
+│   │   ├── fixed_point.h
+│   │   ├── linalg
+│   │   │   ├── Axb
+│   │   │   │   ├── algorithm.h
+│   │   │   │   ├── cg.h
+│   │   │   │   ├── linear_system.h
+│   │   │   │   ├── sor.h
+│   │   │   │   └── state.h
+│   │   │   ├── blas.h
+│   │   │   ├── matrix.h
+│   │   │   ├── utils
+│   │   │   │   ├── io.h
+│   │   │   │   └── math.h
+│   │   │   └── vec.h
+│   │   └── math.h
+│   └── utils
+│       └── io.h
 ├── lab_include
-│   ├── inputs.h
-│   └── util.h
+│   ├── build_system.h
+│   └── Lab10.h
+├── README.md
 └── src
-    └── outlab10.cpp
+    ├── outlab10.cpp
+    └── timing.cpp
 ```
 
 # Hazel HPC System (NCSU)
@@ -57,7 +76,7 @@ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
 ```
 ### Example
 ```bash
-[kshumil@login02 shumilov_outlab10]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
+[kshumil@login03 shumilov_outlab10]$ cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --fresh
 -- The CXX compiler identification is GNU 13.2.0
 -- Detecting CXX compiler ABI info
 -- Detecting CXX compiler ABI info - done
@@ -99,7 +118,7 @@ Optional arguments:
   -o, --output  Path to output file 
 ```
 
-# Examples
+# 3. Examples
 ## Printing to stdout
 ```bash
 ================================================================================
@@ -165,3 +184,31 @@ Solution Vector, x:
 [ 1.66666667e-01  6.66666667e-02  6.66666667e-02  6.66666667e-02  6.66666667e-02]
 ================================================================================
 ```
+
+# 4. Analysis
+The graphs for the Task 4 located under `analysis` in `iters_rand.pdf` and `iters_cust.pdf`.
+The `cust` graph plots data obtained from original custom function, required in the task.
+The `rand` graph plots data based on diagonally dominant matrix generated separately.
+
+## Custom Matrix
+The special property of that matrix is that the sum of its elements is 1. 
+Further, the solution for custom linear system of rank n, where b_i = 1 for all i, x_i = n, for all i.
+Given that vectors b and x are therefore collinear, the CG gradient method finds the solution in a single iteration,
+since the direction space (i.e. the space of the residuals) gets populated with the desired direction immediately.
+
+SOR method struggles in the case of this matrix, as diagonally dominance of this system is not profound.
+
+## Random matrix
+The random symmetric matrix is generated based on the following rules:
+1. M[i, j] = M[j, i] = (f(i, j) + f(j, i)) / 2, where f(i, j) in [0, 1]
+2. The sum of all elements in row i and col i is calculated (=Si)
+3. M[i, i] = Si
+
+The results of this matrix are found in `rand` variant of timings. We can see that in this case number of iterations is comparable between the CG and SOR methods, which is interesting.
+Furthremore, it goes down with the rank size. This can be explained by the increased diagonal dominance of the matrix, as the rank of the matrix grows.
+
+The timing scaling is the most interesting. All scale roughly with the size of the matrix. SOR is the most memory efficient as it only requires a single GEMM call. 
+CG requires one or two depending on the iteration (every 10th iteration it performs an accurate residual calculation). 
+Furthermore, it stores 3 arrays per iterative state, while SOR stores only 1. 
+
+LUP is the most inefficient of them all.

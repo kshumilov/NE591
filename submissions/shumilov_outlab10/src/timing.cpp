@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
+#include "methods/linalg/lu.h"
 #include "methods/linalg/Axb/cg.h"
 #include "methods/linalg/Axb/sor.h"
 
@@ -81,6 +82,17 @@ struct TimingInfo {
     , iterations{ result.iteration() }
     {}
 
+    TimingInfo(
+        const int n_,
+        const std::chrono::duration<long long, std::nano> time_,
+        const T error
+    )
+    : n{n_} , algo{AxbAlgorithm::LUP}, time{time_}
+    , converged{ true }
+    , iterative_error{ 0.0 }
+    , residual_error{error}
+    {}
+
     template<class BasicJsonType>
     friend void to_json(BasicJsonType& j, const TimingInfo& ti) {
         j["n"] = ti.n;
@@ -95,7 +107,7 @@ struct TimingInfo {
 
 
 template<std::floating_point T, class Algo>
-auto time(const Algo& algo, std::shared_ptr<const LinearSystem<T>> system)
+auto time_iterative(const Algo& algo, std::shared_ptr<const LinearSystem<T>> system)
 {
     const auto start = std::chrono::high_resolution_clock::now();
     const auto result = algo.solve(system);
@@ -105,6 +117,33 @@ auto time(const Algo& algo, std::shared_ptr<const LinearSystem<T>> system)
         system->rank(),
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - start),
         result.first, *(result.second),
+    };
+}
+
+
+template<std::floating_point T>
+auto time_lup(std::shared_ptr<LinearSystem<T>> system)
+{
+    auto& A = system->A;
+    const auto& b = system->b;
+
+    const auto start = std::chrono::high_resolution_clock::now();
+    const auto [P, success] = lup_factor_inplace<T>(A);
+    const auto x = lup_solve<T>(A, P, b);
+
+    std::vector<T> tmp(x.size());
+    std::vector<T> residual{ b.cbegin(), b.cend() };
+    gemv<T, MatrixSymmetry::Upper>(A, x, tmp, T{ 1 });
+    gemv<T, MatrixSymmetry::Lower, Diag::Unit>(A, tmp, residual, T{ -1 }, T{ 1 });
+    const auto error = max_abs(residual);
+    const auto end = std::chrono::high_resolution_clock::now();
+
+    const auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+    return TimingInfo<T>{
+        system->rank(),
+        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start),
+        error
     };
 }
 
@@ -123,8 +162,9 @@ auto get_timings(std::span<const int> N, const int k, const System system_type)
         for ([[maybe_unused]] const auto i : std::views::iota(0, k))
         {
             const auto system = build_system<T>(n, system_type);
-            timings.emplace_back(time<T>(cg, system));
-            timings.emplace_back(time<T>(sor, system));
+            timings.emplace_back(time_iterative<T>(cg, system));
+            timings.emplace_back(time_iterative<T>(sor, system));
+            timings.emplace_back(time_lup<T>(system));
         }
         fmt::println("Done {}", n);
     }
@@ -150,9 +190,9 @@ using real = long double;
 
 int main()
 {
-    constexpr auto N = std::to_array({32, 64, 128, 256, 512, 1024, 2048});
+    constexpr auto N = std::to_array({32, 64, 128, 256, 512, 1024});
     constexpr int k = 20;
-    constexpr auto system_type = System::Random;
+    constexpr auto system_type = System::Custom;
     const std::string output_filename{
         fmt::format("timing_{}.json", system_type)
     };

@@ -3,12 +3,11 @@
 #include <iostream>
 
 #include <argparse/argparse.hpp>
-#include <fmt/base.h>
+
 #include <fmt/color.h>
 #include <fmt/ostream.h>
 
-#include "lab/lab.h"
-#include "lab/utils/io.h"
+#include "lab/io.h"
 
 #include "Lab10.h"
 

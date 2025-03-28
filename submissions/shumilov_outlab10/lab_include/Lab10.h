@@ -7,8 +7,7 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 
-#include "methods/linalg/Axb/conjugate_gradient.h"
-#include "methods/linalg/Axb/utils.h"
+#include "methods/linalg/Axb/cg.h"
 
 #include "lab/lab.h"
 

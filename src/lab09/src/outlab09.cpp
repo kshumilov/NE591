@@ -6,14 +6,11 @@
 #include <fmt/base.h>
 #include <fmt/color.h>
 #include <fmt/ostream.h>
-#include <methods/linalg/Axb/point_jacobi.h>
-#include <methods/linalg/Axb/sor.h>
 
 #include "lab/lab.h"
 #include "lab/utils/io.h"
 
 #include "Lab10.h"
-#include "custom_system.h"
 
 
 using real = long double;

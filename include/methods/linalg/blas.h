@@ -68,7 +68,7 @@ void axpy(std::span<const T> x, std::span<T> y, const T alpha = T{ 1 }) noexcept
 }
 
 
-auto dot(const std::ranges::range auto& lhs, const std::ranges::range auto& rhs)
+constexpr auto dot(const std::ranges::range auto& lhs, const std::ranges::range auto& rhs)
 {
     assert(lhs.size() == rhs.size());
     return std::transform_reduce(
@@ -80,7 +80,18 @@ auto dot(const std::ranges::range auto& lhs, const std::ranges::range auto& rhs)
 }
 
 
-auto norm_l2(const std::ranges::range auto& v) { return std::sqrt(dot(v, v)); }
+constexpr auto norm_l2(const std::ranges::range auto& v) { return std::sqrt(dot(v, v)); }
+
+constexpr auto norm_linf(const std::ranges::range auto& v)
+{
+    return std::transform_reduce(
+        std::cbegin(v),
+        std::cend(v),
+        0,
+        [&](const auto& vi, const auto& vj) { return std::max(vi, vj); },
+        [&](const auto& vi) { return std::abs(vi); }
+    );
+}
 
 
 template<

@@ -65,7 +65,7 @@ struct CGState final : IterAxbState<T>
       , d(Ab->b.cbegin(), Ab->b.cend())
     {
         CGState::validate_system(*this->system);
-        this->m_error = norm_l2(r);
+        this->m_error = norm_l2(r) / norm_l2(this->system->b);
     }
 
     static auto validate_system(const LinearSystem<T>& system)
@@ -117,6 +117,12 @@ struct CGState final : IterAxbState<T>
         this->m_error = std::sqrt(r_dot_r) / norm_l2(b);
 
         FPState<T>::update();
+    }
+
+    [[nodiscard]]
+    AxbAlgorithm algorithm() const override
+    {
+        return AxbAlgorithm::ConjugateGradient;
     }
 };
 
@@ -190,7 +196,7 @@ struct fmt::formatter<CG<T>>
             ctx.out(),
             "Method: {}\n"
             "{}",
-            AxbAlgorithm::ConjugateGradient,
+            cg.algorithm(),
             cg.params
         );
     }

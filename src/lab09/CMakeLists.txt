@@ -20,6 +20,6 @@ set_property(TARGET outlab09 PROPERTY OUTPUT_NAME shumilov_outlab09)
 
 install(TARGETS outlab09 DESTINATION bin OPTIONAL)
 
-add_executable(test09 src/test.cpp)
-target_include_directories(test09 PRIVATE ./include)
-target_link_libraries(test09 PRIVATE methods ne591_compiler_flags fmt::fmt argparse nlohmann_json::nlohmann_json)
+add_executable(timing src/timing.cpp)
+target_include_directories(timing PRIVATE ./include)
+target_link_libraries(timing PRIVATE methods ne591_compiler_flags fmt::fmt argparse nlohmann_json::nlohmann_json)

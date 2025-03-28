@@ -108,6 +108,12 @@ struct SORState final : IterAxbState<T>
             );
         }
     }
+
+    [[nodiscard]]
+    AxbAlgorithm algorithm() const override
+    {
+        return AxbAlgorithm::SuccessiveOverRelaxation;
+    }
 };
 
 

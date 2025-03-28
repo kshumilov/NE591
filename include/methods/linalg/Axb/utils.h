@@ -7,11 +7,13 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
+#include "methods/fixed_point.h"
+
 #include "methods/linalg/matrix.h"
 #include "methods/utils/io.h"
 #include "methods/linalg/utils/io.h"
 
-
+#include "methods/linalg/Axb/algorithm.h"
 
 template<std::floating_point T>
 struct LinearSystem
@@ -50,7 +52,7 @@ struct LinearSystem
     }
 
     [[nodiscard]]
-    constexpr auto residual(std::span<const T> x) const
+    constexpr auto residual(const std::vector<T>& x) const
     {
         return get_residual<T>(A, x, b);
     }
@@ -87,6 +89,7 @@ struct fmt::formatter<LinearSystem<T>>
     }
 };
 
+
 template<std::floating_point T>
 struct IterAxbState : FPState<T>
 {
@@ -108,7 +111,13 @@ struct IterAxbState : FPState<T>
     [[nodiscard]]
     constexpr auto residual() const
     {
-        return system->template residual<T>(x);
+        return system->residual(x);
+    }
+
+    [[nodiscard]]
+    virtual AxbAlgorithm algorithm() const
+    {
+        std::unreachable();
     }
 };
 

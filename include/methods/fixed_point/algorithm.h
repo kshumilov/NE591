@@ -89,7 +89,7 @@ struct fmt::formatter<FPState<ErrorType>>
     {
         auto out = fmt::format_to(ctx.out(), "Iter #");
         ctx.advance_to(out);
-        out = int_fmt.format(state.iteration() + 1, ctx);
+        out = int_fmt.format(state.iteration(), ctx);
         ctx.advance_to(out);
 
         out = fmt::format_to(ctx.out(), ", Error = ");

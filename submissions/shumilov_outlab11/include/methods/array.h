@@ -6,6 +6,8 @@
 #include <numeric>
 #include <ranges>
 #include <random>
+#include <algorithm>
+
 
 #include "methods/math.h"
 
@@ -30,6 +32,24 @@ template<std::ranges::range U, std::ranges::range V = U>
                 if (ri == zero and isclose(ti, zero)) return zero;
                 return std::abs(ti / ri - one);
             });
+}
+
+template<std::floating_point T>
+auto generate_random_vector(int size, T min_val, T max_val) {
+    // Seed the random number generator
+    std::vector<T> data(static_cast<std::size_t>(size));
+
+    std::random_device rd{};
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<> unif(min_val, max_val);
+
+    // Generate random numbers and fill the vector
+    std::generate(data.begin(), data.end(), [&]()
+    {
+        return unif(rng);
+    });
+
+    return data;
 }
 
 template<std::ranges::range U, std::ranges::range V = U>

@@ -29,12 +29,12 @@ struct CMDArgs
 
     std::string input_filename{};
     std::optional<std::string> output_filename{};
-    std::string flux_filename{"FLUX"};
+    std::optional<std::string> flux_filename{};
 
     output_t output;
 
     [[nodiscard]]
-    CMDArgs(const std::string& i, const std::optional<std::string>& o, const std::string& f)
+    CMDArgs(const std::string& i, const std::optional<std::string>& o, const std::optional<std::string>& f)
         : input_filename{ i }
         , output_filename{ o }
         , flux_filename{ f }
@@ -51,10 +51,15 @@ struct CMDArgs
     template<std::floating_point T>
     void write_flux(const FixedPointResult<T>& result) const
     {
-        std::ofstream flux_output{ flux_filename };
+        if (not flux_filename.has_value())
+        {
+            return;
+        }
+
+        std::ofstream flux_output{ *flux_filename };
         if (!flux_output.is_open())
             throw std::runtime_error(
-                fmt::format("Could not open: '{}'", flux_filename)
+                fmt::format("Could not open: '{}'", *flux_filename)
             ); // Indicate an error occurred
 
         fmt::println(flux_output, "{:^5s} {:^5s} {:^14s}", "i", "j", "Flux");
@@ -103,14 +108,14 @@ struct CMDArgs
 
         program.add_argument("input").help("Path to input file.");
         program.add_argument("-o", "--output").help("Path to output file.");
-        program.add_argument("-f", "--flux").help("Path to flux file").default_value("FLUX");
+        program.add_argument("-f", "--flux").help("Path to flux file");
 
         program.parse_args(argc, argv);
 
         return CMDArgs{
             program.get<std::string>("input"),
             program.present<std::string>("-o"),
-            program.get<std::string>("-f"),
+            program.present<std::string>("-f"),
         };
     }
 };

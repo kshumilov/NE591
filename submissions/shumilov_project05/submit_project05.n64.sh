@@ -13,7 +13,14 @@ module load cmake/3.24
 module load gcc/13.2.0
 module load mpi/mpich-x86_64
 
-mpirun -n 64 ./shumilov_project04 analysis/tests/g128_pj.inp 1> analysis/tests/g128_pj.n64.out
-mpirun -n 64 ./shumilov_project04 analysis/tests/g256_pj.inp 1> analysis/tests/g256_pj.n64.out
-mpirun -n 64 ./shumilov_project04 analysis/tests/g512_pj.inp 1> analysis/tests/g512_pj.n64.out
-mpirun -n 64 ./shumilov_project04 analysis/tests/g1024_pj.inp 1> analysis/tests/g1024_pj.n64.out
+nproc=$LSB_DJOB_NUMPROC
+
+for s in 128 256 512 1024; do
+    for i in {1..10}; do
+      for a in pj gs sor; do
+        echo "Working $a $s $i"
+        mpirun --map-by numa --bind-to core -n $nproc ./shumilov_project05 analysis/tests/g${s}_${a}.inp  -o analysis/tests/g${s}_${a}.n${nproc}.$i.out --flux analysis/tests/g${s}_${a}.n${nproc}.$i.flux
+        echo "Done"
+      done
+    done
+done

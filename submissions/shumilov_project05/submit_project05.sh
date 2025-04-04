@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#BSUB -J shumilov_project04
+#BSUB -J shumilov_project05
 #BSUB -o stdout.%J
 #BSUB -e stderr.%J
 #BSUB -W 00:10
@@ -12,4 +12,4 @@ module load cmake/3.24
 module load gcc/13.2.0
 module load mpi/mpich-x86_64
 
-mpirun -n 9 ./shumilov_project04 examples/s12_pj.inp 1> examples/s12_pj.out
+mpirun -n $LSB_DJOB_NUMPROC ./shumilov_project05 examples/s12_pj.inp 1> examples/s12_pj.out

@@ -7,9 +7,10 @@ Parallel implementation of PJ, GS, and SOR
 ================================================================================
                                      Inputs                                     
 --------------------------------------------------------------------------------
-Algorithm: Gauss-Seidel
+Algorithm: Successive Over Relaxation
 Tolerance: 1e-05
 Maximum #Iterations: 500000
+Relaxation Factor: 1.95
 ................................................................................
 Space Dimensions, a x b: 1.00000000e+01 x 1.00000000e+01
 Non-Zero Grid Points, M x N:  1024 x  1024
@@ -28,11 +29,11 @@ Dimensions:     4 x     4
                                     Results                                     
 --------------------------------------------------------------------------------
 Converged: true
-#Iterations: 179062
-Iterative Error: 9.9998372979999735404e-06
-Max Abs Residual: 0.003256522232019998242
+#Iterations: 10908
+Iterative Error: 9.995613396164075496e-06
+Max Abs Residual: 0.0018662930637067809414
 Solution:
 <1024, 1024>
 ================================================================================
-Execution time: 49.988767000 seconds.
+Execution time: 11.477835229 seconds.
 ================================================================================

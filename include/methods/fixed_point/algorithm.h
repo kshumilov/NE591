@@ -102,11 +102,11 @@ struct fmt::formatter<FPState<ErrorType>>
 template<std::floating_point ErrorType>
 class FixedPoint {
     protected:
-        FPSettings<ErrorType> iter_settings{};
+        FixedPointSettings<ErrorType> iter_settings{};
 
     public:
         [[nodiscard]]
-        explicit constexpr FixedPoint(const FPSettings<ErrorType>& fps) : iter_settings{fps} {}
+        explicit constexpr FixedPoint(const FixedPointSettings<ErrorType>& fps) : iter_settings{fps} {}
 
         template<class State, class... Args>
         [[nodiscard]]

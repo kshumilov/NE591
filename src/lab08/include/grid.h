@@ -12,7 +12,7 @@
 using json = nlohmann::json;
 
 
-struct Grid
+struct Grid2D
 {
     static constexpr int MIN_SPATIAL_CELLS{ 1 };
     static constexpr int MIN_ANGULAR{ 2 };
@@ -21,11 +21,11 @@ struct Grid
     int num_spatial_cells{ MIN_SPATIAL_CELLS };
 
     [[nodiscard]]
-    constexpr Grid() = default;
+    constexpr Grid2D() = default;
 
 
     [[nodiscard]]
-    constexpr Grid(const int N, const int I)
+    constexpr Grid2D(const int N, const int I)
         : num_angular_points{ N }
       , num_spatial_cells{ I }
     {
@@ -101,9 +101,9 @@ struct Grid
     }
 
     [[nodiscard]]
-    static auto from_file(std::istream& input) -> Grid
+    static auto from_file(std::istream& input) -> Grid2D
     {
-        const Grid grid{
+        const Grid2D grid{
             read_positive_value<int>(input, "Number of angular points") * 2,
             read_positive_value<int>(input, "Number of spatial points"),
         };
@@ -111,6 +111,6 @@ struct Grid
         return grid;
     }
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Grid, num_spatial_cells, num_angular_points)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Grid2D, num_spatial_cells, num_angular_points)
 };
 #endif // LAB08_GRID_H

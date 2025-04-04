@@ -18,7 +18,7 @@ concept HasFromFile = requires(std::istream& input) {
 
 template<HasFromFile T>
 [[nodiscard]]
-auto read_input_file(const std::string& filename)
+auto read_file(const std::string& filename)
 {
     const auto input_filepath = std::filesystem::path{ filename };
 

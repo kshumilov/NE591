@@ -24,8 +24,12 @@ struct ParallelFiniteDifference
         auto result = fixed_point_iteration(
             [&](typename PointJacobiAlgorithm<T>::State& state) constexpr
             {
+                state.curr.display();
+
                 MPI_Barrier(MPI_COMM_WORLD);
                 const auto local_error = pj.iter(state, stencil, f);
+
+                state.curr.display();
 
                 T global_error{};
                 MPI_Allreduce(

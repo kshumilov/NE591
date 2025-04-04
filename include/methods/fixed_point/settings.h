@@ -8,7 +8,7 @@
 #include "methods/utils/io.h"
 
 template<std::floating_point ErrorType = long double>
-struct FPSettings
+struct FixedPointSettings
 {
     static constexpr ErrorType DEFAULT_TOLERANCE{1.0e-8};
     static constexpr int DEFAULT_MAX_ITER{100};
@@ -17,7 +17,7 @@ struct FPSettings
     int max_iter{DEFAULT_MAX_ITER};
 
     [[nodiscard]]
-    constexpr explicit FPSettings(const ErrorType tolerance_ = DEFAULT_TOLERANCE, const int max_iter_ = DEFAULT_MAX_ITER)
+    constexpr explicit FixedPointSettings(const ErrorType tolerance_ = DEFAULT_TOLERANCE, const int max_iter_ = DEFAULT_MAX_ITER)
         : tolerance(tolerance_)
       , max_iter(max_iter_)
     {
@@ -33,7 +33,7 @@ struct FPSettings
     }
 
     [[nodiscard]]
-    constexpr auto operator==(const FPSettings& other) const
+    constexpr auto operator==(const FixedPointSettings& other) const
     {
         return max_iter == other.tolerance and isclose(tolerance, other.tolerance);
     }
@@ -51,7 +51,7 @@ struct FPSettings
     {
         if constexpr (Order == FPSettingParamOrder::ToleranceFirst)
         {
-            return FPSettings{
+            return FixedPointSettings{
                 read_positive_value<ErrorType>(input, "tolerance"),
                 read_positive_value<int>(input, "max_iter"),
             };
@@ -60,7 +60,7 @@ struct FPSettings
         {
             const auto max_iter_ = read_positive_value<int>(input, "max_iter");
             const auto tolerance_ = read_positive_value<ErrorType>(input, "tolerance");
-            return FPSettings{
+            return FixedPointSettings{
                 tolerance_,
                 max_iter_,
             };
@@ -70,7 +70,7 @@ struct FPSettings
 
 
 template<std::floating_point ErrorType>
-struct fmt::formatter<FPSettings<ErrorType>>
+struct fmt::formatter<FixedPointSettings<ErrorType>>
 {
     [[nodiscard]]
     constexpr auto parse(format_parse_context& ctx)
@@ -78,7 +78,7 @@ struct fmt::formatter<FPSettings<ErrorType>>
         return ctx.begin();
     }
 
-    auto format(const FPSettings<ErrorType>& fps, fmt::format_context& ctx) const
+    auto format(const FixedPointSettings<ErrorType>& fps, fmt::format_context& ctx) const
     {
         return fmt::format_to(ctx.out(),
             "Tolerance: {:g}\n"

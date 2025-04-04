@@ -292,7 +292,7 @@ constexpr auto fixed_point_iteration
         #ifndef NDEBUG
         fmt::println(
             std::cerr,
-            "#{: >5d}/{: >5d}: {:14.6e}",
+            "#{: >5d}/{: >5d}: {:.12e}",
             i + 1,
             settings.max_iter,
             current_error

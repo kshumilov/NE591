@@ -30,12 +30,7 @@ struct Block2DInfo
 
     // MPI Datatypes for efficient communication of ghost layers
     MPI_Datatype col_dt{ MPI_DATATYPE_NULL }; // For east/west exchange
-    // MPI_Datatype col_even_dt{ MPI_DATATYPE_NULL }; // For north/south exchange
-    // MPI_Datatype col_odd_dt{ MPI_DATATYPE_NULL }; // For north/south exchange
-
     MPI_Datatype row_dt{ MPI_DATATYPE_NULL }; // For north/south exchange
-    // MPI_Datatype row_even_dt{ MPI_DATATYPE_NULL }; // For north/south exchange
-    // MPI_Datatype row_odd_dt{ MPI_DATATYPE_NULL }; // For north/south exchange
 
     // MPI Datatypes for block scattering and aggregation
     MPI_Datatype aux_block_type_{ MPI_DATATYPE_NULL };
@@ -68,26 +63,17 @@ struct Block2DInfo
         , local{ std::move(other.local) }
         , halo{ std::move(other.halo) }
         , col_dt{ other.col_dt }
-        // , col_even_dt{ other.col_even_dt }
-        // , col_odd_dt{ other.col_odd_dt }
         , row_dt{ other.row_dt }
-        // , row_even_dt{ other.row_even_dt }
-        // , row_odd_dt{ other.row_odd_dt }
         , aux_block_type_{ other.aux_block_type_ }
         , global_block_dt{ other.global_block_dt }
         , local_block_dt{ other.local_block_dt }
     {
         other.col_dt = MPI_DATATYPE_NULL;
-        // other.col_even_dt = MPI_DATATYPE_NULL;
-        // other.col_odd_dt = MPI_DATATYPE_NULL;
 
         other.row_dt = MPI_DATATYPE_NULL;
-        // other.row_even_dt = MPI_DATATYPE_NULL;
-        // other.row_odd_dt = MPI_DATATYPE_NULL;
-        //
-        // other.aux_block_type_ = MPI_DATATYPE_NULL;
-        // other.global_block_dt = MPI_DATATYPE_NULL;
-        // other.local_block_dt = MPI_DATATYPE_NULL;
+        other.aux_block_type_ = MPI_DATATYPE_NULL;
+        other.global_block_dt = MPI_DATATYPE_NULL;
+        other.local_block_dt = MPI_DATATYPE_NULL;
     }
 
     ~Block2DInfo() {
@@ -158,46 +144,10 @@ struct Block2DInfo
             );
             MPI_Type_commit(&col_dt);
 
-            // MPI_Type_vector(
-            //     local.rows() / 2 /* column length */,
-            //     1 /* column width = 1 by def */,
-            //     padded_cols() * 2 /* stride between column elements in row major order, in local padded block */,
-            //     get_mpi_type<T>(),
-            //     &col_even_dt
-            // );
-            // MPI_Type_commit(&col_even_dt);
-            //
-            // MPI_Type_vector(
-            //     local.rows() / 2 + 1 /* column length */,
-            //     1 /* column width = 1 by def */,
-            //     padded_cols() * 2 /* stride between column elements in row major order, in local padded block */,
-            //     get_mpi_type<T>(),
-            //     &col_odd_dt
-            // );
-            // MPI_Type_commit(&col_odd_dt);
-
             // Create a contiguous type for rows (since they are contiguous in memory)
             // A row is elements (j, 1), (j, 2), ..., (j, N_internal)
             MPI_Type_contiguous(local.cols(), get_mpi_type<T>(), &row_dt);
             MPI_Type_commit(&row_dt);
-
-            // MPI_Type_vector(
-            //     local.cols() / 2,
-            //     1,
-            //     2,
-            //     get_mpi_type<T>(),
-            //     &row_even_dt
-            // );
-            // MPI_Type_commit(&row_even_dt);
-            //
-            // MPI_Type_vector(
-            //     local.cols() / 2 + 1,
-            //     1,
-            //     2,
-            //     get_mpi_type<T>(),
-            //     &row_odd_dt
-            // );
-            // MPI_Type_commit(&row_odd_dt);
 
 
             // Scatter Block Type

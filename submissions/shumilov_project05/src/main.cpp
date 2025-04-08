@@ -202,8 +202,9 @@ int main(int argc, char* argv[]) {
                 cmd_args->output
             );
 
-            if (result.x.size() > 64)
-                cmd_args->write_flux(result);
+            // if (result.x.size() > 64)
+            //     cmd_args->write_flux(result);
+            cmd_args->write_flux(result);
         }
     }
     catch (const std::exception& err)

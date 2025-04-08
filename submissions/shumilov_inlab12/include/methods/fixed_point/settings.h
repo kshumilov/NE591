@@ -8,7 +8,7 @@
 #include "utils/io.h"
 
 template<std::floating_point ErrorType = long double>
-struct FixedPointSettings
+struct FPSettings
 {
     static constexpr ErrorType DEFAULT_TOLERANCE{1.0e-8};
     static constexpr int DEFAULT_MAX_ITER{100};
@@ -17,7 +17,7 @@ struct FixedPointSettings
     int max_iter{DEFAULT_MAX_ITER};
 
     [[nodiscard]]
-    constexpr explicit FixedPointSettings(const ErrorType tolerance_ = DEFAULT_TOLERANCE, const int max_iter_ = DEFAULT_MAX_ITER)
+    constexpr explicit FPSettings(const ErrorType tolerance_ = DEFAULT_TOLERANCE, const int max_iter_ = DEFAULT_MAX_ITER)
         : tolerance(tolerance_)
       , max_iter(max_iter_)
     {
@@ -33,7 +33,7 @@ struct FixedPointSettings
     }
 
     [[nodiscard]]
-    constexpr auto operator==(const FixedPointSettings& other) const
+    constexpr auto operator==(const FPSettings& other) const
     {
         return max_iter == other.tolerance and isclose(tolerance, other.tolerance);
     }
@@ -51,7 +51,7 @@ struct FixedPointSettings
     {
         if constexpr (Order == FPSettingParamOrder::ToleranceFirst)
         {
-            return FixedPointSettings{
+            return FPSettings{
                 read_positive_value<ErrorType>(input, "tolerance"),
                 read_positive_value<int>(input, "max_iter"),
             };
@@ -60,7 +60,7 @@ struct FixedPointSettings
         {
             const auto max_iter_ = read_positive_value<int>(input, "max_iter");
             const auto tolerance_ = read_positive_value<ErrorType>(input, "tolerance");
-            return FixedPointSettings{
+            return FPSettings{
                 tolerance_,
                 max_iter_,
             };
@@ -70,7 +70,7 @@ struct FixedPointSettings
 
 
 template<std::floating_point ErrorType>
-struct fmt::formatter<FixedPointSettings<ErrorType>>
+struct fmt::formatter<FPSettings<ErrorType>>
 {
     [[nodiscard]]
     constexpr auto parse(format_parse_context& ctx)
@@ -78,7 +78,8 @@ struct fmt::formatter<FixedPointSettings<ErrorType>>
         return ctx.begin();
     }
 
-    auto format(const FixedPointSettings<ErrorType>& fps, fmt::format_context& ctx) const
+    [[nodiscard]]
+    auto format(const FPSettings<ErrorType>& fps, fmt::format_context& ctx) const
     {
         return fmt::format_to(ctx.out(),
             "Tolerance: {:g}\n"

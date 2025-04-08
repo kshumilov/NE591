@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <cmath>
+#include <numbers>
 
 template<std::floating_point T>
 struct Gaussian2D {

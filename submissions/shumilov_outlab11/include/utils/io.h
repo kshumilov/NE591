@@ -62,7 +62,7 @@ auto read_nonnegative_value(std::istream &in, std::string_view name = "value") -
             [&]() { return std::runtime_error(fmt::format("Could not read `{}`", name)); });
 }
 
-template<class T> auto read_vector(std::istream &is, const std::size_t size) -> std::vector<T> {
+template<class T> auto read_vector(std::istream &is, const std::size_t size) {
     std::vector<T> values{};
 
     while (values.size() < size) {

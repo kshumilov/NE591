@@ -5,7 +5,7 @@
 #include <ranges>
 #include <vector>
 
-#include "methods/utils/math.h"
+#include "methods/math.h"
 
 #include "methods/linalg/matrix.h"
 
@@ -105,7 +105,8 @@ using Index2D = std::pair<std::size_t, std::size_t>;
 
 template<std::floating_point T>
 [[nodiscard]]
-constexpr auto find_matrix_assymetry(
+constexpr auto find_matrix_assymetry
+(
     const Matrix<T>& M,
     const T rtol = T{ 1.0e-05 },
     const T atol = T{ 1.0e-08 }

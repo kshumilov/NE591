@@ -14,7 +14,8 @@
 #include <fmt/ranges.h>
 
 
-template<class T> auto read_value(std::istream &in) -> std::optional<T> {
+template<class T>
+auto read_value(std::istream &in) -> std::optional<T> {
     T result{};
 
     if (in >> result) {
